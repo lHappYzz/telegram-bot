@@ -1,0 +1,15 @@
+{
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/",
+      "Boot\\": "boot/",
+      "Boot\\Interfaces\\": "boot/interfaces",
+      "Boot\\Src\\": "boot/src",
+      "Boot\\Traits\\": "boot/traits"
+    }
+  },
+  "require": {
+    "ext-json": "*",
+    "ext-curl": "*"
+  }
+}
