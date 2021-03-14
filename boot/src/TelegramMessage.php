@@ -23,6 +23,7 @@ class TelegramMessage {
 
     private $date;
     private $text;
+    private $commandClassName;
 
     public function __construct($update) {
         $this->messageID = $update['message']['message_id'];
@@ -33,12 +34,20 @@ class TelegramMessage {
 
         $this->date = $update[$this->event['type']]['date'];
         $this->text = $update[$this->event['type']]['text'];
+        $this->setCommandClassName();
     }
     private function setEvent($update) {
         foreach ($this->events as $event) {
             if (array_key_exists($event['type'], $update)) {
                 $this->event = $event;
             }
+        }
+    }
+    private function setCommandClassName() {
+        if ($this->isCommand()) {
+            $this->commandClassName = str_replace('/', '', $this->text) . 'Command';
+        } else {
+            $this->commandClassName = '';
         }
     }
     public function getEventDescription() {
@@ -59,6 +68,18 @@ class TelegramMessage {
 
     public function getMessageDate($format = 'Y-m-d H:i:s') {
         return date($format, $this->date);
+    }
+
+    public function getCommandClassName() {
+        return $this->commandClassName;
+    }
+    public function isCommand() {
+        if ($this->text[0] == '/') {
+            if (strpos($this->text, ' ') === false) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -26,9 +26,32 @@ class Bot extends TelegramChat implements BotInterface
     }
 
     public function handle() {
+        if ($this->message->isCommand()) {
+            $this->handleCommand();
+        }
+
         $this->sendMessage(
             '<' . $this->message->getMessageText() . '> ' . $this->message->getEventDescription() . ': ' .
             $this->message->getMessageDate()
         );
+    }
+
+    private function handleCommand() {
+        $commandsNamespace = '\\App\\Commands\\';
+
+        $commandClassName = $this->message->getCommandClassName();
+        $availableCommands = scandir('app/commands');
+
+        foreach ($availableCommands as $availableCommand) {
+            if (is_file(__DIR__.DIRECTORY_SEPARATOR.'commands'.DIRECTORY_SEPARATOR.$availableCommand)) {
+                if ($availableCommand == $commandClassName.'.php' && $availableCommand != 'baseCommand.php') {
+                    $fullPath = $commandsNamespace.$commandClassName;
+                    $command = new $fullPath();
+                    $command->boot($this);
+                    return;
+                }
+            }
+        }
+        $this->sendMessage('Sorry, I can not recognize the command - <'.$this->message->getMessageText().'>');
     }
 }
