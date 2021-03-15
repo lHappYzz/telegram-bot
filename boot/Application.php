@@ -23,6 +23,7 @@ class Application {
     public function boot() {
         $this->config = parse_ini_file('app/app.ini');
         if (!$this->config) throw new Exception('Missing application configuration file');
+        date_default_timezone_set($this->config['timezone']);
         return new Bot($this->config);
     }
 
