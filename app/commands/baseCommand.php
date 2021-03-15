@@ -6,9 +6,23 @@ namespace App\Commands;
 
 use App\Bot;
 
-class baseCommand
+abstract class baseCommand
 {
-    public function boot(Bot $bot) {
-        $bot->sendMessage('Hello from base command');
+    abstract public function boot(Bot $bot);
+
+    public static function getInstance()
+    {
+        if (!isset(static::$instance)) {
+            static::$instance = new static();
+        }
+        return static::$instance;
+    }
+
+    public function getDescription() {
+        return $this->description;
+    }
+
+    public function getSignature() {
+        return $this->signature;
     }
 }

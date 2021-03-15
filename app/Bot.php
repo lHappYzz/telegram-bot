@@ -2,11 +2,15 @@
 
 namespace App;
 
+use App\Commands\baseCommand;
 use Boot\Src\TelegramChat;
 use Boot\Interfaces\BotInterface;
+use Boot\Traits\Helpers;
 
 class Bot extends TelegramChat implements BotInterface
 {
+    use Helpers;
+
     private $TOKEN;
     private $BOT_URL;
 
@@ -37,21 +41,11 @@ class Bot extends TelegramChat implements BotInterface
     }
 
     private function handleCommand() {
-        $commandsNamespace = '\\App\\Commands\\';
-
-        $commandClassName = $this->message->getCommandClassName();
-        $availableCommands = scandir('app/commands');
-
-        foreach ($availableCommands as $availableCommand) {
-            if (is_file(__DIR__.DIRECTORY_SEPARATOR.'commands'.DIRECTORY_SEPARATOR.$availableCommand)) {
-                if ($availableCommand == $commandClassName.'.php' && $availableCommand != 'baseCommand.php') {
-                    $fullPath = $commandsNamespace.$commandClassName;
-                    $command = new $fullPath();
-                    $command->boot($this);
-                    return;
-                }
-            }
+        $command = $this->getCommandClassInstance($this->message->getCommandClassName());
+        if ($command instanceof baseCommand){
+            $command->boot($this);
+        } else {
+            $this->sendMessage('I can not recognize the command - <' . $this->message->getMessageText() . '>');
         }
-        $this->sendMessage('Sorry, I can not recognize the command - <'.$this->message->getMessageText().'>');
     }
 }

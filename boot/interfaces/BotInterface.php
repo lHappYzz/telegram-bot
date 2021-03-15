@@ -3,5 +3,5 @@
 namespace Boot\Interfaces;
 
 interface BotInterface {
-    public function sendMessage();
+    public function sendMessage($message);
 }
