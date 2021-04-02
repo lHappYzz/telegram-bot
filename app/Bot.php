@@ -43,9 +43,11 @@ class Bot extends TelegramChat implements BotInterface
         }
 
         $this->sendMessage(
-            '<' . $this->message->getMessageText() . '> ' .
-            $this->request->getUpdateType() . ': ' .
-            $this->message->getMessageDate()
+            'id: ' . $this->user->getID()."\n".
+            'username: ' . $this->user->getUserName()."\n".
+            'first name: ' . $this->user->getFirstName()."\n".
+            'last name: ' . $this->user->getLastName()."\n".
+            'language code: ' . $this->user->getLanguageCode()
         );
     }
 

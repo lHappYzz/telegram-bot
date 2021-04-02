@@ -10,6 +10,7 @@ class TelegramChat extends Telegram {
     private $userName;
 
     public TelegramMessage $message;
+    public TelegramUser $user;
 
     public function __construct() {
         parent::__construct();
@@ -18,6 +19,8 @@ class TelegramChat extends Telegram {
         $updateType = $this->request->getUpdateType();
 
         $this->message = new TelegramMessage($update[$updateType]);
+        $this->user = new TelegramUser($update[$updateType]['from']);
+
         $this->id = $update[$updateType]['chat']['id'];
         $this->type = $update[$updateType]['chat']['type'];
         $this->firstName = $update[$updateType]['chat']['firstName'];
@@ -29,6 +32,7 @@ class TelegramChat extends Telegram {
         if (empty($this->id)) return '423303268';
         return $this->id;
     }
+
     protected function getChatType() {
         return $this->type;
     }

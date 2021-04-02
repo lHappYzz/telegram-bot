@@ -6,7 +6,6 @@ namespace Boot\Src;
 
 class TelegramMessage {
     private $messageID;
-    private $from;
     private $date;
     private $text;
     private $commandClassName;
@@ -15,7 +14,6 @@ class TelegramMessage {
 
     public function __construct($messageData) {
         $this->messageID = $messageData['message_id'];
-        $this->from = $messageData['from'];
         $this->date = $messageData['date'];
         $this->text = $messageData['text'];
         $this->setCommandClassName();
