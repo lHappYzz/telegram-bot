@@ -5,57 +5,35 @@ namespace Boot\Src;
 
 
 class TelegramMessage {
-    private $events = [
-        [
-            'type' => 'message',
-            'description' => 'message was sent'
-        ],
-        [
-            'type' => 'edited_message',
-            'description' => 'message was edited'
-        ]
-    ];
-    private $event = [];
-
     private $messageID;
     private $from;
-    private $chat;
-
     private $date;
     private $text;
     private $commandClassName;
+    private TelegramMessage $replyToMessage;
 
-    public function __construct($update) {
-        $this->messageID = $update['message']['message_id'];
-        $this->setEvent($update);
 
-        $this->from = $update[$this->event['type']]['from'];
-        $this->chat = $update[$this->event['type']]['chat'];
-
-        $this->date = $update[$this->event['type']]['date'];
-        $this->text = $update[$this->event['type']]['text'];
+    public function __construct($messageData) {
+        $this->messageID = $messageData['message_id'];
+        $this->from = $messageData['from'];
+        $this->date = $messageData['date'];
+        $this->text = $messageData['text'];
         $this->setCommandClassName();
+
+        $this->setReplyToMessage($messageData);
     }
-    private function setEvent($update) {
-        foreach ($this->events as $event) {
-            if (array_key_exists($event['type'], $update)) {
-                $this->event = $event;
-            }
+    private function setReplyToMessage($messageData) {
+        if (array_key_exists('reply_to_message', $messageData)) {
+            $this->replyToMessage = new TelegramMessage($messageData['reply_to_message']);
         }
     }
+
     private function setCommandClassName() {
         if ($this->isCommand()) {
             $this->commandClassName = str_replace('/', '', $this->text) . 'Command';
         } else {
             $this->commandClassName = '';
         }
-    }
-    public function getEventDescription() {
-        return $this->event['description'];
-    }
-
-    public function getChat() {
-        return $this->chat;
     }
 
     public function getMessageID() {
@@ -73,6 +51,20 @@ class TelegramMessage {
     public function getCommandClassName() {
         return $this->commandClassName;
     }
+
+    /**
+     * Get message that was replied otherwise null is returned,
+     * so always check your var for not being null
+     *
+     * @return TelegramMessage|null
+     */
+    public function getRepliedMessage() {
+        if (isset($this->replyToMessage)) {
+            return $this->replyToMessage;
+        }
+        return null;
+    }
+
     public function isCommand() {
         if ($this->text[0] == '/') {
             if (strpos($this->text, ' ') === false) {
@@ -81,5 +73,6 @@ class TelegramMessage {
         }
         return false;
     }
+
 
 }

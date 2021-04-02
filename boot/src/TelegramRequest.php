@@ -18,6 +18,12 @@ class TelegramRequest {
      */
     private $update;
 
+    private $updateTypes = [
+        'message',
+        'edited_message'
+    ];
+
+    private $updateType;
     /**
      * Marker that indicates if telegram request parsed ok
      *
@@ -28,6 +34,17 @@ class TelegramRequest {
     public function __construct() {
         $this->update = $this->parseTelegramRequest();
         $this->isTelegramRequestParsedOk();
+        $this->setUpdateType($this->update);
+    }
+
+    public function setUpdateType($update) {
+        foreach ($this->updateTypes as $type) {
+            if (array_key_exists($type, $update)) {
+                $this->updateType = $type;
+                return;
+            }
+        }
+        throw new Exception('Can not recognize telegram update type.');
     }
 
     /**
@@ -38,6 +55,15 @@ class TelegramRequest {
      */
     public function isTelegramRequestParsedOk() {
         if (!$this->isParseOk) {
+           /* $this->update =
+                [
+                    'message' => [
+                        'text'=>'test',
+                        'reply_to_message' => [
+                            'text' => 'test2'
+                        ]
+                    ]
+                ];*/
             throw new Exception('Telegram request error');
         }
     }
@@ -62,5 +88,9 @@ class TelegramRequest {
      */
     public function getUpdate() {
         return $this->update;
+    }
+
+    public function getUpdateType() {
+        return $this->updateType;
     }
 }

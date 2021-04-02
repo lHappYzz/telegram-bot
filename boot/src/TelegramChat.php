@@ -13,14 +13,16 @@ class TelegramChat extends Telegram {
 
     public function __construct() {
         parent::__construct();
-        $this->message = new TelegramMessage($this->request->getUpdate());
-        $chat = $this->message->getChat();
 
-        $this->id = $chat['id'];
-        $this->type = $chat['type'];
-        $this->firstName = $chat['firstName'];
-        $this->lastName = $chat['lastName'];
-        $this->userName = $chat['userName'];
+        $update = $this->request->getUpdate();
+        $updateType = $this->request->getUpdateType();
+
+        $this->message = new TelegramMessage($update[$updateType]);
+        $this->id = $update[$updateType]['chat']['id'];
+        $this->type = $update[$updateType]['chat']['type'];
+        $this->firstName = $update[$updateType]['chat']['firstName'];
+        $this->lastName = $update[$updateType]['chat']['lastName'];
+        $this->userName = $update[$updateType]['chat']['userName'];
     }
 
     public function getChatID() {

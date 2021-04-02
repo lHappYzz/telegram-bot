@@ -34,8 +34,17 @@ class Bot extends TelegramChat implements BotInterface
             $this->handleCommand();
         }
 
+        $repliedMessage = $this->message->getRepliedMessage();
+        if ($repliedMessage) {
+            $this->sendMessage('Detected the reply for message: ' .
+                $repliedMessage->getMessageText() .
+                ' that was sent at: ' . $repliedMessage->getMessageDate()
+            );
+        }
+
         $this->sendMessage(
-            '<' . $this->message->getMessageText() . '> ' . $this->message->getEventDescription() . ': ' .
+            '<' . $this->message->getMessageText() . '> ' .
+            $this->request->getUpdateType() . ': ' .
             $this->message->getMessageDate()
         );
     }
