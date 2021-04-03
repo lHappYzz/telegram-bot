@@ -3,18 +3,32 @@
 namespace Boot\Traits;
 
 trait Http {
+
+    /**
+     * @param array $parameters
+     * @param bool $isPost
+     * @return bool|string|null
+     * @see sendRequest
+     */
+    public function sendTelegramRequest(array $parameters, bool $isPost = true) {
+        $url = "https://api.telegram.org/bot" . $parameters['token'] . "/" . $parameters['method'];
+        return $this->sendRequest($parameters, $url, $isPost);
+    }
+
     /**
      * @param array $parameters
      * The parameters array should contain bot token, method and other optional fields
+     * that service API can work with
+     *
+     * @param $url
+     * API url
      *
      * @param bool $isPost
-     * Should http should use post method otherwise get method will be used
+     * If true then post http method will be used otherwise get method will be used
      *
      * @return string|bool|null
      */
-    public function sendRequest($parameters, $isPost = true) {
-
-        $url = "https://api.telegram.org/bot" . $parameters['token'] . "/" . $parameters['method'];
+    public function sendRequest(array $parameters, string $url, bool $isPost = true) {
 
         $ch = curl_init();
 
