@@ -10,9 +10,9 @@ trait Http {
      * @return bool|string|null
      * @see sendRequest
      */
-    public function sendTelegramRequest(array $parameters, bool $isPost = true) {
+    public static function sendTelegramRequest(array $parameters, bool $isPost = true) {
         $url = "https://api.telegram.org/bot" . $parameters['token'] . "/" . $parameters['method'];
-        return $this->sendRequest($parameters, $url, $isPost);
+        return self::sendRequest($parameters, $url, $isPost);
     }
 
     /**
@@ -28,7 +28,7 @@ trait Http {
      *
      * @return string|bool|null
      */
-    public function sendRequest(array $parameters, string $url, bool $isPost = true) {
+    public static function sendRequest(array $parameters, string $url, bool $isPost = true) {
 
         $ch = curl_init();
 

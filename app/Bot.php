@@ -22,11 +22,11 @@ class Bot extends TelegramChat implements BotInterface
     }
 
     public function setWebhook() {
-        $this->request->sendTelegramRequest(['token' => $this->TOKEN, 'method' => 'setWebhook', 'url' => 'https://' . $this->BOT_URL]);
+        $this->request::sendTelegramRequest(['token' => $this->TOKEN, 'method' => 'setWebhook', 'url' => 'https://' . $this->BOT_URL]);
     }
 
     public function sendMessage($message = '') {
-        $this->request->sendTelegramRequest(['token' => $this->TOKEN, 'method' => 'sendMessage', 'text' => $message, 'chat_id' => $this->getChatID()]);
+        $this->request::sendTelegramRequest(['token' => $this->TOKEN, 'method' => 'sendMessage', 'text' => $message, 'chat_id' => $this->getChatID()]);
     }
 
     public function handle() {
