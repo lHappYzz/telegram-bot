@@ -2,10 +2,10 @@
 
 require_once "vendor/autoload.php";
 
-use Boot\Application;
+use Boot\application;
 
 try {
-    $app = new Application();
+    $app = new application();
     $bot = $app->boot();
 } catch (Exception $e) {
     die($e->getMessage());

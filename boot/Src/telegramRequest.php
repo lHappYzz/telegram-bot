@@ -2,13 +2,13 @@
 
 namespace Boot\Src;
 
-use Boot\Traits\Http;
+use Boot\Traits\http;
 use Exception;
 
 
-class TelegramRequest {
+class telegramRequest {
 
-    use Http;
+    use http;
 
     /**
      * An array created from json object sent by telegram
@@ -64,7 +64,7 @@ class TelegramRequest {
                         ]
                     ]
                 ];*/
-            throw new Exception('Telegram request error');
+            throw new Exception('telegram request error');
         }
     }
 

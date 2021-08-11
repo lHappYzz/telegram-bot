@@ -2,7 +2,7 @@
 
 namespace Boot\Traits;
 
-trait Http {
+trait http {
 
     /**
      * @param array $parameters

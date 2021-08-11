@@ -2,15 +2,15 @@
 
 namespace Boot\Src;
 
-class TelegramChat extends Telegram {
+class telegramChat extends telegram {
     private $id;
     private $type;
     private $firstName;
     private $lastName;
     private $userName;
 
-    public TelegramMessage $message;
-    public TelegramUser $user;
+    public telegramMessage $message;
+    public telegramUser $user;
 
     public function __construct() {
         parent::__construct();
@@ -18,8 +18,8 @@ class TelegramChat extends Telegram {
         $update = $this->request->getUpdate();
         $updateType = $this->request->getUpdateType();
 
-        $this->message = new TelegramMessage($update[$updateType]);
-        $this->user = new TelegramUser($update[$updateType]['from']);
+        $this->message = new telegramMessage($update[$updateType]);
+        $this->user = new telegramUser($update[$updateType]['from']);
 
         $this->id = $update[$updateType]['chat']['id'];
         $this->type = $update[$updateType]['chat']['type'];

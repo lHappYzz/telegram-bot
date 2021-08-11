@@ -3,21 +3,21 @@
 
 namespace App\Commands;
 
-use App\Bot;
-use Boot\Traits\Helpers;
+use App\bot;
+use Boot\Traits\helpers;
 
 class helpCommand extends baseCommand
 {
-    use Helpers;
+    use helpers;
 
     protected $description = 'Represents available bot commands.';
     protected $signature = '/help';
 
     protected static $instance = null;
 
-    public function boot(Bot $bot)
+    public function boot(bot $bot)
     {
-        $message = 'List of available commands:' . PHP_EOL;
+        $message = 'List of available Commands:' . PHP_EOL;
         $classedInCommandsDir = $this->getCommandsInTheCommandDir();
         foreach ($classedInCommandsDir as $commandClass) {
             $command = $this->getCommandClassInstance(substr($commandClass, 0, -4));

@@ -4,11 +4,11 @@
 namespace App\Commands;
 
 
-use App\Bot;
+use App\bot;
 
 abstract class baseCommand
 {
-    abstract public function boot(Bot $bot);
+    abstract public function boot(bot $bot);
 
     public static function getInstance()
     {

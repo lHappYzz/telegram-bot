@@ -4,7 +4,7 @@
 namespace Boot\Src;
 
 
-class TelegramUser {
+class telegramUser {
 
     private $id;
     private $firstName;

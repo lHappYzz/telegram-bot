@@ -2,7 +2,7 @@
 
 namespace Boot\Traits;
 
-trait Helpers {
+trait helpers {
     public function getCommandClassInstance($className) {
         $commandsNamespace = '\\App\\Commands\\';
 
@@ -16,9 +16,9 @@ trait Helpers {
         return null;
     }
     public function getCommandsInTheCommandDir() {
-        $commands = scandir('app'.DIRECTORY_SEPARATOR.'commands');
+        $commands = scandir('app'.DIRECTORY_SEPARATOR.'Commands');
         foreach ($commands as $key => $command) {
-            if (!is_file('app'.DIRECTORY_SEPARATOR.'commands'.DIRECTORY_SEPARATOR.$command)) {
+            if (!is_file('app'.DIRECTORY_SEPARATOR.'Commands'.DIRECTORY_SEPARATOR.$command)) {
                 unset($commands[$key]);
             }
         }

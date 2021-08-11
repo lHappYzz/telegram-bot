@@ -3,13 +3,13 @@
 namespace App;
 
 use App\Commands\baseCommand;
-use Boot\Src\TelegramChat;
-use Boot\Interfaces\BotInterface;
-use Boot\Traits\Helpers;
+use Boot\Src\telegramChat;
+use Boot\Interfaces\botInterface;
+use Boot\Traits\helpers;
 
-class Bot extends TelegramChat implements BotInterface
+class bot extends telegramChat implements botInterface
 {
-    use Helpers;
+    use helpers;
 
     private $TOKEN;
     private $BOT_URL;
@@ -26,7 +26,7 @@ class Bot extends TelegramChat implements BotInterface
     }
 
     public function sendMessage($message = '') {
-        $this->request::sendTelegramRequest(['token' => $this->TOKEN, 'method' => 'sendMessage', 'text' => $message, 'chat_id' => $this->getChatID()]);
+        $this->request::sendTelegramRequest(['parse_mode' => 'Markdown', 'token' => $this->TOKEN, 'method' => 'sendMessage', 'text' => $message, 'chat_id' => $this->getChatID()]);
     }
 
     public function handle() {
@@ -41,14 +41,6 @@ class Bot extends TelegramChat implements BotInterface
                 ' that was sent at: ' . $repliedMessage->getMessageDate()
             );
         }
-
-        $this->sendMessage(
-            'id: ' . $this->user->getID()."\n".
-            'username: ' . $this->user->getUserName()."\n".
-            'first name: ' . $this->user->getFirstName()."\n".
-            'last name: ' . $this->user->getLastName()."\n".
-            'language code: ' . $this->user->getLanguageCode()
-        );
     }
 
     private function handleCommand() {

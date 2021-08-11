@@ -4,12 +4,12 @@
 namespace Boot\Src;
 
 
-class TelegramMessage {
+class telegramMessage {
     private $messageID;
     private $date;
     private $text;
     private $commandClassName;
-    private TelegramMessage $replyToMessage;
+    private telegramMessage $replyToMessage;
 
 
     public function __construct($messageData) {
@@ -22,7 +22,7 @@ class TelegramMessage {
     }
     private function setReplyToMessage($messageData) {
         if (array_key_exists('reply_to_message', $messageData)) {
-            $this->replyToMessage = new TelegramMessage($messageData['reply_to_message']);
+            $this->replyToMessage = new telegramMessage($messageData['reply_to_message']);
         }
     }
 
@@ -54,7 +54,7 @@ class TelegramMessage {
      * Get message that was replied otherwise null is returned,
      * so always check your var for not being null
      *
-     * @return TelegramMessage|null
+     * @return telegramMessage|null
      */
     public function getRepliedMessage() {
         if (isset($this->replyToMessage)) {

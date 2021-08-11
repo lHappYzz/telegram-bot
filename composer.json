@@ -2,12 +2,7 @@
   "autoload": {
     "psr-4": {
       "App\\": "app/",
-      "App\\Api\\": "app/api",
-      "App\\Commands\\": "app/commands",
-      "Boot\\": "boot/",
-      "Boot\\Interfaces\\": "boot/interfaces",
-      "Boot\\Src\\": "boot/src",
-      "Boot\\Traits\\": "boot/traits"
+      "Boot\\": "boot/"
     }
   },
   "require": {

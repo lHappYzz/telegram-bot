@@ -4,7 +4,7 @@
 namespace App\Commands;
 
 use App\Api\privatApi;
-use App\Bot;
+use App\bot;
 
 class courseCommand extends baseCommand {
 
@@ -13,7 +13,7 @@ class courseCommand extends baseCommand {
 
     protected static $instance = null;
 
-    public function boot(Bot $bot) {
+    public function boot(bot $bot) {
         $message = '';
         $result = privatApi::run();
         foreach ($result as $block) {
