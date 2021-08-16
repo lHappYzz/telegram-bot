@@ -16,4 +16,19 @@ abstract class api {
         return self::sendRequest(static::$parameters, static::$url, false);
     }
 
+    public static function GET() {
+        return self::sendRequest(static::$parameters, static::$url, false);
+    }
+
+    public static function POST() {
+        return self::sendRequest(static::$parameters, static::$url, true);
+    }
+
+    public static function setApiUrl($newUrl) {
+        static::$url = $newUrl;
+    }
+    public static function setApiParameters($newParameters) {
+        static::$parameters = $newParameters;
+    }
+
 }
