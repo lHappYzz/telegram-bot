@@ -27,4 +27,8 @@ class application {
         return new bot(self::$config);
     }
 
+    public static function log($whatToLog) {
+        file_put_contents("systemlogs.txt", date('H:i:s')." ->".gettype($whatToLog)."<- ".print_r(($whatToLog), 1) . "\n*******\n\n");
+    }
+
 }
