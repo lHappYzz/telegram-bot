@@ -2,17 +2,24 @@
 
 namespace Boot\Database;
 
+use Boot\application;
 use Boot\Database\DB;
 
 /**
  * Class record represents a table record from a database. It is like a model
  * @package Boot\Database
  */
-abstract class record extends DB {
+abstract class record {
 
     public function __construct() {
-        parent::__construct();
+
     }
+
+    /**
+     * Save record into database. Returns saved record
+     * @return record
+     */
+    abstract public function save();
 
     /**
      * Returns an array of database record objects
@@ -20,7 +27,7 @@ abstract class record extends DB {
      */
     public static function fetchAll() {
         $records = [];
-        $db = new DB();
+        $db = DB::getInstance();
 
         $result = $db->query("SELECT * FROM `" . static::getTableName() . "`");
         while (($record = $result->fetch_object(static::class)) !== null) {
@@ -40,10 +47,6 @@ abstract class record extends DB {
         return static::$tableName;
     }
 
-    public function create() {
-
-    }
-
     public function update($id) {
 
     }
@@ -55,7 +58,7 @@ abstract class record extends DB {
      * @return static
      */
     public static function fetch($id) {
-        $db = new DB();
+        $db = DB::getInstance();
 
         $result = $db->query("SELECT * FROM `" . static::getTableName() . "` WHERE id = " . $id);
 

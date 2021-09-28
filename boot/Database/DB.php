@@ -3,11 +3,12 @@
 namespace Boot\Database;
 
 use Boot\application;
+use Boot\Src\singleton;
 use Exception;
 use mysqli;
 use mysqli_result;
 
-class DB
+class DB extends singleton
 {
     /**
      * @param string $hostname Can be either a host name or an IP address. Passing the NULL value or the string "localhost" to this parameter, the local host is assumed. When possible, pipes will be used instead of the TCP/IP protocol.
@@ -29,7 +30,9 @@ class DB
      */
     private $database;
 
-    public function __construct() {
+    protected function __construct() {
+        parent::__construct();
+
         $config = application::$config;
         $this->hostname = $config['db_host'];
         $this->username = $config['db_username'];
@@ -53,7 +56,7 @@ class DB
 
     /**
      * @param $sql
-     * An SQL string
+     * SQL string
      * @return mysqli_result
      */
     public function query($sql) {
