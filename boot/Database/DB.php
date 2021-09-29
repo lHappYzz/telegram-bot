@@ -57,14 +57,13 @@ class DB extends singleton
     /**
      * @param $sql
      * SQL string
-     * @return mysqli_result
+     * @return mysqli_result|true
+     * On success mysqli_result or true returned
      */
     public function query($sql) {
         try {
             $result = $this->makeConnection()->query($sql);
-            if ($result === true) {
-                throw new Exception('The query ended fine but returned nothing.');
-            } elseif ($result === false) {
+            if ($result === false) {
                 throw new Exception('The query ended with error.');
             }
         } catch (Exception $e) {
