@@ -4,9 +4,6 @@ namespace App;
 
 use App\Commands\baseCommand;
 use App\Records\chatRecord;
-use App\Records\statusRecord;
-use App\Records\userRecord;
-use Boot\application;
 use Boot\Src\telegramChat;
 use Boot\Interfaces\botInterface;
 use Boot\Traits\helpers;
@@ -47,9 +44,10 @@ class bot extends telegramChat implements botInterface
         }
 
         $chatRecord = chatRecord::fetch($this->getChatID());
-        $statusRecord = statusRecord::fetch($chatRecord->getStatusId());
-
-        application::log($statusRecord->getName());
+        $chatRecord->setID('1111111');
+//        $statusRecord = statusRecord::fetch($chatRecord->getStatusId());
+        $chatRecord->saveAll();
+//        application::log($statusRecord->getName());
 
     }
 
