@@ -8,6 +8,6 @@ try {
     $app = new application();
     $bot = $app->boot();
 } catch (Exception $e) {
-    die($e->getMessage());
+    application::log($e->getMessage()); die;
 }
 $bot->handle();

@@ -2,11 +2,13 @@
   "autoload": {
     "psr-4": {
       "App\\": "app/",
-      "Boot\\": "boot/"
+      "Boot\\": "boot/",
+      "Boot\\Database\\": "boot/Database"
     }
   },
   "require": {
     "ext-json": "*",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "ext-mysqli": "*"
   }
 }

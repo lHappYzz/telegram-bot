@@ -11,7 +11,7 @@ class application {
      * @var $config
      * The application configuration
      */
-    private $config;
+    public static $config;
 
     /**
      * Starts the application by doing some things like getting the configuration or parsing telegram request
@@ -21,10 +21,14 @@ class application {
      * @throws Exception
      */
     public function boot() {
-        $this->config = parse_ini_file('app/app.ini');
-        if (!$this->config) throw new Exception('Missing application configuration file');
-        date_default_timezone_set($this->config['timezone']);
-        return new bot($this->config);
+        self::$config = parse_ini_file('app/app.ini');
+        if (!self::$config) throw new Exception('Missing application configuration file');
+        date_default_timezone_set(self::$config['timezone']);
+        return new bot(self::$config);
+    }
+
+    public static function log($whatToLog) {
+        file_put_contents("systemlogs.txt", date('H:i:s')." ->".gettype($whatToLog)."<- ".print_r(($whatToLog), 1) . "\n*******\n\n");
     }
 
 }
