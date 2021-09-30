@@ -3,24 +3,33 @@
 
 namespace App\Records;
 
-
 use Boot\Database\record;
 
 class statusRecord extends record {
 
-    protected static $tableName = 'status';
+    protected static string $tableName = 'status';
+    protected static array $fillable = ['name', 'description'];
 
-    private $id;
-    private $name;
-    private $description;
+    protected int $id;
+    protected string $name;
+    protected string $description;
 
-    public function getID() {
+    public function getID(): int {
         return $this->id;
     }
-    public function getName() {
+    public function getName(): string {
         return $this->name;
     }
-    public function getDescription() {
+    public function getDescription(): string {
         return $this->description;
+    }
+    public function setID($id): void {
+        $this->id = $id;
+    }
+    public function setName($name): void {
+        $this->name = $name;
+    }
+    public function setDescription($description): void {
+        $this->description = $description;
     }
 }

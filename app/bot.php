@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Commands\baseCommand;
-use App\Records\chatRecord;
 use Boot\Src\telegramChat;
 use Boot\Interfaces\botInterface;
 use Boot\Traits\helpers;
@@ -42,13 +41,6 @@ class bot extends telegramChat implements botInterface
                 ' that was sent at: ' . $repliedMessage->getMessageDate()
             );
         }
-
-        $chatRecord = chatRecord::fetch($this->getChatID());
-        $chatRecord->setID('1111111');
-//        $statusRecord = statusRecord::fetch($chatRecord->getStatusId());
-        $chatRecord->saveAll();
-//        application::log($statusRecord->getName());
-
     }
 
     private function handleCommand() {

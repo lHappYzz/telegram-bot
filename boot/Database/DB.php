@@ -30,6 +30,8 @@ class DB extends singleton
      */
     private $database;
 
+    private $connection;
+
     protected function __construct() {
         parent::__construct();
 
@@ -54,6 +56,18 @@ class DB extends singleton
         return $dbconnection;
     }
 
+    private function getConnection() {
+        if (!$this->connection) {
+            try {
+                $this->connection = $this->makeConnection();
+            } catch (Exception $e) {
+                application::log($e->getMessage());
+                die($e->getMessage());
+            }
+        }
+        return $this->connection;
+    }
+
     /**
      * @param $sql
      * SQL string
@@ -62,9 +76,9 @@ class DB extends singleton
      */
     public function query($sql) {
         try {
-            $result = $this->makeConnection()->query($sql);
+            $result = $this->getConnection()->query($sql);
             if ($result === false) {
-                throw new Exception('The query ended with error.');
+                throw new Exception('The query ended with error. ' . mysqli_error($this->getConnection()));
             }
         } catch (Exception $e) {
             application::log($e->getMessage());
