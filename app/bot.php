@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Commands\baseCommand;
+use Boot\application;
 use Boot\Src\telegramChat;
 use Boot\Interfaces\botInterface;
 use Boot\Traits\helpers;
@@ -29,6 +30,10 @@ class bot extends telegramChat implements botInterface
         $this->request::sendTelegramRequest(['parse_mode' => 'Markdown', 'token' => $this->TOKEN, 'method' => 'sendMessage', 'text' => $message, 'chat_id' => $this->getChatID()]);
     }
 
+    public function sendPhoto($fileID, $caption = '') {
+        $this->request::sendTelegramRequest(['parse_mode' => 'Markdown', 'token' => $this->TOKEN, 'method' => 'sendPhoto', 'photo' => $fileID, 'caption' => $caption, 'chat_id' => $this->getChatID()]);
+    }
+
     public function handle() {
         if ($this->message->isCommand()) {
             $this->handleCommand();
@@ -41,6 +46,12 @@ class bot extends telegramChat implements botInterface
                 ' that was sent at: ' . $repliedMessage->getMessageDate()
             );
         }
+
+        application::log($this->message->getPhoto());
+        foreach ($this->message->getPhoto() as $photo) {
+            $fileID = $photo->getFileID();
+        }
+        $this->sendPhoto($fileID, $this->message->getCaption());
     }
 
     private function handleCommand() {
