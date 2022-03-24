@@ -2,19 +2,14 @@
 
 namespace Boot\Database;
 
-use Boot\application;
 use Boot\Database\DB;
 use ReflectionClass;
 
 /**
- * Class record represents a table record from a database. It is like a model
- * @package Boot\Database
+ * Class record represents a table record from a database
  */
-abstract class record {
-
-    public function __construct() {
-
-    }
+abstract class record
+{
 
     /**
      * Returns the identifier of the record
@@ -27,8 +22,9 @@ abstract class record {
      * @param $field
      * @return bool
      */
-    private function isFillable($field): bool {
-        return in_array($field, static::$fillable);
+    private function isFillable($field): bool
+    {
+        return in_array($field, static::$fillable, true);
     }
 
     /**
@@ -36,7 +32,8 @@ abstract class record {
      * represents field value
      * @return array
      */
-    private function attributesToArray(): array {
+    private function attributesToArray(): array
+    {
         $class = new ReflectionClass($this);
 
         $arrayOfAttributes = [];
@@ -53,7 +50,8 @@ abstract class record {
      * Returns an array of database record objects
      * @return array
      */
-    public static function fetchAll(): array {
+    public static function fetchAll(): array
+    {
         $records = [];
         $db = DB::getInstance();
 
@@ -71,7 +69,8 @@ abstract class record {
      * $tableName
      * @return string
      */
-    protected static function getTableName(): string {
+    protected static function getTableName(): string
+    {
         return static::$tableName;
     }
 
@@ -79,7 +78,8 @@ abstract class record {
      * Updates a record in the database
      * @return true
      */
-    public function update(): bool {
+    public function update(): bool
+    {
         $db = DB::getInstance();
         $table = self::getTableName();
         $id = $this->getID();
@@ -98,7 +98,8 @@ abstract class record {
     /** Creates a record to the database
      * @return true
      */
-    public function create(): bool {
+    public function create(): bool
+    {
         $db = DB::getInstance();
         $table = self::getTableName();
         $fillableFields = implode(',', static::$fillable);
@@ -120,7 +121,8 @@ abstract class record {
      * Removes a record from the database
      * @return true
      */
-    public function delete(): bool {
+    public function delete(): bool
+    {
         $db = DB::getInstance();
         $table = self::getTableName();
         $id = $this->getID();
@@ -136,7 +138,8 @@ abstract class record {
      * Database record identifier
      * @return record
      */
-    public static function fetch($id): record {
+    public static function fetch($id): record
+    {
         $db = DB::getInstance();
 
         $result = $db->query("SELECT * FROM `" . static::getTableName() . "` WHERE id = " . $id);
@@ -153,7 +156,8 @@ abstract class record {
      * @param array $options
      * @return array
      */
-    public static function find($options = []): array {
+    public static function find($options = []): array
+    {
         $db = DB::getInstance();
         $tableName = static::getTableName();
 
