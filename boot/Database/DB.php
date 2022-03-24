@@ -2,6 +2,7 @@
 
 namespace Boot\Database;
 
+use App\Config\Config;
 use Boot\application;
 use Boot\Src\singleton;
 use Exception;
@@ -36,7 +37,8 @@ class DB extends singleton
     protected function __construct() {
         parent::__construct();
 
-        $config = application::$config;
+        $config = Config::database();
+
         $this->hostname = $config['db_host'];
         $this->username = $config['db_username'];
         $this->password = $config['db_password'];
