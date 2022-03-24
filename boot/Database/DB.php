@@ -7,6 +7,7 @@ use Boot\Src\singleton;
 use Exception;
 use mysqli;
 use mysqli_result;
+use PDO;
 
 class DB extends singleton
 {
@@ -85,6 +86,24 @@ class DB extends singleton
             die($e->getMessage());
         }
         return $result;
+    }
+
+    public function executeQuery(string $query, array $bindings = [])
+    {
+        //TODO: https://www.php.net/manual/en/class.pdo.php#89019
+        $dsn = 'mysql:dbname=oopauth;host=127.0.0.1';
+        $pdo = new PDO($dsn, 'root', 'root');
+
+        $stmt = $pdo->prepare($query);
+
+        if ($stmt === false) {
+//            throw new Exception('The query ended with error. ' . mysqli_error($this->getConnection()));
+            return $pdo->errorInfo();
+        }
+        //[email => email@gmail.com]
+        $stmt->execute($bindings);
+
+        return $stmt;
     }
 
 }

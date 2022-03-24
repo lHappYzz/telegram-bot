@@ -177,4 +177,12 @@ abstract class record {
 
         return $result;
     }
+
+    public function query(): QueryBuilder
+    {
+        $queryBuilderInstance = QueryBuilder::getInstance();
+        $queryBuilderInstance->init(static::getTableName(), static::class);
+
+        return $queryBuilderInstance;
+    }
 }
