@@ -2,7 +2,6 @@
 
 namespace Boot\Database;
 
-use Boot\Database\DB;
 use ReflectionClass;
 
 /**
@@ -10,6 +9,7 @@ use ReflectionClass;
  */
 abstract class record
 {
+    protected string $table;
 
     /**
      * Returns the identifier of the record
@@ -52,26 +52,18 @@ abstract class record
      */
     public static function fetchAll(): array
     {
-        $records = [];
-        $db = DB::getInstance();
-
-        $result = $db->query("SELECT * FROM `" . self::getTableName() . "`");
-        while (($record = $result->fetch_object(static::class)) !== null) {
-            $records[] = $record;
-        }
-
-        return $records;
+        return self::query()->select()->get();
     }
 
     /**
      * This function is need to know what table to use in record class.
      * So in every class that extends base class record must have their own field called
-     * $tableName
+     * $table
      * @return string
      */
-    protected static function getTableName(): string
+    protected function getTableName(): string
     {
-        return static::$tableName;
+        return $this->table;
     }
 
     /**
@@ -80,41 +72,16 @@ abstract class record
      */
     public function update(): bool
     {
-        $db = DB::getInstance();
-        $table = self::getTableName();
-        $id = $this->getID();
-
-        $propsToImplode = [];
-        foreach ($this->attributesToArray() as $field => $value) {
-            $propsToImplode[] = "$field = '{$value}'";
-        }
-        $field_value = implode(', ', $propsToImplode);
-
-        $sql = "UPDATE $table SET $field_value WHERE id = '$id'";
-
-        return $db->query($sql);
+        return $this->newQuery()->where('id', $this->getID())->update($this->attributesToArray());
     }
 
-    /** Creates a record to the database
+    /**
+     * Creates a record to the database
      * @return true
      */
     public function create(): bool
     {
-        $db = DB::getInstance();
-        $table = self::getTableName();
-        $fillableFields = implode(',', static::$fillable);
-
-        $valuesToImplode = [];
-        foreach ($this->attributesToArray() as $value) {
-            if ($value) {
-                $valuesToImplode[] = "'{$value}'";
-            }
-        }
-        $stringOfValues = implode(', ', $valuesToImplode);
-
-        $sql = "INSERT INTO $table($fillableFields) VALUES ($stringOfValues)";
-
-        return $db->query($sql);
+        return $this->newQuery()->insert($this->attributesToArray());
     }
 
     /**
@@ -123,69 +90,40 @@ abstract class record
      */
     public function delete(): bool
     {
-        $db = DB::getInstance();
-        $table = self::getTableName();
-        $id = $this->getID();
-
-        $sql = "DELETE FROM $table WHERE id = '{$id}'";
-
-        return $db->query($sql);
+        return $this->newQuery()->where('id', $this->getID())->delete();
     }
 
     /**
      * Returns an object that represents table record identified by the $tableName field
      * @param $id
-     * Database record identifier
      * @return record
      */
     public static function fetch($id): record
     {
-        $db = DB::getInstance();
+        $arrayOfResults = self::query()->select()->where('id', $id)->get();
 
-        $result = $db->query("SELECT * FROM `" . static::getTableName() . "` WHERE id = " . $id);
-
-        if ($result->num_rows < 1) {
-            return new static();
-        }
-
-        return $result->fetch_object(static::class);
+        return array_pop($arrayOfResults) ?? new static();
     }
 
     /**
-     * Returns an array of objects filtered by the passed conditions
-     * @param array $options
+     * Find multiple records by their primary ids
+     * @param array $ids
      * @return array
      */
-    public static function find($options = []): array
+    public static function find(array $ids): array
     {
-        $db = DB::getInstance();
-        $tableName = static::getTableName();
-
-        $query = "SELECT * FROM $tableName";
-
-        $whereConditions = [];
-        if (!empty($options)) {
-            foreach ($options as $key => $value) {
-                $whereConditions[] = "{$key} = '{$value}'";
-            }
-            $whereClause = " WHERE " . implode(' AND ',$whereConditions);
-            $query .= $whereClause;
-        }
-
-        $raw = $db->query($query);
-
-        $result = [];
-        foreach ($raw as $rawRow) {
-            $result[] = self::fetch($rawRow['id']);
-        }
-
-        return $result;
+        return self::query()->whereIn('id', $ids)->get();
     }
 
-    public function query(): QueryBuilder
+    public static function query(): QueryBuilder
+    {
+        return (new static)->newQuery();
+    }
+
+    public function newQuery(): QueryBuilder
     {
         $queryBuilderInstance = QueryBuilder::getInstance();
-        $queryBuilderInstance->init(static::getTableName(), static::class);
+        $queryBuilderInstance->init($this->getTableName(), static::class);
 
         return $queryBuilderInstance;
     }

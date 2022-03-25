@@ -7,7 +7,7 @@ use Boot\Database\record;
 
 class statusRecord extends record {
 
-    protected static string $tableName = 'status';
+    protected string $table = 'status';
     protected static array $fillable = ['name', 'description'];
 
     protected int $id;
