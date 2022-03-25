@@ -24,7 +24,7 @@ abstract class record
      */
     private function isFillable($field): bool
     {
-        return in_array($field, static::$fillable, true);
+        return in_array($field, $this->fillable, true);
     }
 
     /**

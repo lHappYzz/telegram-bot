@@ -8,7 +8,7 @@ use Boot\Database\record;
 class chatRecord extends record {
 
     protected string $table = 'chat';
-    protected static array $fillable = ['id', 'status_id', 'user_id'];
+    protected array $fillable = ['id', 'status_id', 'user_id'];
 
     protected int $id;
     protected int $status_id;
