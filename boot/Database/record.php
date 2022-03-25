@@ -68,7 +68,7 @@ abstract class record
 
     /**
      * Updates a record in the database
-     * @return true
+     * @return bool
      */
     public function update(): bool
     {
@@ -77,7 +77,7 @@ abstract class record
 
     /**
      * Creates a record to the database
-     * @return true
+     * @return bool
      */
     public function create(): bool
     {
@@ -86,7 +86,7 @@ abstract class record
 
     /**
      * Removes a record from the database
-     * @return true
+     * @return bool
      */
     public function delete(): bool
     {

@@ -1,12 +1,9 @@
 <?php
 
-
 namespace Boot\Database;
 
-
-use Exception;
-
 //TODO: Use try catch when exception thrown
+//TODO Updated: see composeUpdate, composeDelete and find out what to do in case when WHERE condition is empty
 class  QueryBuilder extends DB
 {
     /** @var boolean
@@ -70,7 +67,7 @@ class  QueryBuilder extends DB
             $this->addBinding($column, $value, 'update');
         }
 
-        return $this->executeQuery($this->composeUpdate(), $this->cleanBindings())->errorCode() === 00000;
+        return $this->query($this->composeUpdate(), $this->cleanBindings())->errorCode() !== 00000;
     }
 
     public function insert(array $values): bool
@@ -87,14 +84,14 @@ class  QueryBuilder extends DB
             $this->addBinding($column, $value, 'insert');
         }
 
-        return $this->executeQuery($this->composeInsert(), $this->cleanBindings())->errorCode() === 00000;
+        return $this->query($this->composeInsert(), $this->cleanBindings())->errorCode() !== 00000;
     }
 
     public function delete(): bool
     {
         $this->sqlType = 'DELETE';
 
-        return $this->executeQuery($this->composeDelete(), $this->cleanBindings())->errorCode() === 00000;
+        return $this->query($this->composeDelete(), $this->cleanBindings())->errorCode() !== 00000;
     }
 
     public function select(array $columns = ['*']): QueryBuilder
@@ -134,7 +131,7 @@ class  QueryBuilder extends DB
     public function get(): array
     {
         $sql = $this->compose();
-        $sqlResult = $this->executeQuery($sql, $this->cleanBindings());
+        $sqlResult = $this->query($sql, $this->cleanBindings());
 
         $records = [];
         while (($record = $sqlResult->fetchObject($this->calledFromClass)) !== false) {
@@ -187,6 +184,11 @@ class  QueryBuilder extends DB
      */
     private function addBinding(string $key, $value, string $type): void
     {
+        //PDO bad works with boolean so we will convert it to int type
+        if (is_bool($value)) {
+            $value = (int)$value;
+        }
+
         if (is_array($value)) {
             $i = 0;
             foreach ($value as $item) {
@@ -248,17 +250,13 @@ class  QueryBuilder extends DB
         return "SELECT $select FROM $this->table $where";
     }
 
-    /**
-     * @return string
-     * @throws Exception
-     */
     private function composeDelete(): string
     {
         $where = $this->implodeWhereConditions();
 
-        if (empty($where)) {
+        /*if (empty($where)) {
             throw new Exception('Unknown record to delete');
-        }
+        }*/
 
         return "DELETE FROM $this->table $where";
     }
@@ -272,10 +270,6 @@ class  QueryBuilder extends DB
         return "INSERT INTO $this->table ($insert) VALUES ($values)";
     }
 
-    /**
-     * @return string
-     * @throws Exception
-     */
     private function composeUpdate(): string
     {
         $set = implode(', ', array_map(static function ($element) {
@@ -284,9 +278,9 @@ class  QueryBuilder extends DB
 
         $where = $this->implodeWhereConditions();
 
-        if (empty($where)) {
+        /*if (empty($where)) {
             throw new Exception('Unknown record to update.');
-        }
+        }*/
 
         return "UPDATE $this->table SET $set $where";
     }
@@ -302,12 +296,7 @@ class  QueryBuilder extends DB
         if (!empty($this->whereConditions)) {
             $result .= 'WHERE ';
 
-            $result .= implode(' ', array_map(static function ($element) {/*
-                if (is_array($element['value'])) {
-                    $marker = '(' . str_repeat('?,', count($element)-1) . '?)';
-                } else {
-                    $marker = $element['marker'];
-                }*/
+            $result .= implode(' ', array_map(static function ($element) {
                 return $element['boolean'] . ' ' . $element['column'] . ' ' . $element['operator'] . ' ' . $element['marker'];
             }, $this->whereConditions));
 
