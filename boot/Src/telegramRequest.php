@@ -2,6 +2,7 @@
 
 namespace Boot\Src;
 
+use App\Config\Config;
 use Boot\Traits\http;
 use Exception;
 use Boot\Log\Logger;
@@ -70,5 +71,21 @@ class telegramRequest {
     public function getUpdateType(): string
     {
         return $this->updateType;
+    }
+
+    /**
+     * Set telegram webhook according to application configuration
+     */
+    public static function setWebhook()
+    {
+        $botConfig = Config::bot();
+        return self::sendTelegramRequest(['token' => $botConfig['bot_token'], 'method' => 'setWebhook', 'url' => 'https://' . $botConfig['bot_url']]);
+    }
+    /**
+     * Remove telegram webhook
+     */
+    public static function removeWebhook()
+    {
+        return self::sendTelegramRequest(['token' => Config::bot()['bot_token'], 'method' => 'setWebhook', 'url' => '']);
     }
 }
