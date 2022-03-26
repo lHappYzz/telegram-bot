@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Commands\baseCommand;
+use App\Config\Config;
 use Boot\Src\telegramChat;
 use Boot\Interfaces\botInterface;
 use Boot\Traits\helpers;
@@ -14,8 +15,10 @@ class bot extends telegramChat implements botInterface
     private $TOKEN;
     private $BOT_URL;
 
-    public function __construct($config) {
+    public function __construct() {
         parent::__construct();
+
+        $config = Config::bot();
 
         $this->TOKEN = $config['bot_token'];
         $this->BOT_URL = $config['bot_url'];

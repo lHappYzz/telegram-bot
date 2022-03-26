@@ -7,8 +7,8 @@ use Boot\Database\record;
 
 class userRecord extends record {
 
-    protected static $tableName = 'user';
-    protected static array $fillable = ['firstName', 'lastName', 'userName', 'languageCode', 'isBot'];
+    protected string $table = 'user';
+    protected array $fillable = ['firstName', 'lastName', 'userName', 'languageCode', 'isBot'];
 
     protected int $id;
     protected string $firstName;

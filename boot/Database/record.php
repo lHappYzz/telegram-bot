@@ -2,19 +2,14 @@
 
 namespace Boot\Database;
 
-use Boot\application;
-use Boot\Database\DB;
 use ReflectionClass;
 
 /**
- * Class record represents a table record from a database. It is like a model
- * @package Boot\Database
+ * Class record represents a table record from a database
  */
-abstract class record {
-
-    public function __construct() {
-
-    }
+abstract class record
+{
+    protected string $table;
 
     /**
      * Returns the identifier of the record
@@ -27,8 +22,9 @@ abstract class record {
      * @param $field
      * @return bool
      */
-    private function isFillable($field): bool {
-        return in_array($field, static::$fillable);
+    private function isFillable($field): bool
+    {
+        return in_array($field, $this->fillable, true);
     }
 
     /**
@@ -36,7 +32,8 @@ abstract class record {
      * represents field value
      * @return array
      */
-    private function attributesToArray(): array {
+    private function attributesToArray(): array
+    {
         $class = new ReflectionClass($this);
 
         $arrayOfAttributes = [];
@@ -53,128 +50,81 @@ abstract class record {
      * Returns an array of database record objects
      * @return array
      */
-    public static function fetchAll(): array {
-        $records = [];
-        $db = DB::getInstance();
-
-        $result = $db->query("SELECT * FROM `" . self::getTableName() . "`");
-        while (($record = $result->fetch_object(static::class)) !== null) {
-            $records[] = $record;
-        }
-
-        return $records;
+    public static function fetchAll(): array
+    {
+        return self::query()->select()->get();
     }
 
     /**
      * This function is need to know what table to use in record class.
      * So in every class that extends base class record must have their own field called
-     * $tableName
+     * $table
      * @return string
      */
-    protected static function getTableName(): string {
-        return static::$tableName;
+    protected function getTableName(): string
+    {
+        return $this->table;
     }
 
     /**
      * Updates a record in the database
-     * @return true
+     * @return bool
      */
-    public function update(): bool {
-        $db = DB::getInstance();
-        $table = self::getTableName();
-        $id = $this->getID();
-
-        $propsToImplode = [];
-        foreach ($this->attributesToArray() as $field => $value) {
-            $propsToImplode[] = "$field = '{$value}'";
-        }
-        $field_value = implode(', ', $propsToImplode);
-
-        $sql = "UPDATE $table SET $field_value WHERE id = '$id'";
-
-        return $db->query($sql);
+    public function update(): bool
+    {
+        return $this->newQuery()->where('id', $this->getID())->update($this->attributesToArray());
     }
 
-    /** Creates a record to the database
-     * @return true
+    /**
+     * Creates a record to the database
+     * @return bool
      */
-    public function create(): bool {
-        $db = DB::getInstance();
-        $table = self::getTableName();
-        $fillableFields = implode(',', static::$fillable);
-
-        $valuesToImplode = [];
-        foreach ($this->attributesToArray() as $value) {
-            if ($value) {
-                $valuesToImplode[] = "'{$value}'";
-            }
-        }
-        $stringOfValues = implode(', ', $valuesToImplode);
-
-        $sql = "INSERT INTO $table($fillableFields) VALUES ($stringOfValues)";
-
-        return $db->query($sql);
+    public function create(): bool
+    {
+        return $this->newQuery()->insert($this->attributesToArray());
     }
 
     /**
      * Removes a record from the database
-     * @return true
+     * @return bool
      */
-    public function delete(): bool {
-        $db = DB::getInstance();
-        $table = self::getTableName();
-        $id = $this->getID();
-
-        $sql = "DELETE FROM $table WHERE id = '{$id}'";
-
-        return $db->query($sql);
+    public function delete(): bool
+    {
+        return $this->newQuery()->where('id', $this->getID())->delete();
     }
 
     /**
      * Returns an object that represents table record identified by the $tableName field
      * @param $id
-     * Database record identifier
      * @return record
      */
-    public static function fetch($id): record {
-        $db = DB::getInstance();
+    public static function fetch($id): record
+    {
+        $arrayOfResults = self::query()->select()->where('id', $id)->get();
 
-        $result = $db->query("SELECT * FROM `" . static::getTableName() . "` WHERE id = " . $id);
-
-        if ($result->num_rows < 1) {
-            return new static();
-        }
-
-        return $result->fetch_object(static::class);
+        return array_pop($arrayOfResults) ?? new static();
     }
 
     /**
-     * Returns an array of objects filtered by the passed conditions
-     * @param array $options
+     * Find multiple records by their primary ids
+     * @param array $ids
      * @return array
      */
-    public static function find($options = []): array {
-        $db = DB::getInstance();
-        $tableName = static::getTableName();
+    public static function find(array $ids): array
+    {
+        return self::query()->whereIn('id', $ids)->get();
+    }
 
-        $query = "SELECT * FROM $tableName";
+    public static function query(): QueryBuilder
+    {
+        return (new static)->newQuery();
+    }
 
-        $whereConditions = [];
-        if (!empty($options)) {
-            foreach ($options as $key => $value) {
-                $whereConditions[] = "{$key} = '{$value}'";
-            }
-            $whereClause = " WHERE " . implode(' AND ',$whereConditions);
-            $query .= $whereClause;
-        }
+    public function newQuery(): QueryBuilder
+    {
+        $queryBuilderInstance = QueryBuilder::getInstance();
+        $queryBuilderInstance->init($this->getTableName(), static::class);
 
-        $raw = $db->query($query);
-
-        $result = [];
-        foreach ($raw as $rawRow) {
-            $result[] = self::fetch($rawRow['id']);
-        }
-
-        return $result;
+        return $queryBuilderInstance;
     }
 }
