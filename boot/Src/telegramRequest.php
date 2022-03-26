@@ -4,7 +4,7 @@ namespace Boot\Src;
 
 use Boot\Traits\http;
 use Exception;
-
+use Boot\Log\Logger;
 
 class telegramRequest {
 
@@ -16,28 +16,22 @@ class telegramRequest {
      * @var array
      * @see parseTelegramRequest
      */
-    private $update;
+    private array $update;
 
-    private $updateTypes = [
+    private array $updateTypes = [
         'message',
         'edited_message'
     ];
 
-    private $updateType;
-    /**
-     * Marker that indicates if telegram request parsed ok
-     *
-     * @var bool
-     */
-    public $isParseOk = false;
+    private string $updateType;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->update = $this->parseTelegramRequest();
-        $this->isTelegramRequestParsedOk();
-        $this->setUpdateType($this->update);
     }
 
-    public function setUpdateType($update) {
+    public function setUpdateType(array $update): void
+    {
         foreach ($this->updateTypes as $type) {
             if (array_key_exists($type, $update)) {
                 $this->updateType = $type;
@@ -47,37 +41,19 @@ class telegramRequest {
         throw new Exception('Can not recognize telegram update type.');
     }
 
-    /**
-     * Check if telegram request parsed ok
-     *
-     * @see $isParseOk
-     * @throws Exception
-     */
-    public function isTelegramRequestParsedOk() {
-        if (!$this->isParseOk) {
-           /* $this->update =
-                [
-                    'message' => [
-                        'text'=>'test',
-                        'reply_to_message' => [
-                            'text' => 'test2'
-                        ]
-                    ]
-                ];*/
-            throw new Exception('telegram request error');
-        }
-    }
+    private function parseTelegramRequest(): array
+    {
+        try {
+            $tgData = json_decode(file_get_contents('php://input'), 1, 512, JSON_THROW_ON_ERROR);
+            $this->setUpdateType($tgData);
 
-    private function parseTelegramRequest() {
-        $tgData = json_decode(file_get_contents('php://input'),1);
-        if (isset($tgData)) {
-            $old_log = file_get_contents("log.txt");
-            file_put_contents("log.txt", print_r($tgData, 1) . "\n*********************\n\n" . $old_log);
-            $this->isParseOk = true;
-        } else {
-            return ['ok' => false];
+            Logger::logInfo(print_r($tgData, true));
+
+            return $tgData;
+        } catch (Exception $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            die();
         }
-        return  $tgData;
     }
 
     /**
@@ -86,11 +62,13 @@ class telegramRequest {
      * @see parseTelegramRequest
      * @return array
      */
-    public function getUpdate() {
+    public function getUpdate(): array
+    {
         return $this->update;
     }
 
-    public function getUpdateType() {
+    public function getUpdateType(): string
+    {
         return $this->updateType;
     }
 }
