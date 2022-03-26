@@ -3,7 +3,7 @@
 namespace App;
 
 use App\Commands\baseCommand;
-use Boot\application;
+use App\Config\Config;
 use Boot\Src\telegramChat;
 use Boot\Interfaces\botInterface;
 use Boot\Traits\helpers;
@@ -15,8 +15,10 @@ class bot extends telegramChat implements botInterface
     private $TOKEN;
     private $BOT_URL;
 
-    public function __construct($config) {
+    public function __construct() {
         parent::__construct();
+
+        $config = Config::bot();
 
         $this->TOKEN = $config['bot_token'];
         $this->BOT_URL = $config['bot_url'];
@@ -46,12 +48,6 @@ class bot extends telegramChat implements botInterface
                 ' that was sent at: ' . $repliedMessage->getMessageDate()
             );
         }
-
-        application::log($this->message->getPhoto());
-        foreach ($this->message->getPhoto() as $photo) {
-            $fileID = $photo->getFileID();
-        }
-        $this->sendPhoto($fileID, $this->message->getCaption());
     }
 
     private function handleCommand() {
