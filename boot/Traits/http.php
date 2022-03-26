@@ -28,17 +28,13 @@ trait http {
      *
      * @return string|bool|null
      */
-    public static function sendRequest(array $parameters, string $url, bool $isPost = true) {
-
+    public static function sendRequest(array $parameters, string $url, bool $isPost) {
         $ch = curl_init();
 
         if($isPost) {
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
+            self::setCurlOptionsForPostRequest($ch, $url, $parameters);
         } else {
-            curl_setopt($ch, CURLOPT_URL, $url . "?" . http_build_query($parameters));
-            curl_setopt($ch, CURLOPT_POST, 0);
+            self::setCurlOptionsForGetRequest($ch, $url, $parameters);
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -53,5 +49,46 @@ trait http {
         }
 
         return $serverResponse;
+    }
+
+    /**
+     * @see sendRequest
+     * @param $curl
+     * A CurlHandle object
+     *
+     * @param $url
+     * API url
+     *
+     * @param $parameters
+     * Post body parameters array
+     *
+     * @return bool
+     */
+    private static function setCurlOptionsForPostRequest($curl, $url, $parameters) {
+        return curl_setopt_array($curl, [
+            CURLOPT_URL => $url,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => http_build_query($parameters),
+        ]);
+    }
+
+    /**
+     * @see sendRequest
+     * @param $curl
+     * A CurlHandle object
+     *
+     * @param $url
+     * API url
+     *
+     * @param $parameters
+     * Post body parameters array
+     *
+     * @return bool
+     */
+    private static function setCurlOptionsForGetRequest($curl, $url, $parameters) {
+        return curl_setopt_array($curl, [
+            CURLOPT_URL => $url . "?" . http_build_query($parameters),
+            CURLOPT_POST => false,
+        ]);
     }
 }

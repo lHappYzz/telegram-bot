@@ -10,12 +10,23 @@ class telegramMessage {
     private $text;
     private $commandClassName;
     private telegramMessage $replyToMessage;
-
+    private array $photo = [];
+    private string $caption = '';
 
     public function __construct($messageData) {
         $this->messageID = $messageData['message_id'];
         $this->date = $messageData['date'];
         $this->text = $messageData['text'];
+
+        if (array_key_exists('photo', $messageData)) {
+            if (array_key_exists('caption', $messageData)) {
+                $this->caption = $messageData['caption'];
+            }
+            foreach ($messageData['photo'] as $photoData) {
+                $this->photo[] = new telegramPhotoSize($photoData);
+            }
+        }
+
         $this->setCommandClassName();
 
         $this->setReplyToMessage($messageData);
@@ -48,6 +59,19 @@ class telegramMessage {
 
     public function getCommandClassName() {
         return $this->commandClassName;
+    }
+
+    /**
+     * Returns array of telegramPhotoSize object.
+     * Read more: https://core.telegram.org/bots/api#photosize
+     * @return array
+     */
+    public function getPhoto(): array {
+        return $this->photo;
+    }
+
+    public function getCaption(): string {
+        return $this->caption;
     }
 
     /**

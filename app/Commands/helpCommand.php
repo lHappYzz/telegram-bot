@@ -22,7 +22,7 @@ class helpCommand extends baseCommand
         foreach ($classedInCommandsDir as $commandClass) {
             $command = $this->getCommandClassInstance(substr($commandClass, 0, -4));
             if ($command instanceof baseCommand) {
-                $message .= '<'.$command->getSignature().'> - '.$command->getDescription().PHP_EOL;
+                $message .= $command->getSignature().' - '.$command->getDescription().PHP_EOL;
             }
         }
         $bot->sendMessage($message);

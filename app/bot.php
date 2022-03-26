@@ -25,11 +25,15 @@ class bot extends telegramChat implements botInterface
     }
 
     public function setWebhook() {
-        $this->request::sendTelegramRequest(['token' => $this->TOKEN, 'method' => 'setWebhook', 'url' => 'https://' . $this->BOT_URL]);
+        return $this->request::sendTelegramRequest(['token' => $this->TOKEN, 'method' => 'setWebhook', 'url' => 'https://' . $this->BOT_URL]);
     }
 
     public function sendMessage($message = '') {
         $this->request::sendTelegramRequest(['parse_mode' => 'Markdown', 'token' => $this->TOKEN, 'method' => 'sendMessage', 'text' => $message, 'chat_id' => $this->getChatID()]);
+    }
+
+    public function sendPhoto($fileID, $caption = '') {
+        $this->request::sendTelegramRequest(['parse_mode' => 'Markdown', 'token' => $this->TOKEN, 'method' => 'sendPhoto', 'photo' => $fileID, 'caption' => $caption, 'chat_id' => $this->getChatID()]);
     }
 
     public function handle() {
