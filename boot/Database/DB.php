@@ -3,7 +3,7 @@
 namespace Boot\Database;
 
 use App\Config\Config;
-use Boot\application;
+use Boot\Log\Logger;
 use Boot\Src\singleton;
 use Exception;
 use PDO;
@@ -66,8 +66,7 @@ class DB extends singleton
 
             $stmt->execute($bindings);
         } catch (Exception $e) {
-            application::log($e->getMessage());
-            die($e->getMessage());
+            Logger::logException($e, Logger::LEVEL_ERROR);
         }
 
         return $stmt;
