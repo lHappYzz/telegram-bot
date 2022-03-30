@@ -34,7 +34,7 @@ class DB extends singleton
     /**
      * @var PDO Object represents db connection.
      */
-    private PDO $connection;
+    private $connection;
 
     /**
      * @var string Credential for pdo object.
