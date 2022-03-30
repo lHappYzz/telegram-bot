@@ -2,7 +2,26 @@
 
 namespace Boot\Traits;
 
+use Boot\Log\Logger;
+use GuzzleHttp\Client;
+use Throwable;
+
 trait http {
+
+    protected static function request(string $method, string $url, array $parameters): array
+    {
+        try {
+            $client = new Client();
+
+            $response = $client->request($method, $url, $parameters)->getBody()->getContents();
+
+            return json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+        } catch (Throwable $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+        }
+
+        return [];
+    }
 
     /**
      * @param array $parameters

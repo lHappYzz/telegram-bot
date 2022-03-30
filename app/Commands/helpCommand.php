@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Commands;
 
 use App\bot;
@@ -10,12 +9,12 @@ class helpCommand extends baseCommand
 {
     use helpers;
 
-    protected $description = 'Represents available bot commands.';
-    protected $signature = '/help';
+    protected string $description = 'Represents available bot commands.';
+    protected string $signature = '/help';
 
-    protected static $instance = null;
+    protected static ?baseCommand $instance = null;
 
-    public function boot(bot $bot)
+    public function boot(bot $bot): void
     {
         $message = 'List of available Commands:' . PHP_EOL;
         $classedInCommandsDir = $this->getCommandsInTheCommandDir();

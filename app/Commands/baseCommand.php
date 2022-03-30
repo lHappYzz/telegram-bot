@@ -1,14 +1,12 @@
 <?php
 
-
 namespace App\Commands;
-
 
 use App\bot;
 
 abstract class baseCommand
 {
-    abstract public function boot(bot $bot);
+    abstract public function boot(bot $bot): void;
 
     public static function getInstance()
     {
