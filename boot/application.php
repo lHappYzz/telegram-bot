@@ -25,9 +25,4 @@ class application {
         return new bot();
     }
 
-    public static function log($whatToLog): void
-    {
-        file_put_contents("systemlogs.txt", date('H:i:s')." ->".gettype($whatToLog)."<- ".print_r(($whatToLog), 1) . "\n*******\n\n");
-    }
-
 }
