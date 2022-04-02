@@ -7,11 +7,26 @@ use GuzzleHttp\Client;
 use Throwable;
 
 trait http {
+    /**
+     * https://docs.guzzlephp.org/en/stable/quickstart.html
+     * @var array
+     */
+    private static array $defaults = [
+        'timeout' => 5.0,
+    ];
 
-    protected static function request(string $method, string $url, array $parameters): array
+    /**
+     * Makes requests by using Guzzle library
+     * @param string $method
+     * @param string $url
+     * @param array $parameters
+     * @param array $clientSettings
+     * @return array
+     */
+    protected static function request(string $method, string $url, array $parameters, array $clientSettings = []): array
     {
         try {
-            $client = new Client();
+            $client = new Client(array_merge(self::$defaults, $clientSettings));
 
             $response = $client->request($method, $url, $parameters)->getBody()->getContents();
 
