@@ -2,7 +2,41 @@
 
 namespace Boot\Traits;
 
+use Boot\Log\Logger;
+use GuzzleHttp\Client;
+use Throwable;
+
 trait http {
+    /**
+     * https://docs.guzzlephp.org/en/stable/quickstart.html
+     * @var array
+     */
+    private static array $defaults = [
+        'timeout' => 5.0,
+    ];
+
+    /**
+     * Makes requests by using Guzzle library
+     * @param string $method
+     * @param string $url
+     * @param array $parameters
+     * @param array $clientSettings
+     * @return array
+     */
+    protected static function request(string $method, string $url, array $parameters, array $clientSettings = []): array
+    {
+        try {
+            $client = new Client(array_merge(self::$defaults, $clientSettings));
+
+            $response = $client->request($method, $url, $parameters)->getBody()->getContents();
+
+            return json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+        } catch (Throwable $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+        }
+
+        return [];
+    }
 
     /**
      * @param array $parameters
