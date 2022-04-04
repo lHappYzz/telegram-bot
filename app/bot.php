@@ -7,15 +7,18 @@ use App\Config\Config;
 use Boot\Src\telegramChat;
 use Boot\Interfaces\botInterface;
 use Boot\Traits\helpers;
+use Boot\Src\ReplyMarkup\InlineKeyboardMarkup;
+use Boot\Traits\http;
 
 class bot extends telegramChat implements botInterface
 {
-    use helpers;
+    use helpers, http;
 
     private $TOKEN;
     private $BOT_URL;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $config = Config::bot();
@@ -24,19 +27,49 @@ class bot extends telegramChat implements botInterface
         $this->BOT_URL = $config['bot_url'];
     }
 
-    public function setWebhook() {
+    public function setWebhook()
+    {
         return $this->request::sendTelegramRequest(['token' => $this->TOKEN, 'method' => 'setWebhook', 'url' => 'https://' . $this->BOT_URL]);
     }
 
-    public function sendMessage($message = '') {
-        $this->request::sendTelegramRequest(['parse_mode' => 'Markdown', 'token' => $this->TOKEN, 'method' => 'sendMessage', 'text' => $message, 'chat_id' => $this->getChatID()]);
+    public function sendMessage($message = ''): void
+    {
+        $this->request::sendTelegramRequest([
+            'parse_mode' => 'Markdown',
+            'token' => $this->TOKEN,
+            'method' => 'sendMessage',
+            'text' => $message,
+            'chat_id' => $this->getChatID(),
+
+        ]);
     }
 
-    public function sendPhoto($fileID, $caption = '') {
-        $this->request::sendTelegramRequest(['parse_mode' => 'Markdown', 'token' => $this->TOKEN, 'method' => 'sendPhoto', 'photo' => $fileID, 'caption' => $caption, 'chat_id' => $this->getChatID()]);
+    //TODO: Refactor messages sending
+    public function sendMessageV2(string $message, telegramChat $chat, InlineKeyboardMarkup $inlineKeyboardMarkup): void
+    {
+        $this->request::sendTelegramRequest([
+            'token' => $this->TOKEN,
+            'method' => 'sendMessage',
+            'text' => $message,
+            'chat_id' => $chat->getChatID(),
+            'reply_markup' => $inlineKeyboardMarkup->getInlineKeyboard(),
+        ]);
     }
 
-    public function handle() {
+    public function sendPhoto($fileID, $caption = ''): void
+    {
+        $this->request::sendTelegramRequest([
+            'parse_mode' => 'Markdown',
+            'token' => $this->TOKEN,
+            'method' => 'sendPhoto',
+            'photo' => $fileID,
+            'caption' => $caption,
+            'chat_id' => $this->getChatID(),
+        ]);
+    }
+
+    public function handle(): void
+    {
         if ($this->message->isCommand()) {
             $this->handleCommand();
         }
@@ -50,7 +83,8 @@ class bot extends telegramChat implements botInterface
         }
     }
 
-    private function handleCommand() {
+    private function handleCommand(): void
+    {
         $command = $this->getCommandClassInstance($this->message->getCommandClassName());
         if ($command instanceof baseCommand){
             $command->boot($this);
