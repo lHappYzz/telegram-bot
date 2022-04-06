@@ -2,13 +2,17 @@
 
 namespace Boot\Src;
 
+/**
+ * Class telegramChat
+ * @link https://core.telegram.org/bots/api#chat
+ */
 class telegramChat extends Entity
 {
     private int $id;
     private string $type;
-    private string $firstName;
-    private string $lastName;
-    private string $userName;
+    private ?string $firstName;
+    private ?string $lastName;
+    private ?string $userName;
 
     public function __construct(array $telegramChatData) {
         $this->id = $telegramChatData['id'];

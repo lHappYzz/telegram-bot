@@ -2,14 +2,18 @@
 
 namespace Boot\Src;
 
+/**
+ * Class telegramUser
+ * @link https://core.telegram.org/bots/api#user
+ */
 class telegramUser extends Entity
 {
     private int $id;
     private bool $isBot;
     private string $firstName;
-    private string $lastName;
-    private string $userName;
-    private string $languageCode;
+    private ?string $lastName;
+    private ?string $userName;
+    private ?string $languageCode;
 
     public function __construct($userData) {
         $this->id = $userData['id'];
@@ -17,7 +21,7 @@ class telegramUser extends Entity
         $this->lastName = $userData['last_name'];
         $this->userName = $userData['username'];
         $this->languageCode = $userData['language_code'];
-        $this->isBot = $userData['isBot'];
+        $this->isBot = $userData['is_bot'];
     }
 
     public function getID(): int
