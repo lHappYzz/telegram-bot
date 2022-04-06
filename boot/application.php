@@ -4,9 +4,11 @@ namespace Boot;
 
 use App\bot;
 use App\Config\Config;
+use Boot\Src\telegram;
 use Exception;
 
-class application {
+class application extends telegram
+{
     /**
      * Starts the application by doing some things like getting the configuration or parsing telegram request
      * In success case new bot instance will be returned else an exception will be thrown
@@ -22,7 +24,6 @@ class application {
 
         date_default_timezone_set(Config::timezone());
 
-        return new bot();
+        return new bot($this);
     }
-
 }

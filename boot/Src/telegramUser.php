@@ -1,17 +1,15 @@
 <?php
 
-
 namespace Boot\Src;
 
-
-class telegramUser {
-
-    private $id;
-    private $firstName;
-    private $lastName;
-    private $userName;
-    private $languageCode;
-    private $isBot;
+class telegramUser extends Entity
+{
+    private int $id;
+    private bool $isBot;
+    private string $firstName;
+    private string $lastName;
+    private string $userName;
+    private string $languageCode;
 
     public function __construct($userData) {
         $this->id = $userData['id'];
@@ -22,27 +20,33 @@ class telegramUser {
         $this->isBot = $userData['isBot'];
     }
 
-    public function getID() {
+    public function getID(): int
+    {
         return $this->id;
     }
 
-    public function getFirstName() {
+    public function getFirstName(): string
+    {
         return $this->firstName;
     }
 
-    public function getLastName() {
+    public function getLastName(): string
+    {
         return $this->lastName;
     }
 
-    public function getUserName() {
+    public function getUserName(): string
+    {
         return $this->userName;
     }
 
-    public function getLanguageCode() {
+    public function getLanguageCode(): string
+    {
         return $this->languageCode;
     }
 
-    public function isBot() {
+    public function isBot(): bool
+    {
         return $this->isBot;
     }
 }

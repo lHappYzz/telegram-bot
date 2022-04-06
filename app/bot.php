@@ -4,22 +4,28 @@ namespace App;
 
 use App\Commands\baseCommand;
 use App\Config\Config;
+use Boot\Src\Entity;
+use Boot\Src\telegram;
 use Boot\Src\telegramChat;
-use Boot\Interfaces\botInterface;
+use Boot\Src\Update;
 use Boot\Traits\helpers;
 use Boot\Src\ReplyMarkup\InlineKeyboardMarkup;
 use Boot\Traits\http;
 
-class bot extends telegramChat implements botInterface
+class bot extends Entity
 {
-    use helpers, http;
+    use http, helpers { getCommandClassInstance as protected; getCommandsInTheCommandDir as protected; }
 
     private $TOKEN;
     private $BOT_URL;
 
-    public function __construct()
+    protected telegram $telegram;
+    public static Update $update;
+
+    public function __construct(telegram $telegram)
     {
-        parent::__construct();
+        $this->telegram = $telegram;
+        self::$update = &$telegram->request->update;
 
         $config = Config::bot();
 
@@ -29,25 +35,24 @@ class bot extends telegramChat implements botInterface
 
     public function setWebhook()
     {
-        return $this->request::sendTelegramRequest(['token' => $this->TOKEN, 'method' => 'setWebhook', 'url' => 'https://' . $this->BOT_URL]);
+        return $this->telegram->request::sendTelegramRequest(['token' => $this->TOKEN, 'method' => 'setWebhook', 'url' => 'https://' . $this->BOT_URL]);
     }
 
     public function sendMessage($message = ''): void
     {
-        $this->request::sendTelegramRequest([
+        $this->telegram->request::sendTelegramRequest([
             'parse_mode' => 'Markdown',
             'token' => $this->TOKEN,
             'method' => 'sendMessage',
             'text' => $message,
-            'chat_id' => $this->getChatID(),
-
+            'chat_id' => $this->getChat()->getChatID(),
         ]);
     }
 
     //TODO: Refactor messages sending
     public function sendMessageV2(string $message, telegramChat $chat, InlineKeyboardMarkup $inlineKeyboardMarkup): void
     {
-        $this->request::sendTelegramRequest([
+        $this->telegram->request::sendTelegramRequest([
             'token' => $this->TOKEN,
             'method' => 'sendMessage',
             'text' => $message,
@@ -58,23 +63,23 @@ class bot extends telegramChat implements botInterface
 
     public function sendPhoto($fileID, $caption = ''): void
     {
-        $this->request::sendTelegramRequest([
+        $this->telegram->request::sendTelegramRequest([
             'parse_mode' => 'Markdown',
             'token' => $this->TOKEN,
             'method' => 'sendPhoto',
             'photo' => $fileID,
             'caption' => $caption,
-            'chat_id' => $this->getChatID(),
+            'chat_id' => $this->getChat()->getChatID(),
         ]);
     }
 
     public function handle(): void
     {
-        if ($this->message->isCommand()) {
+        if ($this->getMessage()->isCommand()) {
             $this->handleCommand();
         }
 
-        $repliedMessage = $this->message->getRepliedMessage();
+        $repliedMessage = $this->getMessage()->getRepliedMessage();
         if ($repliedMessage) {
             $this->sendMessage('Detected the reply for message: ' .
                 $repliedMessage->getMessageText() .
@@ -85,11 +90,11 @@ class bot extends telegramChat implements botInterface
 
     private function handleCommand(): void
     {
-        $command = $this->getCommandClassInstance($this->message->getCommandClassName());
+        $command = $this->getCommandClassInstance($this->getMessage()->getCommandClassName());
         if ($command instanceof baseCommand){
             $command->boot($this);
         } else {
-            $this->sendMessage('I can not recognize the command - <' . $this->message->getMessageText() . '>');
+            $this->sendMessage('I can not recognize the command - <' . $this->getMessage()->getMessageText() . '>');
         }
     }
 }

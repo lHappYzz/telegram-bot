@@ -1,20 +1,27 @@
 <?php
 
-
 namespace Boot\Src;
 
+class telegramMessage extends Entity
+{
+    private int $messageID;
+    private telegramUser $from;
+    private telegramChat $chat;
 
-class telegramMessage {
-    private $messageID;
-    private $date;
-    private $text;
+    private int $date;
+    private string $text;
     private $commandClassName;
     private telegramMessage $replyToMessage;
     private array $photo = [];
     private string $caption = '';
 
-    public function __construct($messageData) {
+    public function __construct($messageData)
+    {
         $this->messageID = $messageData['message_id'];
+
+        $this->from = new telegramUser($messageData['from']);
+        $this->chat = new telegramChat($messageData['chat']);
+
         $this->date = $messageData['date'];
         $this->text = $messageData['text'];
 
@@ -31,33 +38,34 @@ class telegramMessage {
 
         $this->setReplyToMessage($messageData);
     }
-    private function setReplyToMessage($messageData) {
-        if (array_key_exists('reply_to_message', $messageData)) {
-            $this->replyToMessage = new telegramMessage($messageData['reply_to_message']);
-        }
-    }
 
-    private function setCommandClassName() {
-        if ($this->isCommand()) {
-            $this->commandClassName = str_replace('/', '', $this->text) . 'Command';
-        } else {
-            $this->commandClassName = '';
-        }
-    }
-
-    public function getMessageID() {
+    public function getMessageID(): int
+    {
         return $this->messageID;
     }
 
-    public function getMessageText() {
+    public function getFrom(): telegramUser
+    {
+        return $this->from;
+    }
+
+    public function getChat(): telegramChat
+    {
+        return $this->chat;
+    }
+
+    public function getMessageText()
+    {
         return $this->text;
     }
 
-    public function getMessageDate($format = 'Y-m-d H:i:s') {
+    public function getMessageDate($format = 'Y-m-d H:i:s')
+    {
         return date($format, $this->date);
     }
 
-    public function getCommandClassName() {
+    public function getCommandClassName()
+    {
         return $this->commandClassName;
     }
 
@@ -66,11 +74,13 @@ class telegramMessage {
      * Read more: https://core.telegram.org/bots/api#photosize
      * @return array
      */
-    public function getPhoto(): array {
+    public function getPhoto(): array
+    {
         return $this->photo;
     }
 
-    public function getCaption(): string {
+    public function getCaption(): string
+    {
         return $this->caption;
     }
 
@@ -78,22 +88,37 @@ class telegramMessage {
      * Get message that was replied otherwise null is returned,
      * so always check your var for not being null
      *
-     * @return telegramMessage|null
+     * @return ?telegramMessage
      */
-    public function getRepliedMessage() {
-        if (isset($this->replyToMessage)) {
-            return $this->replyToMessage;
-        }
-        return null;
+    public function getRepliedMessage(): ?telegramMessage
+    {
+        return $this->replyToMessage ?? null;
     }
 
-    public function isCommand() {
-        if ($this->text[0] == '/') {
+    public function isCommand(): bool
+    {
+        if ($this->text[0] === '/') {
             if (strpos($this->text, ' ') === false) {
                 return true;
             }
         }
         return false;
+    }
+
+    private function setReplyToMessage($messageData): void
+    {
+        if (array_key_exists('reply_to_message', $messageData)) {
+            $this->replyToMessage = new telegramMessage($messageData['reply_to_message']);
+        }
+    }
+
+    private function setCommandClassName(): void
+    {
+        if ($this->isCommand()) {
+            $this->commandClassName = str_replace('/', '', $this->text) . 'Command';
+        } else {
+            $this->commandClassName = '';
+        }
     }
 
 
