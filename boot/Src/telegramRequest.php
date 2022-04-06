@@ -7,70 +7,36 @@ use Boot\Traits\http;
 use Exception;
 use Boot\Log\Logger;
 
-class telegramRequest {
+class telegramRequest
+{
 
     use http;
 
     /**
-     * An array created from json object sent by telegram
+     * An object created from JSON sent by telegram
      *
-     * @var array
+     * @var Update
      * @see parseTelegramRequest
      */
-    private array $update;
-
-    private array $updateTypes = [
-        'message',
-        'edited_message'
-    ];
-
-    private string $updateType;
+    public Update $update;
 
     public function __construct()
     {
         $this->update = $this->parseTelegramRequest();
     }
 
-    public function setUpdateType(array $update): void
-    {
-        foreach ($this->updateTypes as $type) {
-            if (array_key_exists($type, $update)) {
-                $this->updateType = $type;
-                return;
-            }
-        }
-        throw new Exception('Can not recognize telegram update type.');
-    }
-
-    private function parseTelegramRequest(): array
+    private function parseTelegramRequest(): Update
     {
         try {
             $tgData = json_decode(file_get_contents('php://input'), 1, 512, JSON_THROW_ON_ERROR);
-            $this->setUpdateType($tgData);
 
             Logger::logInfo(print_r($tgData, true));
 
-            return $tgData;
+            return new Update($tgData);
         } catch (Exception $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
             die();
         }
-    }
-
-    /**
-     * Returns array data created from json object sent by telegram
-     *
-     * @see parseTelegramRequest
-     * @return array
-     */
-    public function getUpdate(): array
-    {
-        return $this->update;
-    }
-
-    public function getUpdateType(): string
-    {
-        return $this->updateType;
     }
 
     /**

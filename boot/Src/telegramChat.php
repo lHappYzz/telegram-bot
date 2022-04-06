@@ -2,38 +2,47 @@
 
 namespace Boot\Src;
 
-class telegramChat extends telegram {
-    private $id;
-    private $type;
-    private $firstName;
-    private $lastName;
-    private $userName;
+class telegramChat extends Entity
+{
+    private int $id;
+    private string $type;
+    private string $firstName;
+    private string $lastName;
+    private string $userName;
 
-    public telegramMessage $message;
-    public telegramUser $user;
-
-    public function __construct() {
-        parent::__construct();
-
-        $update = $this->request->getUpdate();
-        $updateType = $this->request->getUpdateType();
-
-        $this->message = new telegramMessage($update[$updateType]);
-        $this->user = new telegramUser($update[$updateType]['from']);
-
-        $this->id = $update[$updateType]['chat']['id'];
-        $this->type = $update[$updateType]['chat']['type'];
-        $this->firstName = $update[$updateType]['chat']['firstName'];
-        $this->lastName = $update[$updateType]['chat']['lastName'];
-        $this->userName = $update[$updateType]['chat']['userName'];
+    public function __construct(array $telegramChatData) {
+        $this->id = $telegramChatData['id'];
+        $this->type = $telegramChatData['type'];
+        $this->firstName = $telegramChatData['firstName'];
+        $this->lastName = $telegramChatData['lastName'];
+        $this->userName = $telegramChatData['userName'];
     }
 
-    public function getChatID() {
-        if (empty($this->id)) return '423303268';
+    public function getChatID(): int
+    {
+        if (empty($this->id)) {
+            return 423303268;
+        }
         return $this->id;
     }
 
-    protected function getChatType() {
+    public function getChatType(): string
+    {
         return $this->type;
+    }
+
+    public function getFirstName(): string
+    {
+        return $this->firstName;
+    }
+
+    public function getLastName(): string
+    {
+        return $this->lastName;
+    }
+
+    public function getUsername(): string
+    {
+        return $this->userName;
     }
 }
