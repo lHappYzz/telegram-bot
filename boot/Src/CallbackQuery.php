@@ -21,6 +21,10 @@ class CallbackQuery extends Entity
         $this->id = $callbackQueryData['id'];
         $this->from = new telegramUser($callbackQueryData['from']);
         $this->message = new telegramMessage($callbackQueryData['message']);
+        $this->inlineMessageId = $callbackQueryData['inline_message_id'];
+        $this->chatInstance = $callbackQueryData['chat_instance'];
+        $this->data = $callbackQueryData['data'];
+        $this->gameShortName = $callbackQueryData['game_short_name'];
     }
 
     public function getId(): string
@@ -33,8 +37,28 @@ class CallbackQuery extends Entity
         return $this->from;
     }
 
-    public function getMessage(): telegramMessage
+    public function getMessage(): ?telegramMessage
     {
         return $this->message;
+    }
+
+    public function getInlineMessageId(): ?string
+    {
+        return $this->inlineMessageId;
+    }
+
+    public function getChatInstance(): ?string
+    {
+        return $this->chatInstance;
+    }
+
+    public function getGameShortName(): ?string
+    {
+        return $this->gameShortName;
+    }
+
+    public function getData(): ?string
+    {
+        return $this->data;
     }
 }

@@ -28,6 +28,6 @@ class courseCommand extends baseCommand {
             $message .= '💰BUY: 1' . $block['ccy'] . ' - ' . $block['buy'] . ' ' . $block['base_ccy'].
                 "\n💱SALE: 1" . $block['ccy'] . ' - ' . $block['sale'] . ' ' . $block['base_ccy'] . "\n\n";
         }
-        $bot->sendMessage($message);
+        $bot->sendMessage($message, $bot->getChat());
     }
 }

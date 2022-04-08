@@ -2,29 +2,36 @@
 
 namespace Boot\Traits;
 
+use Boot\Src\CallbackQueryHandler;
+
 trait helpers {
 
-    public function getCommandClassInstance($className) {
-        $commandsNamespace = '\\App\\Commands\\';
-
-        $availableCommands = $this->getCommandsInTheCommandDir();
-        foreach ($availableCommands as $availableCommand) {
-            if ($availableCommand === $className.'.php' && $availableCommand !== 'baseCommand.php') {
-                $fullPath = $commandsNamespace.$className;
-                return $fullPath::getInstance();
-            }
-        }
-        return null;
+    private function getCallbackQueryHandlerClassInstance(string $className): CallbackQueryHandler
+    {
+        return $this->getClassInstance(
+            '\\App\\CallbackQueryHandlers\\',
+            $className,
+            $this->getCallbackHandlersInTheHandlersDir()
+        );
     }
 
-    public function getCommandsInTheCommandDir() {
-        $commands = scandir('app'.DIRECTORY_SEPARATOR.'Commands');
-        foreach ($commands as $key => $command) {
-            if (!is_file('app'.DIRECTORY_SEPARATOR.'Commands'.DIRECTORY_SEPARATOR.$command)) {
-                unset($commands[$key]);
-            }
-        }
-        return array_values($commands);
+    private function resolveCallbackQueryHandlerName(string $callbackData): string
+    {
+        return ucfirst(strtolower(preg_replace('/[^A-Za-z0-9]/', '', $callbackData))) . 'Handler';
+    }
+
+    private function getCommandClassInstance($className) {
+        return $this->getClassInstance('\\App\\Commands\\', $className, $this->getCommandsInTheCommandDir());
+    }
+
+    private function getCommandsInTheCommandDir()
+    {
+        return $this->getClasses('app'.DIRECTORY_SEPARATOR.'Commands');
+    }
+
+    private function getCallbackHandlersInTheHandlersDir()
+    {
+        return $this->getClasses('app'.DIRECTORY_SEPARATOR.'CallbackQueryHandlers');
     }
 
     /**
@@ -32,7 +39,7 @@ trait helpers {
      * @param string $input
      * @return string
      */
-    public function camelCaseToSnakeCase(string $input): string
+    private function camelCaseToSnakeCase(string $input): string
     {
         return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $input));
     }
@@ -42,8 +49,30 @@ trait helpers {
      * @param string $input
      * @return string
      */
-    public function snakeCaseToCamelCase(string $input): string
+    private function snakeCaseToCamelCase(string $input): string
     {
         return lcfirst(str_replace('_', '', ucwords($input, '_')));
+    }
+
+    private function getClassInstance(string $namespace, string $className, array $classes)
+    {
+        foreach ($classes as $class) {
+            if ($class === $className.'.php' && $class !== 'baseCommand.php') {
+                $fullPath = $namespace.$className;
+                return $fullPath::getInstance();
+            }
+        }
+        return null;
+    }
+
+    private function getClasses(string $dir)
+    {
+        $classes = scandir($dir);
+        foreach ($classes as &$class) {
+            if (!is_file($dir.DIRECTORY_SEPARATOR.$class)) {
+                unset($class);
+            }
+        }
+        return array_values($classes);
     }
 }
