@@ -7,11 +7,11 @@ use App\Config\Config;
 use BadMethodCallException;
 use Boot\Src\CallbackQueryHandler;
 use Boot\Src\Entity;
+use Boot\Src\ReplyMarkup\ReplyMarkup;
 use Boot\Src\telegram;
 use Boot\Src\telegramChat;
 use Boot\Src\Update;
 use Boot\Traits\helpers;
-use Boot\Src\ReplyMarkup\InlineKeyboardMarkup;
 use Boot\Traits\http;
 
 class bot extends Entity
@@ -37,7 +37,7 @@ class bot extends Entity
     public function sendMessage(
         string $text,
         telegramChat $chat,
-        ?InlineKeyboardMarkup $inlineKeyboardMarkup = null,
+        ?ReplyMarkup $replyMarkup = null,
         ?string $parseMode = null,
         bool $disableWebPagePreview = false,
         bool $disableNotification = false,
@@ -56,7 +56,27 @@ class bot extends Entity
             'protect_content' => $protectContent,
             'reply_to_message_id' => $replyToMessageId,
             'allow_sending_without_reply' => $allowSendingWithoutReply,
-            'reply_markup' => is_null($inlineKeyboardMarkup) ? '' : $inlineKeyboardMarkup->getInlineKeyboard(),
+            'reply_markup' => (string) $replyMarkup,
+        ]);
+    }
+
+    public function editMessageText(
+        string $text,
+        telegramChat $chat,
+        int $messageId,
+        ?ReplyMarkup $replyMarkup = null,
+        ?string $parseMode = null,
+        bool $disableWebPagePreview = false
+    ): void {
+        $this->telegram->request::sendTelegramRequest([
+            'token' => $this->TOKEN,
+            'method' => 'editMessageText',
+            'text' => $text,
+            'chat_id' => $chat->getChatID(),
+            'message_id' => $messageId,
+            'parse_mode' => $parseMode,
+            'disable_web_page_preview' => $disableWebPagePreview,
+            'reply_markup' => (string) $replyMarkup,
         ]);
     }
 
