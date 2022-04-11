@@ -24,6 +24,6 @@ class helpCommand extends baseCommand
                 $message .= $command->getSignature().' - '.$command->getDescription().PHP_EOL;
             }
         }
-        $bot->sendMessage($message);
+        $bot->sendMessage($message, $bot->getChat());
     }
 }

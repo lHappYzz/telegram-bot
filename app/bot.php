@@ -4,20 +4,22 @@ namespace App;
 
 use App\Commands\baseCommand;
 use App\Config\Config;
+use BadMethodCallException;
+use Boot\Src\CallbackQueryHandler;
 use Boot\Src\Entity;
+use Boot\Src\ReplyMarkup\ReplyMarkup;
 use Boot\Src\telegram;
 use Boot\Src\telegramChat;
 use Boot\Src\Update;
 use Boot\Traits\helpers;
-use Boot\Src\ReplyMarkup\InlineKeyboardMarkup;
 use Boot\Traits\http;
 
 class bot extends Entity
 {
-    use http, helpers { getCommandClassInstance as protected; getCommandsInTheCommandDir as protected; }
+    use http;
+    use helpers;
 
     private $TOKEN;
-    private $BOT_URL;
 
     protected telegram $telegram;
     public static Update $update;
@@ -30,34 +32,51 @@ class bot extends Entity
         $config = Config::bot();
 
         $this->TOKEN = $config['bot_token'];
-        $this->BOT_URL = $config['bot_url'];
     }
 
-    public function setWebhook()
-    {
-        return $this->telegram->request::sendTelegramRequest(['token' => $this->TOKEN, 'method' => 'setWebhook', 'url' => 'https://' . $this->BOT_URL]);
-    }
-
-    public function sendMessage($message = ''): void
-    {
+    public function sendMessage(
+        string $text,
+        telegramChat $chat,
+        ?ReplyMarkup $replyMarkup = null,
+        ?string $parseMode = null,
+        bool $disableWebPagePreview = false,
+        bool $disableNotification = false,
+        bool $protectContent = false,
+        ?string $replyToMessageId = null,
+        bool $allowSendingWithoutReply = false
+    ): void {
         $this->telegram->request::sendTelegramRequest([
-            'parse_mode' => 'Markdown',
             'token' => $this->TOKEN,
             'method' => 'sendMessage',
-            'text' => $message,
-            'chat_id' => $this->getChat()->getChatID(),
+            'text' => $text,
+            'chat_id' => $chat->getChatID(),
+            'parse_mode' => $parseMode,
+            'disable_web_page_preview' => $disableWebPagePreview,
+            'disable_notification' => $disableNotification,
+            'protect_content' => $protectContent,
+            'reply_to_message_id' => $replyToMessageId,
+            'allow_sending_without_reply' => $allowSendingWithoutReply,
+            'reply_markup' => (string) $replyMarkup,
         ]);
     }
 
-    //TODO: Refactor messages sending
-    public function sendMessageV2(string $message, telegramChat $chat, InlineKeyboardMarkup $inlineKeyboardMarkup): void
-    {
+    public function editMessageText(
+        string $text,
+        telegramChat $chat,
+        int $messageId,
+        ?ReplyMarkup $replyMarkup = null,
+        ?string $parseMode = null,
+        bool $disableWebPagePreview = false
+    ): void {
         $this->telegram->request::sendTelegramRequest([
             'token' => $this->TOKEN,
-            'method' => 'sendMessage',
-            'text' => $message,
+            'method' => 'editMessageText',
+            'text' => $text,
             'chat_id' => $chat->getChatID(),
-            'reply_markup' => $inlineKeyboardMarkup->getInlineKeyboard(),
+            'message_id' => $messageId,
+            'parse_mode' => $parseMode,
+            'disable_web_page_preview' => $disableWebPagePreview,
+            'reply_markup' => (string) $replyMarkup,
         ]);
     }
 
@@ -75,16 +94,34 @@ class bot extends Entity
 
     public function handle(): void
     {
-        if ($this->getMessage()->isCommand()) {
-            $this->handleCommand();
+        try {
+            $this->handleCallbackQuery();
+        } catch (BadMethodCallException $exception) {
+            if ($this->getMessage()->isCommand()) {
+                $this->handleCommand();
+            }
         }
 
         $repliedMessage = $this->getMessage()->getRepliedMessage();
         if ($repliedMessage) {
-            $this->sendMessage('Detected the reply for message: ' .
+            $this->sendMessage(
+                'Detected the reply for message: ' .
                 $repliedMessage->getMessageText() .
-                ' that was sent at: ' . $repliedMessage->getMessageDate()
+                ' that was sent at: ' . $repliedMessage->getMessageDate(),
+                $this->getChat()
             );
+        }
+    }
+
+    private function handleCallbackQuery(): void
+    {
+        $callbackQuery = $this->getCallbackQuery();
+        if (
+            ($handler = $this->getCallbackQueryHandlerClassInstance(
+                $this->resolveCallbackQueryHandlerName($callbackQuery->getData())
+            )) instanceof CallbackQueryHandler
+        ) {
+            $handler->handle($this, $callbackQuery);
         }
     }
 
@@ -94,7 +131,11 @@ class bot extends Entity
         if ($command instanceof baseCommand){
             $command->boot($this);
         } else {
-            $this->sendMessage('I can not recognize the command - <' . $this->getMessage()->getMessageText() . '>');
+            $this->sendMessage(
+                'I can not recognize the command - <' .
+                $this->getMessage()->getMessageText() . '>',
+                $this->getChat()
+            );
         }
     }
 }

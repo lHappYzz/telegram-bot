@@ -12,11 +12,11 @@ class InlineKeyboardButton extends ReplyMarkup
     protected string $callbackData;
     protected ?string $url;
 
-    public function __construct(string $text, string $callbackData = null, ?string $url = null)
+    public function __construct(string $text, string $callbackData, ?string $url = null)
     {
-        $this->setText($text);
-        $this->setUrl($url);
-        $this->setCallbackData($callbackData);
+        $this->text = $text;
+        $this->url = $url;
+        $this->callbackData = $callbackData;
     }
 
 
@@ -30,9 +30,24 @@ class InlineKeyboardButton extends ReplyMarkup
         $this->callbackData = $callbackData;
     }
 
-    public function setUrl(?string $url): void
+    public function setUrl(string $url): void
     {
         $this->url = $url;
+    }
+
+    public function getText(): string
+    {
+        return $this->text;
+    }
+
+    public function getCallbackData(): string
+    {
+        return $this->callbackData;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->url;
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace Boot\Src;
 
+use Boot\Src\ReplyMarkup\InlineKeyboardMarkup;
+
 class telegramMessage extends Entity
 {
     private int $messageID;
@@ -14,6 +16,7 @@ class telegramMessage extends Entity
     private telegramMessage $replyToMessage;
     private array $photo = [];
     private string $caption = '';
+    private ?InlineKeyboardMarkup $inlineKeyboardMarkup;
 
     public function __construct($messageData)
     {
@@ -24,6 +27,10 @@ class telegramMessage extends Entity
 
         $this->date = $messageData['date'];
         $this->text = $messageData['text'];
+
+        if (array_key_exists('reply_markup', $messageData)) {
+            $this->setInlineKeyboardMarkup($messageData['reply_markup']);
+        }
 
         if (array_key_exists('photo', $messageData)) {
             if (array_key_exists('caption', $messageData)) {
@@ -54,7 +61,7 @@ class telegramMessage extends Entity
         return $this->chat;
     }
 
-    public function getMessageText()
+    public function getMessageText(): string
     {
         return $this->text;
     }
@@ -95,6 +102,11 @@ class telegramMessage extends Entity
         return $this->replyToMessage ?? null;
     }
 
+    public function getInlineKeyboardMarkup(): ?InlineKeyboardMarkup
+    {
+        return $this->inlineKeyboardMarkup;
+    }
+
     public function isCommand(): bool
     {
         if ($this->text[0] === '/') {
@@ -119,6 +131,18 @@ class telegramMessage extends Entity
         } else {
             $this->commandClassName = '';
         }
+    }
+
+    private function setInlineKeyboardMarkup(array $replyMarkup): void
+    {
+        $inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        foreach ($replyMarkup['inline_keyboard'] as $keyboardRow) {
+            $inlineKeyboardRow = $inlineKeyboardMarkup->addKeyboardRow();
+            foreach ($keyboardRow as $rowButton) {
+                $inlineKeyboardRow->addButton($rowButton['text'], $rowButton['callback_data']);
+            }
+        }
+        $this->inlineKeyboardMarkup = $inlineKeyboardMarkup;
     }
 
 

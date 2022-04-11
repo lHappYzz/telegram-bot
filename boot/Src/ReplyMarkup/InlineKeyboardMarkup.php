@@ -2,7 +2,7 @@
 
 namespace Boot\Src\ReplyMarkup;
 
-use Boot\Log\Logger;
+use JsonException;
 
 /**
  * Class InlineKeyboardMarkup
@@ -28,18 +28,12 @@ final class InlineKeyboardMarkup extends ReplyMarkup
     }
 
     /**
-     * Function result will be used as parameter for reply_markup field
-     * @return string
+     * Get all keyboard rows
+     * @return InlineKeyboardRow[]
      */
-    public function getInlineKeyboard(): string
+    public function getKeyboardRows(): array
     {
-        try {
-            return json_encode($this->toArray(), JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            Logger::logException($e, Logger::LEVEL_ERROR);
-        }
-
-        return '';
+        return $this->inlineKeyboard['inline_keyboard'];
     }
 
     /**
@@ -56,5 +50,15 @@ final class InlineKeyboardMarkup extends ReplyMarkup
         }
 
         return $inlineKeyboard;
+    }
+
+    /**
+     * Result will be used as parameter for reply_markup field
+     * @return string
+     * @throws JsonException
+     */
+    public function __toString(): string
+    {
+        return json_encode($this->toArray(), JSON_THROW_ON_ERROR);
     }
 }
