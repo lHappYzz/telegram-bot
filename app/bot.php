@@ -5,6 +5,7 @@ namespace App;
 use App\Commands\baseCommand;
 use App\Config\Config;
 use BadMethodCallException;
+use Boot\Log\Logger;
 use Boot\Src\CallbackQueryHandler;
 use Boot\Src\Entity;
 use Boot\Src\ReplyMarkup\ReplyMarkup;
@@ -13,6 +14,7 @@ use Boot\Src\telegramChat;
 use Boot\Src\Update;
 use Boot\Traits\helpers;
 use Boot\Traits\http;
+use Throwable;
 
 class bot extends Entity
 {
@@ -45,19 +47,23 @@ class bot extends Entity
         ?string $replyToMessageId = null,
         bool $allowSendingWithoutReply = false
     ): void {
-        $this->telegram->request::sendTelegramRequest([
-            'token' => $this->TOKEN,
-            'method' => 'sendMessage',
-            'text' => $text,
-            'chat_id' => $chat->getChatID(),
-            'parse_mode' => $parseMode,
-            'disable_web_page_preview' => $disableWebPagePreview,
-            'disable_notification' => $disableNotification,
-            'protect_content' => $protectContent,
-            'reply_to_message_id' => $replyToMessageId,
-            'allow_sending_without_reply' => $allowSendingWithoutReply,
-            'reply_markup' => (string) $replyMarkup,
-        ]);
+        try {
+            $this->telegram->request::sendTelegramRequest([
+                'token' => $this->TOKEN,
+                'method' => 'sendMessage',
+                'text' => $text,
+                'chat_id' => $chat->getChatID(),
+                'parse_mode' => $parseMode,
+                'disable_web_page_preview' => $disableWebPagePreview,
+                'disable_notification' => $disableNotification,
+                'protect_content' => $protectContent,
+                'reply_to_message_id' => $replyToMessageId,
+                'allow_sending_without_reply' => $allowSendingWithoutReply,
+                'reply_markup' => $replyMarkup ? json_encode($replyMarkup, JSON_THROW_ON_ERROR) : null,
+            ]);
+        } catch (Throwable $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+        }
     }
 
     public function editMessageText(
@@ -68,16 +74,20 @@ class bot extends Entity
         ?string $parseMode = null,
         bool $disableWebPagePreview = false
     ): void {
-        $this->telegram->request::sendTelegramRequest([
-            'token' => $this->TOKEN,
-            'method' => 'editMessageText',
-            'text' => $text,
-            'chat_id' => $chat->getChatID(),
-            'message_id' => $messageId,
-            'parse_mode' => $parseMode,
-            'disable_web_page_preview' => $disableWebPagePreview,
-            'reply_markup' => (string) $replyMarkup,
-        ]);
+        try {
+            $this->telegram->request::sendTelegramRequest([
+                'token' => $this->TOKEN,
+                'method' => 'editMessageText',
+                'text' => $text,
+                'chat_id' => $chat->getChatID(),
+                'message_id' => $messageId,
+                'parse_mode' => $parseMode,
+                'disable_web_page_preview' => $disableWebPagePreview,
+                'reply_markup' => $replyMarkup ? json_encode($replyMarkup, JSON_THROW_ON_ERROR) : null,
+            ]);
+        } catch (Throwable $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+        }
     }
 
     public function sendPhoto($fileID, $caption = ''): void
