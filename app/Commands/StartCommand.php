@@ -2,16 +2,16 @@
 
 namespace App\Commands;
 
-use App\bot;
+use App\Bot;
 
-class startCommand extends baseCommand
+class StartCommand extends BaseCommand
 {
     protected string $description = 'Greetings to the user.';
     protected string $signature = '/start';
 
-    protected static ?baseCommand $instance = null;
+    protected static ?BaseCommand $instance = null;
 
-    public function boot(bot $bot): void
+    public function boot(Bot $bot): void
     {
         $userCode = $bot->getMessage()->getFrom()->getID();
         $helloMessage = 'Hello, I was created to make students\' lives more comfortable by sending them study schedule.';

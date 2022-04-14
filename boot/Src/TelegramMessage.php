@@ -3,17 +3,18 @@
 namespace Boot\Src;
 
 use Boot\Src\ReplyMarkup\InlineKeyboardMarkup;
+use JetBrains\PhpStorm\Pure;
 
-class telegramMessage extends Entity
+class TelegramMessage extends Entity
 {
     private int $messageID;
-    private telegramUser $from;
-    private telegramChat $chat;
+    private TelegramUser $from;
+    private TelegramChat $chat;
 
     private int $date;
     private string $text;
-    private $commandClassName;
-    private telegramMessage $replyToMessage;
+    private string $commandClassName;
+    private TelegramMessage $replyToMessage;
     private array $photo = [];
     private string $caption = '';
     private ?InlineKeyboardMarkup $inlineKeyboardMarkup;
@@ -22,8 +23,8 @@ class telegramMessage extends Entity
     {
         $this->messageID = $messageData['message_id'];
 
-        $this->from = new telegramUser($messageData['from']);
-        $this->chat = new telegramChat($messageData['chat']);
+        $this->from = new TelegramUser($messageData['from']);
+        $this->chat = new TelegramChat($messageData['chat']);
 
         $this->date = $messageData['date'];
         $this->text = $messageData['text'];
@@ -37,7 +38,7 @@ class telegramMessage extends Entity
                 $this->caption = $messageData['caption'];
             }
             foreach ($messageData['photo'] as $photoData) {
-                $this->photo[] = new telegramPhotoSize($photoData);
+                $this->photo[] = new TelegramPhotoSize($photoData);
             }
         }
 
@@ -51,12 +52,12 @@ class telegramMessage extends Entity
         return $this->messageID;
     }
 
-    public function getFrom(): telegramUser
+    public function getFrom(): TelegramUser
     {
         return $this->from;
     }
 
-    public function getChat(): telegramChat
+    public function getChat(): TelegramChat
     {
         return $this->chat;
     }
@@ -66,12 +67,12 @@ class telegramMessage extends Entity
         return $this->text;
     }
 
-    public function getMessageDate($format = 'Y-m-d H:i:s')
+    #[Pure] public function getMessageDate($format = 'Y-m-d H:i:s'): string
     {
         return date($format, $this->date);
     }
 
-    public function getCommandClassName()
+    public function getCommandClassName(): string
     {
         return $this->commandClassName;
     }
@@ -95,9 +96,9 @@ class telegramMessage extends Entity
      * Get message that was replied otherwise null is returned,
      * so always check your var for not being null
      *
-     * @return ?telegramMessage
+     * @return ?TelegramMessage
      */
-    public function getRepliedMessage(): ?telegramMessage
+    public function getRepliedMessage(): ?TelegramMessage
     {
         return $this->replyToMessage ?? null;
     }
@@ -109,25 +110,20 @@ class telegramMessage extends Entity
 
     public function isCommand(): bool
     {
-        if ($this->text[0] === '/') {
-            if (strpos($this->text, ' ') === false) {
-                return true;
-            }
-        }
-        return false;
+        return ($this->text[0] === '/') && !str_contains($this->text, ' ');
     }
 
     private function setReplyToMessage($messageData): void
     {
         if (array_key_exists('reply_to_message', $messageData)) {
-            $this->replyToMessage = new telegramMessage($messageData['reply_to_message']);
+            $this->replyToMessage = new TelegramMessage($messageData['reply_to_message']);
         }
     }
 
     private function setCommandClassName(): void
     {
         if ($this->isCommand()) {
-            $this->commandClassName = str_replace('/', '', $this->text) . 'Command';
+            $this->commandClassName = ucfirst(str_replace('/', '', $this->text)) . 'Command';
         } else {
             $this->commandClassName = '';
         }
@@ -144,6 +140,4 @@ class telegramMessage extends Entity
         }
         $this->inlineKeyboardMarkup = $inlineKeyboardMarkup;
     }
-
-
 }

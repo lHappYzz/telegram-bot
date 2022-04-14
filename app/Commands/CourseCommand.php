@@ -2,17 +2,17 @@
 
 namespace App\Commands;
 
-use App\Api\api;
-use App\bot;
+use App\Api\Api;
+use App\Bot;
 
-class courseCommand extends baseCommand {
-
+class CourseCommand extends BaseCommand
+{
     protected string $description = 'Privat cashless courses.';
     protected string $signature = '/course';
 
-    protected static ?baseCommand $instance = null;
+    protected static ?BaseCommand $instance = null;
 
-    public function boot(bot $bot): void
+    public function boot(Bot $bot): void
     {
         $message = '';
 
@@ -22,7 +22,7 @@ class courseCommand extends baseCommand {
             'coursid' => '5',
         ];
 
-        $result = api::get('https://api.privatbank.ua/p24api/pubinfo', $parameters);
+        $result = Api::get('https://api.privatbank.ua/p24api/pubinfo', $parameters);
 
         foreach ($result as $block) {
             $message .= '💰BUY: 1' . $block['ccy'] . ' - ' . $block['buy'] . ' ' . $block['base_ccy'].

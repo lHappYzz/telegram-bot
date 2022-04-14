@@ -1,12 +1,11 @@
 <?php
 
-
 namespace App\Records;
 
-use Boot\Database\record;
+use Boot\Database\Record;
 
-class statusRecord extends record {
-
+class StatusRecord extends Record
+{
     protected string $table = 'status';
     protected array $fillable = ['name', 'description'];
 

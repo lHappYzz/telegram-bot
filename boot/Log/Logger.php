@@ -2,10 +2,11 @@
 
 namespace Boot\Log;
 
-use Boot\Src\singleton;
+use Boot\Src\Singleton;
 use Exception;
+use JetBrains\PhpStorm\Pure;
 
-class Logger extends singleton
+class Logger extends Singleton
 {
     public const LEVEL_INFO = 0;
     public const LEVEL_ERROR = 1;
@@ -64,7 +65,7 @@ class Logger extends singleton
      * Return logs file name
      * @return string
      */
-    private function logFileName(): string
+    #[Pure] private function logFileName(): string
     {
         return date('Y-m-d') . '.txt';
     }

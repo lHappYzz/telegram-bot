@@ -2,21 +2,21 @@
 
 namespace Boot;
 
-use App\bot;
+use App\Bot;
 use App\Config\Config;
-use Boot\Src\telegram;
+use Boot\Src\Telegram;
 use Exception;
 
-class application extends telegram
+class Application extends Telegram
 {
     /**
      * Starts the application by doing some things like getting the configuration or parsing telegram request
      * In success case new bot instance will be returned else an exception will be thrown
      *
-     * @return bot
+     * @return Bot
      * @throws Exception
      */
-    public function boot(): bot
+    public function boot(): Bot
     {
         if (!Config::exists()) {
             throw new Exception('Missing application configuration file');
@@ -24,6 +24,6 @@ class application extends telegram
 
         date_default_timezone_set(Config::timezone());
 
-        return new bot($this);
+        return new Bot($this);
     }
 }

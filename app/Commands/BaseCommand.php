@@ -2,13 +2,13 @@
 
 namespace App\Commands;
 
-use App\bot;
+use App\Bot;
 
-abstract class baseCommand
+abstract class BaseCommand
 {
-    abstract public function boot(bot $bot): void;
+    abstract public function boot(Bot $bot): void;
 
-    public static function getInstance()
+    public static function getInstance(): static
     {
         if (!isset(static::$instance)) {
             static::$instance = new static();
@@ -16,11 +16,13 @@ abstract class baseCommand
         return static::$instance;
     }
 
-    public function getDescription() {
+    public function getDescription(): string
+    {
         return $this->description;
     }
 
-    public function getSignature() {
+    public function getSignature(): string
+    {
         return $this->signature;
     }
 }

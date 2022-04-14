@@ -2,21 +2,21 @@
 
 namespace Boot\Src;
 
-use App\bot;
+use App\Bot;
 use BadMethodCallException;
 
 /**
  * Class Entity
- * @method telegramMessage getMessage() New incoming message
- * @method telegramChat getChat() Chat where the event came from
+ * @method TelegramMessage getMessage() New incoming message
+ * @method TelegramChat getChat() Chat where the event came from
  * @method CallbackQuery getCallbackQuery() New incoming callback query
  */
 abstract class Entity
 {
     public function __call(string $methodName, array $arguments): Entity
     {
-        if (strpos($methodName, 'get') === 0) {
-            return bot::$update->getInstance($methodName);
+        if (str_starts_with($methodName, 'get')) {
+            return Bot::$update->getInstance($methodName);
         }
 
         throw new BadMethodCallException('Bad method call: ' .

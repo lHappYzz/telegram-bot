@@ -3,14 +3,13 @@
 namespace Boot\Src;
 
 use App\Config\Config;
-use Boot\Traits\http;
+use Boot\Traits\Http;
 use Exception;
 use Boot\Log\Logger;
 
-class telegramRequest
+class TelegramRequest
 {
-
-    use http;
+    use Http;
 
     /**
      * An object created from JSON sent by telegram

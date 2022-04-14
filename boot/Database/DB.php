@@ -4,12 +4,12 @@ namespace Boot\Database;
 
 use App\Config\Config;
 use Boot\Log\Logger;
-use Boot\Src\singleton;
+use Boot\Src\Singleton;
 use Exception;
 use PDO;
 use PDOStatement;
 
-class DB extends singleton
+class DB extends Singleton
 {
     /**
      * @param string $hostname Can be either a host name or an IP address. Passing the NULL value or the string "localhost" to this parameter, the local host is assumed. When possible, pipes will be used instead of the TCP/IP protocol.
