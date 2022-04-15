@@ -6,7 +6,7 @@ namespace Boot\Src;
  * Class telegramChat
  * @link https://core.telegram.org/bots/api#chat
  */
-class telegramChat extends Entity
+class TelegramChat extends Entity
 {
     private int $id;
     private string $type;

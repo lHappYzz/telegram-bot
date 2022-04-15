@@ -1,12 +1,11 @@
 <?php
 
-
 namespace App\Records;
 
-use Boot\Database\record;
+use Boot\Database\Record;
 
-class userRecord extends record {
-
+class UserRecord extends Record
+{
     protected string $table = 'user';
     protected array $fillable = ['firstName', 'lastName', 'userName', 'languageCode', 'isBot'];
 

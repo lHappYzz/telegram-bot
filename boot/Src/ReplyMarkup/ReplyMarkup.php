@@ -2,6 +2,8 @@
 
 namespace Boot\Src\ReplyMarkup;
 
+use JsonSerializable;
+
 /**
  * Additional interface options.
  * A JSON-serialized object for an inline keyboard,
@@ -9,11 +11,7 @@ namespace Boot\Src\ReplyMarkup;
  * to force a reply from the user.
  * @link https://core.telegram.org/bots/api#callbackquery
  */
-abstract class ReplyMarkup
+abstract class ReplyMarkup implements JsonSerializable
 {
-    /**
-     * Collect all the necessary, according to the telegram API documentation, class fields into an array
-     * @return array
-     */
-    abstract protected function toArray(): array;
+    //
 }

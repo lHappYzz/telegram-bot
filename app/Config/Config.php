@@ -2,9 +2,11 @@
 
 namespace App\Config;
 
+use JetBrains\PhpStorm\Pure;
+
 abstract class Config
 {
-    public static function exists(): bool
+    #[Pure] public static function exists(): bool
     {
         return file_exists('app/app.ini');
     }

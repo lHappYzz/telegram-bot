@@ -9,8 +9,8 @@ namespace Boot\Src;
 class CallbackQuery extends Entity
 {
     private string $id;
-    private telegramUser $from;
-    private ?telegramMessage $message;
+    private TelegramUser $from;
+    private ?TelegramMessage $message;
     private ?string $inlineMessageId;
     private ?string $chatInstance;
     private ?string $data;
@@ -19,8 +19,8 @@ class CallbackQuery extends Entity
     public function __construct(array $callbackQueryData)
     {
         $this->id = $callbackQueryData['id'];
-        $this->from = new telegramUser($callbackQueryData['from']);
-        $this->message = new telegramMessage($callbackQueryData['message']);
+        $this->from = new TelegramUser($callbackQueryData['from']);
+        $this->message = new TelegramMessage($callbackQueryData['message']);
         $this->inlineMessageId = $callbackQueryData['inline_message_id'];
         $this->chatInstance = $callbackQueryData['chat_instance'];
         $this->data = $callbackQueryData['data'];
@@ -32,12 +32,12 @@ class CallbackQuery extends Entity
         return $this->id;
     }
 
-    public function getFrom(): telegramUser
+    public function getFrom(): TelegramUser
     {
         return $this->from;
     }
 
-    public function getMessage(): ?telegramMessage
+    public function getMessage(): ?TelegramMessage
     {
         return $this->message;
     }

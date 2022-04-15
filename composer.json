@@ -11,6 +11,6 @@
     "ext-curl": "*",
     "ext-mysqli": "*",
     "ext-pdo": "*",
-    "guzzlehttp/guzzle": "7.0"
+    "guzzlehttp/guzzle": "^7"
   }
 }

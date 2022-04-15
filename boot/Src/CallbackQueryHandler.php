@@ -2,9 +2,9 @@
 
 namespace Boot\Src;
 
-use App\bot;
+use App\Bot;
 
-abstract class CallbackQueryHandler extends singleton
+abstract class CallbackQueryHandler extends Singleton
 {
-    abstract public function handle(bot $bot, CallbackQuery $callbackQuery): void;
+    abstract public function handle(Bot $bot, CallbackQuery $callbackQuery): void;
 }

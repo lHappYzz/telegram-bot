@@ -37,28 +37,18 @@ final class InlineKeyboardMarkup extends ReplyMarkup
     }
 
     /**
-     * Collect all the necessary, according to the telegram API documentation, class fields into an array
-     * @return array
+     * Specify data which should be serialized to JSON
+     * @return array data which can be serialized by <b>json_encode</b>,
      */
-    protected function toArray(): array
+    public function jsonSerialize(): array
     {
         $inlineKeyboard = $this->inlineKeyboard;
 
         /** @var InlineKeyboardRow $inlineKeyboardRow */
         foreach ($inlineKeyboard['inline_keyboard'] as &$inlineKeyboardRow) {
-            $inlineKeyboardRow = $inlineKeyboardRow->toArray();
+            $inlineKeyboardRow = $inlineKeyboardRow->jsonSerialize();
         }
 
         return $inlineKeyboard;
-    }
-
-    /**
-     * Result will be used as parameter for reply_markup field
-     * @return string
-     * @throws JsonException
-     */
-    public function __toString(): string
-    {
-        return json_encode($this->toArray(), JSON_THROW_ON_ERROR);
     }
 }

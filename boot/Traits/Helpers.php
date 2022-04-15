@@ -4,8 +4,8 @@ namespace Boot\Traits;
 
 use Boot\Src\CallbackQueryHandler;
 
-trait helpers {
-
+trait Helpers
+{
     private function getCallbackQueryHandlerClassInstance(string $className): CallbackQueryHandler
     {
         return $this->getClassInstance(
@@ -57,7 +57,7 @@ trait helpers {
     private function getClassInstance(string $namespace, string $className, array $classes)
     {
         foreach ($classes as $class) {
-            if ($class === $className.'.php' && $class !== 'baseCommand.php') {
+            if ($class === $className.'.php' && $class !== 'BaseCommand.php') {
                 $fullPath = $namespace.$className;
                 return $fullPath::getInstance();
             }

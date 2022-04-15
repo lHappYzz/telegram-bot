@@ -3,7 +3,7 @@
 namespace Boot\Src;
 
 use BadMethodCallException;
-use Boot\Traits\helpers;
+use Boot\Traits\Helpers;
 use RuntimeException;
 
 /**
@@ -12,14 +12,14 @@ use RuntimeException;
  */
 class Update
 {
-    use helpers;
+    use Helpers;
 
     protected int $updateId;
     protected string $updateType;
 
     //At most one of the optional parameters can be present in any given update
-    protected ?telegramMessage $message;
-    protected ?telegramMessage $editedMessage;
+    protected ?TelegramMessage $message;
+    protected ?TelegramMessage $editedMessage;
     protected ?CallbackQuery $callbackQuery;
 
     protected const UPDATE_TYPE_MESSAGE = 'message';
@@ -27,18 +27,18 @@ class Update
     protected const UPDATE_TYPE_CALLBACK_QUERY = 'callback_query';
 
     protected array $bindings = [
-        self::UPDATE_TYPE_MESSAGE => telegramMessage::class,
-        self::UPDATE_TYPE_EDITED_MESSAGE => telegramMessage::class,
+        self::UPDATE_TYPE_MESSAGE => TelegramMessage::class,
+        self::UPDATE_TYPE_EDITED_MESSAGE => TelegramMessage::class,
         self::UPDATE_TYPE_CALLBACK_QUERY => CallbackQuery::class,
     ];
 
-    /** @var telegramMessage|CallbackQuery */
+    /** @var TelegramMessage|CallbackQuery */
     protected $initiatedUpdateParameter;
 
     /**
      * Update constructor.
      * @param array $requestData
-     * @see telegramRequest::parseTelegramRequest
+     * @see TelegramRequest::parseTelegramRequest
      */
     public function __construct(array $requestData)
     {

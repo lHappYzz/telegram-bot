@@ -6,7 +6,8 @@ use Boot\Log\Logger;
 use GuzzleHttp\Client;
 use Throwable;
 
-trait http {
+trait Http
+{
     /**
      * https://docs.guzzlephp.org/en/stable/quickstart.html
      * @var array
@@ -44,7 +45,8 @@ trait http {
      * @return bool|string|null
      * @see sendRequest
      */
-    public static function sendTelegramRequest(array $parameters, bool $isPost = true) {
+    public static function sendTelegramRequest(array $parameters, bool $isPost = true)
+    {
         $url = "https://api.telegram.org/bot" . $parameters['token'] . "/" . $parameters['method'];
         return self::sendRequest($parameters, $url, $isPost);
     }
@@ -62,7 +64,8 @@ trait http {
      *
      * @return string|bool|null
      */
-    public static function sendRequest(array $parameters, string $url, bool $isPost) {
+    public static function sendRequest(array $parameters, string $url, bool $isPost)
+    {
         $ch = curl_init();
 
         if($isPost) {
@@ -98,7 +101,8 @@ trait http {
      *
      * @return bool
      */
-    private static function setCurlOptionsForPostRequest($curl, $url, $parameters) {
+    private static function setCurlOptionsForPostRequest($curl, $url, $parameters)
+    {
         return curl_setopt_array($curl, [
             CURLOPT_URL => $url,
             CURLOPT_POST => true,
@@ -119,7 +123,8 @@ trait http {
      *
      * @return bool
      */
-    private static function setCurlOptionsForGetRequest($curl, $url, $parameters) {
+    private static function setCurlOptionsForGetRequest($curl, $url, $parameters)
+    {
         return curl_setopt_array($curl, [
             CURLOPT_URL => $url . "?" . http_build_query($parameters),
             CURLOPT_POST => false,

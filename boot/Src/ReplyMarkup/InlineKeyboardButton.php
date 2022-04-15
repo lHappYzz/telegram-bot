@@ -51,10 +51,10 @@ class InlineKeyboardButton extends ReplyMarkup
     }
 
     /**
-     * Collect all the necessary, according to the telegram API documentation, class fields into an array
-     * @return array
+     * Specify data which should be serialized to JSON
+     * @return array data which can be serialized by <b>json_encode</b>,
      */
-    protected function toArray(): array
+    public function jsonSerialize(): array
     {
         $resultArray = [];
 

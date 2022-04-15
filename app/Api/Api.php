@@ -2,11 +2,11 @@
 
 namespace App\Api;
 
-use Boot\Traits\http;
+use Boot\Traits\Http;
 
-abstract class api {
+abstract class Api {
 
-    use http;
+    use Http;
 
     public static function get(string $url, ?array $queryParameters = null): array
     {

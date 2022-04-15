@@ -2,25 +2,25 @@
 
 namespace App\Commands;
 
-use App\bot;
-use Boot\Traits\helpers;
+use App\Bot;
+use Boot\Traits\Helpers;
 
-class helpCommand extends baseCommand
+class HelpCommand extends BaseCommand
 {
-    use helpers;
+    use Helpers;
 
     protected string $description = 'Represents available bot commands.';
     protected string $signature = '/help';
 
-    protected static ?baseCommand $instance = null;
+    protected static ?BaseCommand $instance = null;
 
-    public function boot(bot $bot): void
+    public function boot(Bot $bot): void
     {
         $message = 'List of available Commands:' . PHP_EOL;
         $classedInCommandsDir = $this->getCommandsInTheCommandDir();
         foreach ($classedInCommandsDir as $commandClass) {
             $command = $this->getCommandClassInstance(substr($commandClass, 0, -4));
-            if ($command instanceof baseCommand) {
+            if ($command instanceof BaseCommand) {
                 $message .= $command->getSignature().' - '.$command->getDescription().PHP_EOL;
             }
         }

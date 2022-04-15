@@ -2,12 +2,13 @@
 
 namespace Boot\Database;
 
+use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
 
 /**
  * Class record represents a table record from a database
  */
-abstract class record
+abstract class Record
 {
     protected string $table;
 
@@ -22,7 +23,7 @@ abstract class record
      * @param $field
      * @return bool
      */
-    private function isFillable($field): bool
+    #[Pure] private function isFillable($field): bool
     {
         return in_array($field, $this->fillable, true);
     }
@@ -96,9 +97,9 @@ abstract class record
     /**
      * Returns an object that represents table record identified by the $tableName field
      * @param $id
-     * @return record
+     * @return Record
      */
-    public static function fetch($id): record
+    public static function fetch($id): Record
     {
         $arrayOfResults = self::query()->select()->where('id', $id)->get();
 
