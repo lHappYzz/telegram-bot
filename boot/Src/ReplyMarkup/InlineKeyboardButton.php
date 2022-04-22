@@ -8,6 +8,8 @@ namespace Boot\Src\ReplyMarkup;
  */
 class InlineKeyboardButton extends ReplyMarkup
 {
+    public const CALLBACK_DATA_DELIMITER = ':';
+
     protected string $text;
     protected string $callbackData;
     protected ?string $url;

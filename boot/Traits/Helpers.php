@@ -3,6 +3,7 @@
 namespace Boot\Traits;
 
 use Boot\Src\CallbackQueryHandler;
+use Boot\Src\ReplyMarkup\InlineKeyboardButton;
 
 trait Helpers
 {
@@ -17,7 +18,8 @@ trait Helpers
 
     private function resolveCallbackQueryHandlerName(string $callbackData): string
     {
-        return ucfirst(strtolower(preg_replace('/[^A-Za-z0-9]/', '', $callbackData))) . 'Handler';
+        return  $this->arrayFirst(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $callbackData)) .
+            CallbackQueryHandler::CALLBACK_QUERY_HANDLERS_ENDING;
     }
 
     private function getCommandClassInstance($className) {
@@ -74,5 +76,21 @@ trait Helpers
             }
         }
         return array_values($classes);
+    }
+
+    private function arrayFirst(array $array)
+    {
+        if (($firstElement = reset($array)) === false) {
+            return '';
+        }
+        return $firstElement;
+    }
+
+    private function arrayLast(array $array)
+    {
+        if (($lastElement = end($array)) === false) {
+            return '';
+        }
+        return $lastElement;
     }
 }
