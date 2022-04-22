@@ -49,8 +49,11 @@ class InlineKeyboardRow extends ReplyMarkup
             throw new InvalidArgumentException('Handler required');
         }
 
-        if (!is_string($this->arrayLast($buttonSettings))) {
-            throw new InvalidArgumentException('The second parameter of button settings must be a string.');
+        if (!is_string($this->arrayLast($buttonSettings)) && !is_numeric($this->arrayLast($buttonSettings))) {
+            throw new InvalidArgumentException(
+                'The second parameter of button settings must be a string or numeric.' .
+                ' Given: ' . $this->arrayLast($buttonSettings) . '(' . gettype($this->arrayLast($buttonSettings)) . ')'
+            );
         }
 
         $callbackData = $this->createCallbackData($buttonSettings);
