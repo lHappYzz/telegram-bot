@@ -10,17 +10,15 @@ class CourseCommand extends BaseCommand
     protected string $description = 'Privat cashless courses.';
     protected string $signature = '/course';
 
-    protected static ?BaseCommand $instance = null;
-
-    public function boot(Bot $bot): void
+    public function boot(Bot $bot, array $parameters = []): void
     {
         $message = '';
 
-        $parameters = [
+        $parameters = array_merge($parameters, [
             'json' => true,
             'exchange' => true,
             'coursid' => '5',
-        ];
+        ]);
 
         $result = Api::get('https://api.privatbank.ua/p24api/pubinfo', $parameters);
 

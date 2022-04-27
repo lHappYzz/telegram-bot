@@ -12,14 +12,14 @@ use Boot\Src\ReplyMarkup\ReplyMarkup;
 use Boot\Src\Telegram;
 use Boot\Src\TelegramChat;
 use Boot\Src\Update;
+use Boot\Traits\DirectoryHelpers;
 use Boot\Traits\Helpers;
 use Boot\Traits\Http;
 use Throwable;
 
 class Bot extends Entity
 {
-    use Http;
-    use Helpers;
+    use Http, Helpers, DirectoryHelpers;
 
     public static Update $update;
 
@@ -127,24 +127,31 @@ class Bot extends Entity
         }
     }
 
+    public function bootCommand(string $commandName, array $parameters = []): bool
+    {
+        /** @var BaseCommand $instance */
+        $instance = $this->getClassInstance($commandName);
+
+        if ($instance instanceof BaseCommand) {
+            $instance->boot($this, $parameters);
+            return true;
+        }
+
+        return false;
+    }
+
     private function handleCallbackQuery(): void
     {
         $callbackQuery = $this->getCallbackQuery();
-        if (
-            ($handler = $this->getCallbackQueryHandlerClassInstance(
-                $this->resolveCallbackQueryHandlerName($callbackQuery->getData())
-            )) instanceof CallbackQueryHandler
-        ) {
+        $handler = $this->getClassInstance($this->resolveCallbackQueryHandlerName($callbackQuery->getData()));
+        if ($handler instanceof CallbackQueryHandler) {
             $handler->handle($this, $callbackQuery);
         }
     }
 
     private function handleCommand(): void
     {
-        $command = $this->getCommandClassInstance($this->getMessage()->getCommandClassName());
-        if ($command instanceof BaseCommand){
-            $command->boot($this);
-        } else {
+        if (!$this->bootCommand($this->getMessage()->getCommandClassName())) {
             $this->sendMessage(
                 'I can not recognize the command - <' .
                 $this->getMessage()->getMessageText() . '>',

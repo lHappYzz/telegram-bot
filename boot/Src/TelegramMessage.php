@@ -2,11 +2,15 @@
 
 namespace Boot\Src;
 
+use Boot\Src\ReplyMarkup\InlineKeyboardButton;
 use Boot\Src\ReplyMarkup\InlineKeyboardMarkup;
+use Boot\Traits\Helpers;
 use JetBrains\PhpStorm\Pure;
 
 class TelegramMessage extends Entity
 {
+    use Helpers;
+
     private int $messageID;
     private TelegramUser $from;
     private TelegramChat $chat;
@@ -123,7 +127,7 @@ class TelegramMessage extends Entity
     private function setCommandClassName(): void
     {
         if ($this->isCommand()) {
-            $this->commandClassName = ucfirst(str_replace('/', '', $this->text)) . 'Command';
+            $this->commandClassName = Telegram::COMMANDS_NAMESPACE . ucfirst(str_replace('/', '', $this->text)) . 'Command';
         } else {
             $this->commandClassName = '';
         }
@@ -135,7 +139,11 @@ class TelegramMessage extends Entity
         foreach ($replyMarkup['inline_keyboard'] as $keyboardRow) {
             $inlineKeyboardRow = $inlineKeyboardMarkup->addKeyboardRow();
             foreach ($keyboardRow as $rowButton) {
-                $inlineKeyboardRow->addButton($rowButton['text'], $rowButton['callback_data']);
+                $settings = [];
+                $settings[] = $this->resolveCallbackQueryHandlerName($rowButton['callback_data']);
+                $settings[] = $this->arrayLast(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $rowButton['callback_data']));
+
+                $inlineKeyboardRow->addButton($rowButton['text'], $settings);
             }
         }
         $this->inlineKeyboardMarkup = $inlineKeyboardMarkup;

@@ -3,18 +3,11 @@
 namespace App\Commands;
 
 use App\Bot;
+use Boot\Src\Singleton;
 
-abstract class BaseCommand
+abstract class BaseCommand extends Singleton
 {
-    abstract public function boot(Bot $bot): void;
-
-    public static function getInstance(): static
-    {
-        if (!isset(static::$instance)) {
-            static::$instance = new static();
-        }
-        return static::$instance;
-    }
+    abstract public function boot(Bot $bot, array $parameters = []): void;
 
     public function getDescription(): string
     {

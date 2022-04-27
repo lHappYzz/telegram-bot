@@ -2,12 +2,17 @@
 
 namespace Boot\Src;
 
+use Boot\Src\ReplyMarkup\InlineKeyboardButton;
+use Boot\Traits\Helpers;
+
 /**
  * Class CallbackQuery
  * @link https://core.telegram.org/bots/api#callbackquery
  */
 class CallbackQuery extends Entity
 {
+    use Helpers;
+
     private string $id;
     private TelegramUser $from;
     private ?TelegramMessage $message;
@@ -60,5 +65,10 @@ class CallbackQuery extends Entity
     public function getData(): ?string
     {
         return $this->data;
+    }
+
+    public function getButtonUserData(): string
+    {
+        return $this->arrayLast(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $this->data));
     }
 }
