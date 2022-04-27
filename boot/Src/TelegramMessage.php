@@ -127,7 +127,7 @@ class TelegramMessage extends Entity
     private function setCommandClassName(): void
     {
         if ($this->isCommand()) {
-            $this->commandClassName = ucfirst(str_replace('/', '', $this->text)) . 'Command';
+            $this->commandClassName = Telegram::COMMANDS_NAMESPACE . ucfirst(str_replace('/', '', $this->text)) . 'Command';
         } else {
             $this->commandClassName = '';
         }
@@ -140,7 +140,7 @@ class TelegramMessage extends Entity
             $inlineKeyboardRow = $inlineKeyboardMarkup->addKeyboardRow();
             foreach ($keyboardRow as $rowButton) {
                 $settings = [];
-                $settings[] = '\\App\\CallbackQueryHandlers\\' . $this->resolveCallbackQueryHandlerName($rowButton['callback_data']);
+                $settings[] = $this->resolveCallbackQueryHandlerName($rowButton['callback_data']);
                 $settings[] = $this->arrayLast(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $rowButton['callback_data']));
 
                 $inlineKeyboardRow->addButton($rowButton['text'], $settings);

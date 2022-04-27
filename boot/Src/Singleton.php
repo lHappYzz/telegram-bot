@@ -4,6 +4,8 @@ namespace Boot\Src;
 
 abstract class Singleton
 {
+    private static array $aoInstance = [];
+
     protected function __construct()
     {
         //
@@ -14,15 +16,13 @@ abstract class Singleton
      */
     final public static function getInstance(): static
     {
-        static $aoInstance = array();
-
         $calledClassName = static::class;
 
-        if (!isset ($aoInstance[$calledClassName])) {
-            $aoInstance[$calledClassName] = new $calledClassName();
+        if (!isset (self::$aoInstance[$calledClassName])) {
+            self::$aoInstance[$calledClassName] = new $calledClassName();
         }
 
-        return $aoInstance[$calledClassName];
+        return self::$aoInstance[$calledClassName];
     }
 
     final private function __clone()
