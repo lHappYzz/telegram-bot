@@ -30,14 +30,6 @@ class Bot extends Entity
         $config = Config::bot();
 
         $this->token = $config['bot_token'];
-        //block bot if not me or sanya
-        try {
-            $this->getCallbackQuery();
-        } catch (BadMethodCallException $e) {
-            if ($this->getChat()->getChatID() !== 423303268 && $this->getChat()->getChatID() !== 422803630) {
-                die;
-            }
-        }
     }
 
     public function sendMessage(
