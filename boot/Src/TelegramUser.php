@@ -2,12 +2,17 @@
 
 namespace Boot\Src;
 
+use Boot\Interfaces\Recordable;
+use Boot\Traits\Helpers;
+
 /**
  * Class TelegramUser
  * @link https://core.telegram.org/bots/api#user
  */
-class TelegramUser extends Entity
+class TelegramUser extends Entity implements Recordable
 {
+    use Helpers;
+
     private int $id;
     private bool $isBot;
     private string $firstName;
@@ -25,7 +30,7 @@ class TelegramUser extends Entity
         $this->isBot = $userData['is_bot'];
     }
 
-    public function getID(): int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -35,23 +40,35 @@ class TelegramUser extends Entity
         return $this->firstName;
     }
 
-    public function getLastName(): string
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }
 
-    public function getUserName(): string
+    public function getUserName(): ?string
     {
         return $this->userName;
     }
 
-    public function getLanguageCode(): string
+    public function getLanguageCode(): ?string
     {
         return $this->languageCode;
     }
 
-    public function isBot(): bool
+    public function getIsBot(): bool
     {
         return $this->isBot;
+    }
+
+    public function getArrayOfAttributes(array $fillableColumns): array
+    {
+        $arrayOfAttributes = [];
+
+        foreach ($fillableColumns as $fillableColumn) {
+            $propertyValue = $this->{$this->snakeCaseToCamelCase($fillableColumn)};
+            $arrayOfAttributes[$fillableColumn] = $propertyValue;
+        }
+
+        return $arrayOfAttributes;
     }
 }

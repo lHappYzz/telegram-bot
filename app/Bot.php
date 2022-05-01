@@ -48,7 +48,7 @@ class Bot extends Entity
                 'token' => $this->token,
                 'method' => 'sendMessage',
                 'text' => $text,
-                'chat_id' => $chat->getChatID(),
+                'chat_id' => $chat->getId(),
                 'parse_mode' => $parseMode,
                 'disable_web_page_preview' => $disableWebPagePreview,
                 'disable_notification' => $disableNotification,
@@ -75,7 +75,7 @@ class Bot extends Entity
                 'token' => $this->token,
                 'method' => 'editMessageText',
                 'text' => $text,
-                'chat_id' => $chat->getChatID(),
+                'chat_id' => $chat->getId(),
                 'message_id' => $messageId,
                 'parse_mode' => $parseMode,
                 'disable_web_page_preview' => $disableWebPagePreview,
@@ -116,7 +116,7 @@ class Bot extends Entity
             'method' => 'sendPhoto',
             'photo' => $fileID,
             'caption' => $caption,
-            'chat_id' => $this->getChat()->getChatID(),
+            'chat_id' => $this->getChat()->getId(),
         ]);
     }
 

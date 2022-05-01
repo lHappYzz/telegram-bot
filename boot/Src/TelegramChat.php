@@ -2,12 +2,17 @@
 
 namespace Boot\Src;
 
+use Boot\Interfaces\Recordable;
+use Boot\Traits\Helpers;
+
 /**
  * Class telegramChat
  * @link https://core.telegram.org/bots/api#chat
  */
-class TelegramChat extends Entity
+class TelegramChat extends Entity implements Recordable
 {
+    use Helpers;
+
     private int $id;
     private string $type;
     private ?string $firstName;
@@ -22,7 +27,7 @@ class TelegramChat extends Entity
         $this->userName = $telegramChatData['userName'];
     }
 
-    public function getChatID(): int
+    public function getId(): int
     {
         if (empty($this->id)) {
             return 423303268;
@@ -30,7 +35,7 @@ class TelegramChat extends Entity
         return $this->id;
     }
 
-    public function getChatType(): string
+    public function getType(): string
     {
         return $this->type;
     }
@@ -45,8 +50,20 @@ class TelegramChat extends Entity
         return $this->lastName;
     }
 
-    public function getUsername(): string
+    public function getUserName(): string
     {
         return $this->userName;
+    }
+
+    public function getArrayOfAttributes(array $fillableColumns): array
+    {
+        $arrayOfAttributes = [];
+
+        foreach ($fillableColumns as $fillableColumn) {
+            $propertyValue = $this->{$this->snakeCaseToCamelCase($fillableColumn)};
+            $arrayOfAttributes[$fillableColumn] = $propertyValue;
+        }
+
+        return $arrayOfAttributes;
     }
 }
