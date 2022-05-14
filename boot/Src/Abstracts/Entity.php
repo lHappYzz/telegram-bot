@@ -1,9 +1,12 @@
 <?php
 
-namespace Boot\Src;
+namespace Boot\Src\Abstracts;
 
 use App\Bot;
 use BadMethodCallException;
+use Boot\Src\Entities\CallbackQuery;
+use Boot\Src\Entities\TelegramChat;
+use Boot\Src\Entities\TelegramMessage;
 
 /**
  * Class Entity

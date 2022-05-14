@@ -1,6 +1,8 @@
 <?php
 
-namespace Boot\Src;
+namespace Boot\Src\Abstracts;
+
+use Boot\Src\TelegramRequest;
 
 abstract class Telegram
 {

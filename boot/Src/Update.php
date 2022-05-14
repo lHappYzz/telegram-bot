@@ -3,7 +3,11 @@
 namespace Boot\Src;
 
 use BadMethodCallException;
+use Boot\Src\Abstracts\Entity;
+use Boot\Src\Entities\CallbackQuery;
+use Boot\Src\Entities\TelegramMessage;
 use Boot\Traits\Helpers;
+use JetBrains\PhpStorm\Pure;
 use RuntimeException;
 
 /**
@@ -72,7 +76,7 @@ class Update
             '. Line: ' . __LINE__);
     }
 
-    private function resolveInstanceName(string $methodName): string
+    #[Pure] private function resolveInstanceName(string $methodName): string
     {
         return substr_replace($methodName, '', 0, 3);
     }

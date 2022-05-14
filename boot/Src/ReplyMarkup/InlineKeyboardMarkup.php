@@ -2,8 +2,6 @@
 
 namespace Boot\Src\ReplyMarkup;
 
-use JsonException;
-
 /**
  * Class InlineKeyboardMarkup
  * @link https://core.telegram.org/bots/api/#inlinekeyboardmarkup

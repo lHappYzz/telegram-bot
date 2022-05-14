@@ -6,11 +6,11 @@ use App\Commands\BaseCommand;
 use App\Config\Config;
 use BadMethodCallException;
 use Boot\Log\Logger;
-use Boot\Src\CallbackQueryHandler;
-use Boot\Src\Entity;
+use Boot\Src\Abstracts\CallbackQueryHandler;
+use Boot\Src\Abstracts\Entity;
+use Boot\Src\Abstracts\Telegram;
+use Boot\Src\Entities\TelegramChat;
 use Boot\Src\ReplyMarkup\ReplyMarkup;
-use Boot\Src\Telegram;
-use Boot\Src\TelegramChat;
 use Boot\Src\Update;
 use Boot\Traits\DirectoryHelpers;
 use Boot\Traits\Helpers;
@@ -48,7 +48,7 @@ class Bot extends Entity
                 'token' => $this->token,
                 'method' => 'sendMessage',
                 'text' => $text,
-                'chat_id' => $chat->getChatID(),
+                'chat_id' => $chat->getId(),
                 'parse_mode' => $parseMode,
                 'disable_web_page_preview' => $disableWebPagePreview,
                 'disable_notification' => $disableNotification,
@@ -75,7 +75,7 @@ class Bot extends Entity
                 'token' => $this->token,
                 'method' => 'editMessageText',
                 'text' => $text,
-                'chat_id' => $chat->getChatID(),
+                'chat_id' => $chat->getId(),
                 'message_id' => $messageId,
                 'parse_mode' => $parseMode,
                 'disable_web_page_preview' => $disableWebPagePreview,
@@ -116,15 +116,17 @@ class Bot extends Entity
             'method' => 'sendPhoto',
             'photo' => $fileID,
             'caption' => $caption,
-            'chat_id' => $this->getChat()->getChatID(),
+            'chat_id' => $this->getChat()->getId(),
         ]);
     }
 
     public function handle(): void
     {
+        $this->getChat()->getChatState()?->handle($this);
+
         try {
             $this->handleCallbackQuery();
-        } catch (BadMethodCallException $exception) {
+        } catch (BadMethodCallException) {
             if ($this->getMessage()->isCommand()) {
                 $this->handleCommand();
             }

@@ -3,7 +3,7 @@
 namespace Boot\Traits;
 
 use Boot\Log\Logger;
-use Boot\Src\Singleton;
+use Boot\Src\Abstracts\Singleton;
 use ReflectionClass;
 use ReflectionException;
 

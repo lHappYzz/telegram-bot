@@ -1,6 +1,6 @@
 <?php
 
-namespace Boot\Src;
+namespace Boot\Src\Abstracts;
 
 abstract class Singleton
 {

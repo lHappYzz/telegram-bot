@@ -3,7 +3,7 @@
 namespace App\Commands;
 
 use App\Bot;
-use Boot\Src\Singleton;
+use Boot\Src\Abstracts\Singleton;
 
 abstract class BaseCommand extends Singleton
 {

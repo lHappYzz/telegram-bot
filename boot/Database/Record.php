@@ -2,59 +2,40 @@
 
 namespace Boot\Database;
 
+use Boot\Interfaces\Recordable;
+use Boot\Traits\Helpers;
+use InvalidArgumentException;
 use JetBrains\PhpStorm\Pure;
-use ReflectionClass;
+use LogicException;
+use ReflectionObject;
 
 /**
  * Class record represents a table record from a database
  */
 abstract class Record
 {
-    protected string $table;
+    use Helpers;
+
+    protected string $table = '';
 
     /**
-     * Returns the identifier of the record
-     * @return int
+     * @var array List of fields that are going to be inserted into table
+     * when calling an update or create methods on record
      */
-    abstract public function getID(): int;
+    protected array $fillable = [];
 
     /**
-     * Checks if field is present into $fillable array
-     * @param $field
-     * @return bool
+     * @var array List of fields that will be ignored when
+     * trying to create record from telegram entity
+     * @see boundedTelegramEntity
+     * @see createFrom
+     * @see with
      */
-    #[Pure] private function isFillable($field): bool
-    {
-        return in_array($field, $this->fillable, true);
-    }
+    protected array $customFields = [];
 
-    /**
-     * Returns an associative array where key is field name and value
-     * represents field value
-     * @return array
-     */
-    private function attributesToArray(): array
-    {
-        $class = new ReflectionClass($this);
+    protected string $boundedTelegramEntity = '';
 
-        $arrayOfAttributes = [];
-        foreach ($class->getProperties() as $property) {
-            $propertyName = $property->getName();
-            if ($this->isFillable($propertyName)) {
-                $arrayOfAttributes[$propertyName] = $this->$propertyName;
-            }
-        }
-        return $arrayOfAttributes;
-    }
-
-    /**
-     * Returns an array of database record objects
-     * @return array
-     */
-    public static function fetchAll(): array
-    {
-        return self::query()->select()->get();
-    }
+    protected Recordable $telegramEntity;
 
     /**
      * This function is need to know what table to use in record class.
@@ -67,13 +48,32 @@ abstract class Record
         return $this->table;
     }
 
+    protected function getCustomFields(): array
+    {
+        return $this->customFields;
+    }
+
+    protected function getBoundTelegramEntity(): string
+    {
+        return $this->boundedTelegramEntity;
+    }
+
+    /**
+     * Returns an array of database record objects
+     * @return array
+     */
+    public static function fetchAll(): array
+    {
+        return self::query()->select()->get();
+    }
+
     /**
      * Updates a record in the database
      * @return bool
      */
     public function update(): bool
     {
-        return $this->newQuery()->where('id', $this->getID())->update($this->attributesToArray());
+        return $this->newQuery()->where('id', $this->telegramEntity->getId())->update($this->attributesToArray());
     }
 
     /**
@@ -91,19 +91,19 @@ abstract class Record
      */
     public function delete(): bool
     {
-        return $this->newQuery()->where('id', $this->getID())->delete();
+        return $this->newQuery()->where('id', $this->telegramEntity->getId())->delete();
     }
 
     /**
      * Returns an object that represents table record identified by the $tableName field
      * @param $id
-     * @return Record
+     * @return ?static
      */
-    public static function fetch($id): Record
+    public static function fetch($id): ?static
     {
         $arrayOfResults = self::query()->select()->where('id', $id)->get();
 
-        return array_pop($arrayOfResults) ?? new static();
+        return array_pop($arrayOfResults);
     }
 
     /**
@@ -123,9 +123,97 @@ abstract class Record
 
     public function newQuery(): QueryBuilder
     {
-        $queryBuilderInstance = QueryBuilder::getInstance();
+        $queryBuilderInstance = new QueryBuilder();
+
         $queryBuilderInstance->init($this->getTableName(), static::class);
 
         return $queryBuilderInstance;
+    }
+
+    /**
+     * Creates new DB record using telegramEntity
+     * @param Recordable $recordableEntity
+     * @return static
+     */
+    public static function createFrom(Recordable $recordableEntity): static
+    {
+        $record = new static();
+
+        $boundTelegramEntity = $record->getBoundTelegramEntity();
+        if ($recordableEntity instanceof $boundTelegramEntity) {
+            $record->telegramEntity = $recordableEntity;
+            return $record;
+        }
+
+        throw new LogicException('Bounded telegram entity does not match passed entity.');
+    }
+
+    /**
+     * Used to initialize record' fields that listed in customFields array
+     * @see customFields
+     * @param array $columnValues
+     * @return $this
+     */
+    public function with(array $columnValues): static
+    {
+        foreach ($columnValues as $columnName => $columnValue) {
+            if ($this->isCustom($columnName)) {
+                $this->$columnName = $columnValue;
+            } else {
+                throw new InvalidArgumentException('The $columnValues parameter must match records` custom fields array.');
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Checks if field is present into $fillable array
+     * @param $field
+     * @return bool
+     */
+    #[Pure] private function isFillable($field): bool
+    {
+        return in_array($field, $this->fillable, true);
+    }
+
+    private function isCustom($field): bool
+    {
+        return in_array($field, $this->customFields, true);
+    }
+
+    /**
+     * Returns an associative array where key is field name and value
+     * represents field value
+     * @return array
+     */
+    private function attributesToArray(): array
+    {
+        $arrayOfAttributes = [];
+
+        if (isset($this->telegramEntity)) {
+            $arrayOfAttributes = $this
+                ->telegramEntity
+                ->getArrayOfAttributes(array_diff($this->fillable, $this->getCustomFields()));
+        }
+
+        return array_merge($arrayOfAttributes, $this->getArrayOfAttributesFromCurrentRecord());
+    }
+
+    private function getArrayOfAttributesFromCurrentRecord(): array
+    {
+        $arrayOfAttributes = [];
+
+        $recordReflection = new ReflectionObject($this);
+        foreach ($recordReflection->getProperties() as $property) {
+            if (!$property->isPrivate()) {
+                $propertyName = $property->getName();
+                if ($this->isFillable($propertyName)) {
+                    $arrayOfAttributes[$propertyName] = $this->$propertyName;
+                }
+            }
+        }
+
+        return $arrayOfAttributes;
     }
 }

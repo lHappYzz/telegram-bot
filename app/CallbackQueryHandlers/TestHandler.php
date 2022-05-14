@@ -3,8 +3,8 @@
 namespace App\CallbackQueryHandlers;
 
 use App\Bot;
-use Boot\Src\CallbackQuery;
-use Boot\Src\CallbackQueryHandler;
+use Boot\Src\Abstracts\CallbackQueryHandler;
+use Boot\Src\Entities\CallbackQuery;
 
 class TestHandler extends CallbackQueryHandler
 {

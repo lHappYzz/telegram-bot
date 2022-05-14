@@ -1,7 +1,8 @@
 <?php
 
-namespace Boot\Src;
+namespace Boot\Src\Entities;
 
+use Boot\Src\Abstracts\Entity;
 use Boot\Src\ReplyMarkup\InlineKeyboardButton;
 use Boot\Traits\Helpers;
 

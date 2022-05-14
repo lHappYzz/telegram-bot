@@ -3,7 +3,7 @@
 namespace App\Commands;
 
 use App\Bot;
-use Boot\Src\Telegram;
+use Boot\Src\Abstracts\Telegram;
 use Boot\Traits\DirectoryHelpers;
 use ReflectionClass;
 

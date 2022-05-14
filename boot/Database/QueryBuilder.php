@@ -4,7 +4,10 @@ namespace Boot\Database;
 
 //TODO: Use try catch when exception thrown
 //TODO Updated: see composeUpdate, composeDelete and find out what to do in case when WHERE condition is empty
-class  QueryBuilder extends DB
+use JetBrains\PhpStorm\Pure;
+use PDOStatement;
+
+class  QueryBuilder
 {
     /** @var boolean
      * NOTE: When using named marker for binding parameters (:parameter, :name)
@@ -67,7 +70,7 @@ class  QueryBuilder extends DB
             $this->addBinding($column, $value, 'update');
         }
 
-        return $this->query($this->composeUpdate(), $this->cleanBindings())->errorCode() !== 00000;
+        return $this->runQuery($this->composeUpdate())->errorCode() !== 00000;
     }
 
     public function insert(array $values): bool
@@ -84,14 +87,14 @@ class  QueryBuilder extends DB
             $this->addBinding($column, $value, 'insert');
         }
 
-        return $this->query($this->composeInsert(), $this->cleanBindings())->errorCode() !== 00000;
+        return $this->runQuery($this->composeInsert())->errorCode() !== 00000;
     }
 
     public function delete(): bool
     {
         $this->sqlType = 'DELETE';
 
-        return $this->query($this->composeDelete(), $this->cleanBindings())->errorCode() !== 00000;
+        return $this->runQuery($this->composeDelete())->errorCode() !== 00000;
     }
 
     public function select(array $columns = ['*']): QueryBuilder
@@ -131,7 +134,7 @@ class  QueryBuilder extends DB
     public function get(): array
     {
         $sql = $this->compose();
-        $sqlResult = $this->query($sql, $this->cleanBindings());
+        $sqlResult = $this->runQuery($sql);
 
         $records = [];
         while (($record = $sqlResult->fetchObject($this->calledFromClass)) !== false) {
@@ -306,12 +309,23 @@ class  QueryBuilder extends DB
         return $result;
     }
 
-    private function cleanBindings(): array
+    #[Pure] private function cleanBindings(): array
     {
         return array_merge($this->bindings[strtolower($this->sqlType)] ?? [],
             $this->sqlType !== 'INSERT' ?
                 $this->bindings['where'] :
                 []
         );
+    }
+
+    /**
+     * Run SQL query using DB class functionality
+     * @see DB::query()
+     * @param string $query
+     * @return PDOStatement
+     */
+    private function runQuery(string $query): PDOStatement
+    {
+        return DB::getInstance()->query($query, $this->cleanBindings());
     }
 }

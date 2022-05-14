@@ -4,7 +4,7 @@ namespace Boot\Database;
 
 use App\Config\Config;
 use Boot\Log\Logger;
-use Boot\Src\Singleton;
+use Boot\Src\Abstracts\Singleton;
 use Exception;
 use PDO;
 use PDOStatement;

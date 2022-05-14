@@ -1,9 +1,12 @@
 <?php
 
-namespace Boot\Src;
+namespace Boot\Src\Entities;
 
+use Boot\Src\Abstracts\Entity;
+use Boot\Src\Abstracts\Telegram;
 use Boot\Src\ReplyMarkup\InlineKeyboardButton;
 use Boot\Src\ReplyMarkup\InlineKeyboardMarkup;
+use Boot\Src\TelegramPhotoSize;
 use Boot\Traits\Helpers;
 use JetBrains\PhpStorm\Pure;
 
