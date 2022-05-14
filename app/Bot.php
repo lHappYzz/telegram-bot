@@ -6,11 +6,11 @@ use App\Commands\BaseCommand;
 use App\Config\Config;
 use BadMethodCallException;
 use Boot\Log\Logger;
-use Boot\Src\CallbackQueryHandler;
-use Boot\Src\Entity;
+use Boot\Src\Abstracts\CallbackQueryHandler;
+use Boot\Src\Abstracts\Entity;
+use Boot\Src\Abstracts\Telegram;
+use Boot\Src\Entities\TelegramChat;
 use Boot\Src\ReplyMarkup\ReplyMarkup;
-use Boot\Src\Telegram;
-use Boot\Src\TelegramChat;
 use Boot\Src\Update;
 use Boot\Traits\DirectoryHelpers;
 use Boot\Traits\Helpers;
@@ -122,9 +122,11 @@ class Bot extends Entity
 
     public function handle(): void
     {
+        $this->getChat()->getChatState()?->handle($this);
+
         try {
             $this->handleCallbackQuery();
-        } catch (BadMethodCallException $exception) {
+        } catch (BadMethodCallException) {
             if ($this->getMessage()->isCommand()) {
                 $this->handleCommand();
             }

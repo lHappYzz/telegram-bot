@@ -3,7 +3,7 @@
 namespace Boot\Src\ReplyMarkup;
 
 use Boot\Log\Logger;
-use Boot\Src\CallbackQueryHandler;
+use Boot\Src\Abstracts\CallbackQueryHandler;
 use Boot\Traits\Helpers;
 use Exception;
 use InvalidArgumentException;

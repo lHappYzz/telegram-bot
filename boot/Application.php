@@ -4,7 +4,7 @@ namespace Boot;
 
 use App\Bot;
 use App\Config\Config;
-use Boot\Src\Telegram;
+use Boot\Src\Abstracts\Telegram;
 use Exception;
 
 class Application extends Telegram

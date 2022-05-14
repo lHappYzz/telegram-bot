@@ -6,8 +6,8 @@ use App\Bot;
 use App\Records\ChatRecord;
 use App\Records\StatusRecord;
 use App\Records\UserRecord;
-use Boot\Src\TelegramChat;
-use Boot\Src\TelegramUser;
+use Boot\Src\Entities\TelegramChat;
+use Boot\Src\Entities\TelegramUser;
 
 class StartCommand extends BaseCommand
 {

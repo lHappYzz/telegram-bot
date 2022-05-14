@@ -18,6 +18,19 @@ abstract class Record
 
     protected string $table = '';
 
+    /**
+     * @var array List of fields that are going to be inserted into table
+     * when calling an update or create methods on record
+     */
+    protected array $fillable = [];
+
+    /**
+     * @var array List of fields that will be ignored when
+     * trying to create record from telegram entity
+     * @see boundedTelegramEntity
+     * @see createFrom
+     * @see with
+     */
     protected array $customFields = [];
 
     protected string $boundedTelegramEntity = '';
@@ -117,6 +130,11 @@ abstract class Record
         return $queryBuilderInstance;
     }
 
+    /**
+     * Creates new DB record using telegramEntity
+     * @param Recordable $recordableEntity
+     * @return static
+     */
     public static function createFrom(Recordable $recordableEntity): static
     {
         $record = new static();
@@ -130,10 +148,16 @@ abstract class Record
         throw new LogicException('Bounded telegram entity does not match passed entity.');
     }
 
+    /**
+     * Used to initialize record' fields that listed in customFields array
+     * @see customFields
+     * @param array $columnValues
+     * @return $this
+     */
     public function with(array $columnValues): static
     {
         foreach ($columnValues as $columnName => $columnValue) {
-            if (in_array($columnName, $this->customFields, true)) {
+            if ($this->isCustom($columnName)) {
                 $this->$columnName = $columnValue;
             } else {
                 throw new InvalidArgumentException('The $columnValues parameter must match records` custom fields array.');
@@ -151,6 +175,11 @@ abstract class Record
     #[Pure] private function isFillable($field): bool
     {
         return in_array($field, $this->fillable, true);
+    }
+
+    private function isCustom($field): bool
+    {
+        return in_array($field, $this->customFields, true);
     }
 
     /**

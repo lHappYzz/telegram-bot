@@ -1,8 +1,9 @@
 <?php
 
-namespace Boot\Src;
+namespace Boot\Src\Abstracts;
 
 use App\Bot;
+use Boot\Src\Entities\CallbackQuery;
 
 abstract class CallbackQueryHandler extends Singleton
 {

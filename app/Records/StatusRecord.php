@@ -2,11 +2,19 @@
 
 namespace App\Records;
 
+use App\States\DefaultState;
+use App\States\NoState;
 use Boot\Database\Record;
 
 class StatusRecord extends Record
 {
+    public const STATUS_NO_STATUS = null;
     public const STATUS_DEFAULT = 1;
+
+    public static array $statesBindings = [
+        self::STATUS_NO_STATUS => NoState::class,
+        self::STATUS_DEFAULT => DefaultState::class,
+    ];
 
     protected string $table = 'status';
     protected array $fillable = ['name', 'description'];

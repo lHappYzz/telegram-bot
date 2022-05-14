@@ -2,7 +2,7 @@
 
 namespace Boot\Log;
 
-use Boot\Src\Singleton;
+use Boot\Src\Abstracts\Singleton;
 use Exception;
 use JetBrains\PhpStorm\Pure;
 

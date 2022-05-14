@@ -3,7 +3,7 @@
 namespace App\Records;
 
 use Boot\Database\Record;
-use Boot\Src\TelegramUser;
+use Boot\Src\Entities\TelegramUser;
 
 class UserRecord extends Record
 {

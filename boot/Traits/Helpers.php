@@ -2,9 +2,9 @@
 
 namespace Boot\Traits;
 
-use Boot\Src\CallbackQueryHandler;
+use Boot\Src\Abstracts\CallbackQueryHandler;
 use Boot\Src\ReplyMarkup\InlineKeyboardButton;
-use Boot\Src\Telegram;
+use Boot\Src\Abstracts\Telegram;
 
 trait Helpers
 {

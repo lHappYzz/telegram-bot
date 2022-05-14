@@ -1,8 +1,9 @@
 <?php
 
-namespace Boot\Src;
+namespace Boot\Src\Entities;
 
 use Boot\Interfaces\Recordable;
+use Boot\Src\Abstracts\Entity;
 use Boot\Traits\Helpers;
 
 /**
