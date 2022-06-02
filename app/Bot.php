@@ -10,6 +10,7 @@ use Boot\Src\Abstracts\CallbackQueryHandler;
 use Boot\Src\Abstracts\Entity;
 use Boot\Src\Abstracts\Telegram;
 use Boot\Src\Entities\TelegramChat;
+use Boot\Src\Entities\TelegramMessage;
 use Boot\Src\ReplyMarkup\ReplyMarkup;
 use Boot\Src\Update;
 use Boot\Traits\DirectoryHelpers;
@@ -108,15 +109,28 @@ class Bot extends Entity
         }
     }
 
-    public function sendPhoto($fileID, $caption = ''): void
-    {
+    public function sendPhoto(
+        TelegramMessage $telegramMessage,
+        TelegramChat $telegramChat,
+        ?ReplyMarkup $replyMarkup = null,
+        ?string $parseMode = null,
+        ?bool $disableNotification = null,
+        ?bool $protectContent = null,
+        ?int $replyToMessageId = null,
+        ?bool $allowSendingWithoutReply = null
+    ): void {
         $this->telegram->request::sendTelegramRequest([
-            'parse_mode' => 'Markdown',
             'token' => $this->token,
             'method' => 'sendPhoto',
-            'photo' => $fileID,
-            'caption' => $caption,
-            'chat_id' => $this->getChat()->getId(),
+            'chat_id' => $telegramChat->getId(),
+            'photo' => $telegramMessage->getTelegramFile()?->getFileID(),
+            'caption' => $telegramMessage->getTelegramFile()?->getCaption(),
+            'parse_mode' => $parseMode,
+            'disable_notification' => $disableNotification,
+            'protect_content' => $protectContent,
+            'reply_to_message_id' => $replyToMessageId,
+            'allow_sending_without_reply' => $allowSendingWithoutReply,
+            'reply_markup' => $replyMarkup ? json_encode($replyMarkup, JSON_THROW_ON_ERROR) : null,
         ]);
     }
 

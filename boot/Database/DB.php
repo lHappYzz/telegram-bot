@@ -8,6 +8,7 @@ use Boot\Src\Abstracts\Singleton;
 use Exception;
 use PDO;
 use PDOStatement;
+use Throwable;
 
 class DB extends Singleton
 {
@@ -65,8 +66,9 @@ class DB extends Singleton
             $stmt = $pdo->prepare($query);
 
             $stmt->execute($bindings);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
+            Logger::logError(print_r($stmt->errorInfo(), true));
         }
 
         return $stmt;

@@ -4,7 +4,7 @@ namespace Boot\Src;
 
 /**
  * Class telegramPhotoSize represents info about one photo
- * @package Boot\Src
+ * @link https://core.telegram.org/bots/api#photosize
  */
 class TelegramPhotoSize
 {
@@ -12,9 +12,9 @@ class TelegramPhotoSize
     private string $fileUniqueID;
     private int $width;
     private int $height;
-    private int $fileSize;
+    private ?int $fileSize;
 
-    public function __construct($photoData)
+    public function __construct(array $photoData)
     {
         $this->fileID = $photoData['file_id'];
         $this->fileUniqueID = $photoData['file_unique_id'];
@@ -33,7 +33,7 @@ class TelegramPhotoSize
         return $this->fileUniqueID;
     }
 
-    public function getFileSize(): int
+    public function getFileSize(): ?int
     {
         return $this->fileSize;
     }
