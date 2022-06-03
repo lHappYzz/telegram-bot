@@ -10,8 +10,8 @@ use Boot\Src\Abstracts\CallbackQueryHandler;
 use Boot\Src\Abstracts\Entity;
 use Boot\Src\Abstracts\Telegram;
 use Boot\Src\Entities\TelegramChat;
-use Boot\Src\Entities\TelegramMessage;
 use Boot\Src\ReplyMarkup\ReplyMarkup;
+use Boot\Src\TelegramFile;
 use Boot\Src\Update;
 use Boot\Traits\DirectoryHelpers;
 use Boot\Traits\Helpers;
@@ -110,7 +110,7 @@ class Bot extends Entity
     }
 
     public function sendPhoto(
-        TelegramMessage $telegramMessage,
+        TelegramFile $telegramFile,
         TelegramChat $telegramChat,
         ?ReplyMarkup $replyMarkup = null,
         ?string $parseMode = null,
@@ -123,8 +123,8 @@ class Bot extends Entity
             'token' => $this->token,
             'method' => 'sendPhoto',
             'chat_id' => $telegramChat->getId(),
-            'photo' => $telegramMessage->getTelegramFile()?->getFileID(),
-            'caption' => $telegramMessage->getTelegramFile()?->getCaption(),
+            'photo' => $telegramFile->getFileID(),
+            'caption' => $telegramFile->getCaption(),
             'parse_mode' => $parseMode,
             'disable_notification' => $disableNotification,
             'protect_content' => $protectContent,

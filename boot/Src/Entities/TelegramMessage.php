@@ -110,7 +110,7 @@ class TelegramMessage extends Entity
     private function setTelegramFile(array $messageData): void
     {
         if ($photoExists = array_key_exists(TelegramFile::MESSAGE_FILE_PHOTO, $messageData)) {
-            $this->telegramFile = new TelegramPhoto($messageData[TelegramFile::MESSAGE_FILE_PHOTO], $messageData['caption']);
+            $this->telegramFile = new TelegramPhoto($this->arrayLast($messageData[TelegramFile::MESSAGE_FILE_PHOTO]), $messageData['caption']);
         }
 
         if ($videoExists = array_key_exists(TelegramFile::MESSAGE_FILE_VIDEO, $messageData)) {
