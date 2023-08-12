@@ -11,6 +11,7 @@
     "ext-curl": "*",
     "ext-mysqli": "*",
     "ext-pdo": "*",
-    "guzzlehttp/guzzle": "^7"
+    "guzzlehttp/guzzle": "^7",
+    "phpfastcache/phpfastcache": "^8.1"
   }
 }
