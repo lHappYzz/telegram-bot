@@ -4,6 +4,7 @@ namespace App\Commands;
 
 use App\Bot;
 use Boot\Src\Abstracts\Telegram;
+use Boot\Src\Entities\TelegramMessage;
 use Boot\Traits\DirectoryHelpers;
 use ReflectionClass;
 
@@ -14,7 +15,7 @@ class HelpCommand extends BaseCommand
     protected string $description = 'Represents available bot commands.';
     protected string $signature = '/help';
 
-    public function boot(Bot $bot, array $parameters = []): void
+    public function boot(Bot $bot, TelegramMessage $telegramMessage, array $parameters = []): void
     {
         $message = 'List of available Commands:' . PHP_EOL;
         $classedInCommandsDir = $this->getCommandsInTheCommandDir();
@@ -25,6 +26,6 @@ class HelpCommand extends BaseCommand
                 $message .= $command->getSignature().' - '.$command->getDescription().PHP_EOL;
             }
         }
-        $bot->sendMessage($message, $bot->getChat());
+        $bot->sendMessage($message, $telegramMessage->getChat());
     }
 }

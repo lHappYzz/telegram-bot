@@ -2,8 +2,9 @@
 
 namespace Boot\Src\Entities;
 
-use Boot\Src\Abstracts\Entity;
+use Boot\Interfaces\MessageableEntity;
 use Boot\Src\Abstracts\Telegram;
+use Boot\Src\Abstracts\UpdateUnit;
 use Boot\Src\ReplyMarkup\InlineKeyboardButton;
 use Boot\Src\ReplyMarkup\InlineKeyboardMarkup;
 use Boot\Src\TelegramFile;
@@ -12,7 +13,7 @@ use Boot\Src\TelegramVideo;
 use Boot\Traits\Helpers;
 use JetBrains\PhpStorm\Pure;
 
-class TelegramMessage extends Entity
+class TelegramMessage extends UpdateUnit implements MessageableEntity
 {
     use Helpers;
 

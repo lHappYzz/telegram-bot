@@ -4,13 +4,14 @@ namespace App\Commands;
 
 use App\Api\Api;
 use App\Bot;
+use Boot\Src\Entities\TelegramMessage;
 
 class CourseCommand extends BaseCommand
 {
     protected string $description = 'Privat cashless courses.';
     protected string $signature = '/course';
 
-    public function boot(Bot $bot, array $parameters = []): void
+    public function boot(Bot $bot, TelegramMessage $telegramMessage, array $parameters = []): void
     {
         $message = '';
 
@@ -26,6 +27,6 @@ class CourseCommand extends BaseCommand
             $message .= '💰BUY: 1' . $block['ccy'] . ' - ' . $block['buy'] . ' ' . $block['base_ccy'].
                 "\n💱SALE: 1" . $block['ccy'] . ' - ' . $block['sale'] . ' ' . $block['base_ccy'] . "\n\n";
         }
-        $bot->sendMessage($message, $bot->getChat());
+        $bot->sendMessage($message, $telegramMessage->getChat());
     }
 }

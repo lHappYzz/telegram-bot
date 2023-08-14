@@ -5,6 +5,7 @@ namespace Boot\Src\Abstracts;
 use App\Bot;
 use Boot\Interfaces\ChatState;
 use Boot\Src\Entities\TelegramChat;
+use Boot\Src\Entities\TelegramMessage;
 
 abstract class State implements ChatState
 {
@@ -15,5 +16,5 @@ abstract class State implements ChatState
         $this->telegramChat = $telegramChat;
     }
 
-    abstract public function handle(Bot $bot): void;
+    abstract public function handle(Bot $bot, TelegramMessage $telegramMessage): void;
 }

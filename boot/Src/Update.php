@@ -2,13 +2,11 @@
 
 namespace Boot\Src;
 
-use BadMethodCallException;
-use Boot\Src\Abstracts\Entity;
-use Boot\Src\Entities\CallbackQuery;
+use Boot\Application;
+use Boot\Interfaces\CallbackableQueryEntity;
+use Boot\Interfaces\MessageableEntity;
+use Boot\Src\Abstracts\UpdateUnit;
 use Boot\Src\Entities\TelegramMessage;
-use Boot\Traits\Helpers;
-use JetBrains\PhpStorm\Pure;
-use RuntimeException;
 
 /**
  * Class Update
@@ -16,86 +14,41 @@ use RuntimeException;
  */
 class Update
 {
-    use Helpers;
-
-    protected int $updateId;
-    protected string $updateType;
-
-    //At most one of the optional parameters can be present in any given update
-    protected ?TelegramMessage $message;
-    protected ?TelegramMessage $editedMessage;
-    protected ?CallbackQuery $callbackQuery;
-
-    protected const UPDATE_TYPE_MESSAGE = 'message';
-    protected const UPDATE_TYPE_EDITED_MESSAGE = 'edited_message';
-    protected const UPDATE_TYPE_CALLBACK_QUERY = 'callback_query';
-
-    protected array $bindings = [
-        self::UPDATE_TYPE_MESSAGE => TelegramMessage::class,
-        self::UPDATE_TYPE_EDITED_MESSAGE => TelegramMessage::class,
-        self::UPDATE_TYPE_CALLBACK_QUERY => CallbackQuery::class,
-    ];
-
-    /** @var TelegramMessage|CallbackQuery */
-    protected $initiatedUpdateParameter;
-
     /**
      * Update constructor.
-     * @param array $requestData
-     * @see TelegramRequest::parseTelegramRequest
+     * @param string $updateId
+     * @param UpdateUnit $updateUnit
      */
-    public function __construct(array $requestData)
+    public function __construct(
+        public string $updateId,
+        public UpdateUnit $updateUnit
+    ) {}
+
+    /**
+     * @return bool
+     */
+    public function isMessageableUpdate(): bool
     {
-        $this->updateId = $requestData['update_id'];
-
-        $this->setUpdateType($requestData);
-
-        $this->initUpdateField($this->updateType, $requestData);
+        return $this->updateUnit instanceof MessageableEntity;
     }
 
     /**
-     * @param string $methodName
-     * @return Entity
+     * @return bool
      */
-    public function getInstance(string $methodName): Entity
+    public function isCallbackableQueryUpdate(): bool
     {
-        if (get_class($this->initiatedUpdateParameter) === $this->bindings[
-            $this->camelCaseToSnakeCase($this->resolveInstanceName($methodName))]
-        ) {
-            return $this->initiatedUpdateParameter;
-        }
-
-        if (method_exists($this->initiatedUpdateParameter, $methodName)) {
-            return $this->initiatedUpdateParameter->$methodName();
-        }
-
-        throw new BadMethodCallException('Bad method call: ' .
-            $methodName .
-            '. At ' . __CLASS__ .
-            '::' . __METHOD__ .
-            '. Line: ' . __LINE__);
+        return $this->updateUnit instanceof CallbackableQueryEntity;
     }
 
-    #[Pure] private function resolveInstanceName(string $methodName): string
+    /**
+     * @return void
+     */
+    public function tryBootCommand(): void
     {
-        return substr_replace($methodName, '', 0, 3);
-    }
-
-    private function initUpdateField(string $updateType, array $requestData): void
-    {
-        $this->{$this->snakeCaseToCamelCase($updateType)} = new $this->bindings[$updateType]($requestData[$this->updateType]);
-
-        $this->initiatedUpdateParameter = &$this->{$this->snakeCaseToCamelCase($updateType)};
-    }
-
-    private function setUpdateType(array $requestData): void
-    {
-        foreach ($this->bindings as $type => $binding) {
-            if (array_key_exists($type, $requestData)) {
-                $this->updateType = $type;
-                return;
+        if ($this->updateUnit instanceof TelegramMessage) {
+            if ($this->updateUnit->isCommand()) {
+                Application::bootCommand($this->updateUnit->getCommandClassName(), $this->updateUnit);
             }
         }
-        throw new RuntimeException('Can not recognize telegram update type.');
     }
 }

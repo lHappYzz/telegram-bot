@@ -2,7 +2,8 @@
 
 namespace Boot\Src\Entities;
 
-use Boot\Src\Abstracts\Entity;
+use Boot\Interfaces\CallbackableQueryEntity;
+use Boot\Src\Abstracts\UpdateUnit;
 use Boot\Src\ReplyMarkup\InlineKeyboardButton;
 use Boot\Traits\Helpers;
 
@@ -10,7 +11,7 @@ use Boot\Traits\Helpers;
  * Class CallbackQuery
  * @link https://core.telegram.org/bots/api#callbackquery
  */
-class CallbackQuery extends Entity
+class CallbackQuery extends UpdateUnit implements CallbackableQueryEntity
 {
     use Helpers;
 
@@ -71,5 +72,10 @@ class CallbackQuery extends Entity
     public function getButtonUserData(): string
     {
         return $this->arrayLast(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $this->data));
+    }
+
+    public function getChat(): TelegramChat
+    {
+        return $this->getMessage()?->getChat();
     }
 }

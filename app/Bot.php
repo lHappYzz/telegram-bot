@@ -2,32 +2,23 @@
 
 namespace App;
 
-use App\Commands\BaseCommand;
 use App\Config\Config;
-use BadMethodCallException;
+use Boot\Facades\TelegramFacade;
 use Boot\Log\Logger;
-use Boot\Src\Abstracts\CallbackQueryHandler;
-use Boot\Src\Abstracts\Entity;
-use Boot\Src\Abstracts\Telegram;
 use Boot\Src\Entities\TelegramChat;
 use Boot\Src\ReplyMarkup\ReplyMarkup;
 use Boot\Src\TelegramFile;
-use Boot\Src\Update;
 use Boot\Traits\DirectoryHelpers;
 use Boot\Traits\Helpers;
 use Boot\Traits\Http;
 use Throwable;
 
-class Bot extends Entity
+class Bot
 {
     use Http, Helpers, DirectoryHelpers;
 
-    public static Update $update;
-
-    public function __construct(protected Telegram $telegram, private ?string $token = null)
+    public function __construct(private TelegramFacade $telegramFacade, private ?string $token = null)
     {
-        self::$update = &$telegram->request->update;
-
         $config = Config::bot();
 
         $this->token = $config['bot_token'];
@@ -45,7 +36,7 @@ class Bot extends Entity
         bool $allowSendingWithoutReply = false
     ): void {
         try {
-            $this->telegram->request::sendTelegramRequest([
+            $this->telegramFacade->sendTelegramRequest([
                 'token' => $this->token,
                 'method' => 'sendMessage',
                 'text' => $text,
@@ -72,7 +63,7 @@ class Bot extends Entity
         bool $disableWebPagePreview = false
     ): void {
         try {
-            $this->telegram->request::sendTelegramRequest([
+            $this->telegramFacade->sendTelegramRequest([
                 'token' => $this->token,
                 'method' => 'editMessageText',
                 'text' => $text,
@@ -95,7 +86,7 @@ class Bot extends Entity
         ?int $cacheTime = null
     ): void {
         try {
-            $this->telegram->request::sendTelegramRequest([
+            $this->telegramFacade->sendTelegramRequest([
                 'token' => $this->token,
                 'method' => 'answerCallbackQuery',
                 'callback_query_id' => $callbackQueryId,
@@ -119,7 +110,7 @@ class Bot extends Entity
         ?int $replyToMessageId = null,
         ?bool $allowSendingWithoutReply = null
     ): void {
-        $this->telegram->request::sendTelegramRequest([
+        $this->telegramFacade->sendTelegramRequest([
             'token' => $this->token,
             'method' => 'sendPhoto',
             'chat_id' => $telegramChat->getId(),
@@ -132,61 +123,5 @@ class Bot extends Entity
             'allow_sending_without_reply' => $allowSendingWithoutReply,
             'reply_markup' => $replyMarkup ? json_encode($replyMarkup, JSON_THROW_ON_ERROR) : null,
         ]);
-    }
-
-    public function handle(): void
-    {
-        $this->getChat()->getChatState()?->handle($this);
-
-        try {
-            $this->handleCallbackQuery();
-        } catch (BadMethodCallException) {
-            if ($this->getMessage()->isCommand()) {
-                $this->handleCommand();
-            }
-        }
-
-        $repliedMessage = $this->getMessage()->getRepliedMessage();
-        if ($repliedMessage) {
-            $this->sendMessage(
-                'Detected the reply for message: ' .
-                $repliedMessage->getMessageText() .
-                ' that was sent at: ' . $repliedMessage->getMessageDate(),
-                $this->getChat()
-            );
-        }
-    }
-
-    public function bootCommand(string $commandName, array $parameters = []): bool
-    {
-        /** @var BaseCommand $instance */
-        $instance = $this->getClassInstance($commandName);
-
-        if ($instance instanceof BaseCommand) {
-            $instance->boot($this, $parameters);
-            return true;
-        }
-
-        return false;
-    }
-
-    private function handleCallbackQuery(): void
-    {
-        $callbackQuery = $this->getCallbackQuery();
-        $handler = $this->getClassInstance($this->resolveCallbackQueryHandlerName($callbackQuery->getData()));
-        if ($handler instanceof CallbackQueryHandler) {
-            $handler->handle($this, $callbackQuery);
-        }
-    }
-
-    private function handleCommand(): void
-    {
-        if (!$this->bootCommand($this->getMessage()->getCommandClassName())) {
-            $this->sendMessage(
-                'I can not recognize the command - <' .
-                $this->getMessage()->getMessageText() . '>',
-                $this->getChat()
-            );
-        }
     }
 }
