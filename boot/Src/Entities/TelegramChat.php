@@ -4,6 +4,7 @@ namespace Boot\Src\Entities;
 
 use App\Records\ChatRecord;
 use App\Records\StatusRecord;
+use Boot\Cache\Cache;
 use Boot\Interfaces\ChatState;
 use Boot\Interfaces\Recordable;
 use Boot\Log\Logger;
@@ -25,6 +26,8 @@ class TelegramChat extends Entity implements Recordable
     private ?string $lastName;
     private ?string $userName;
 
+    private string $chatStateCacheKey;
+
     /**
      * Current chat state
      * @var ChatState
@@ -40,6 +43,7 @@ class TelegramChat extends Entity implements Recordable
         $this->lastName = $telegramChatData['lastName'];
         $this->userName = $telegramChatData['userName'];
 
+        $this->chatStateCacheKey = 'chat_status' . $this->getId();
         $this->transitionTo($this->getStatusId());
     }
 
@@ -90,6 +94,7 @@ class TelegramChat extends Entity implements Recordable
             ->update(['status_id' => $record->getId()]);
 
         if ($isSuccess) {
+            Cache::getInstance()->set($this->chatStateCacheKey, $record->getId(), 60*60);
             $this->transitionTo($record->getId());
         }
 
@@ -98,12 +103,13 @@ class TelegramChat extends Entity implements Recordable
 
     public function getStatusId(): ?int
     {
-        return $this->arrayFirst(
-            ChatRecord::query()
-                ->select(['status_id'])
-                ->where('id', $this->getId())
-                ->get()
-            )->status_id;
+        return Cache::getInstance()->get($this->chatStateCacheKey) ??
+            $this->arrayFirst(
+                ChatRecord::query()
+                    ->select(['status_id'])
+                    ->where('id', $this->getId())
+                    ->get()
+                )->status_id;
     }
 
     public function getChatState(): ChatState

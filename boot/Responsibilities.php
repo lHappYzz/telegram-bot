@@ -30,9 +30,7 @@ class Responsibilities
      */
     public function handleCommand(TelegramMessage $telegramMessage): void
     {
-        if ($telegramMessage->getChat()->getChatState() instanceof DefaultState) {
-            Application::bootCommand($telegramMessage->getCommandClassName(), $telegramMessage);
-        }
+        Application::bootCommand($telegramMessage->getCommandClassName(), $telegramMessage);
     }
 
     /**

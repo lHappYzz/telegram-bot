@@ -9,12 +9,11 @@ use Boot\Facades\TelegramFacade;
 use Boot\Src\Abstracts\Singleton;
 use Boot\Src\Entities\TelegramMessage;
 use Boot\Traits\DirectoryHelpers;
-use Boot\Traits\Helpers;
 use Exception;
 
 class Application extends Singleton
 {
-    use Helpers, DirectoryHelpers;
+    use DirectoryHelpers;
 
     /** @var Bot */
     private Bot $bot;

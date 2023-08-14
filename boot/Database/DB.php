@@ -5,7 +5,6 @@ namespace Boot\Database;
 use App\Config\Config;
 use Boot\Log\Logger;
 use Boot\Src\Abstracts\Singleton;
-use Exception;
 use PDO;
 use PDOStatement;
 use Throwable;
@@ -15,7 +14,7 @@ class DB extends Singleton
     /**
      * @param string $hostname Can be either a host name or an IP address. Passing the NULL value or the string "localhost" to this parameter, the local host is assumed. When possible, pipes will be used instead of the TCP/IP protocol.
      */
-    private $hostname;
+    private string $hostname;
 
     /**
      * @param string $username The MySQL user name.
@@ -30,7 +29,7 @@ class DB extends Singleton
     /**
      * @param string $database Database to be used when performing queries.
      */
-    private $database;
+    private string $database;
 
     /**
      * @var PDO Object represents db connection.
@@ -56,15 +55,18 @@ class DB extends Singleton
 
     }
 
+    /**
+     * @param string $query
+     * @param array $bindings
+     * @return PDOStatement
+     */
     public function query(string $query, array $bindings = []): PDOStatement
     {
+        $pdo = $this->getConnection();
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $stmt = $pdo->prepare($query);
+
         try {
-            $pdo = $this->getConnection();
-
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-            $stmt = $pdo->prepare($query);
-
             $stmt->execute($bindings);
         } catch (Throwable $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
@@ -76,7 +78,6 @@ class DB extends Singleton
 
     /**
      * @return PDO
-     * @throws Exception
      */
     protected function getConnection(): PDO
     {
@@ -86,6 +87,9 @@ class DB extends Singleton
         return $this->connection;
     }
 
+    /**
+     * @return string
+     */
     private function dataSourceName(): string
     {
         return 'mysql:dbname=' . $this->database . ';host=' . $this->hostname;
@@ -94,7 +98,6 @@ class DB extends Singleton
     /**
      * Open a new connection to the MySQL server
      * @return PDO
-     * @throws Exception
      */
     private function makeConnection(): PDO
     {

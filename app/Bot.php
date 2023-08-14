@@ -8,20 +8,15 @@ use Boot\Log\Logger;
 use Boot\Src\Entities\TelegramChat;
 use Boot\Src\ReplyMarkup\ReplyMarkup;
 use Boot\Src\TelegramFile;
-use Boot\Traits\DirectoryHelpers;
-use Boot\Traits\Helpers;
-use Boot\Traits\Http;
 use Throwable;
 
 class Bot
 {
-    use Http, Helpers, DirectoryHelpers;
-
-    public function __construct(private TelegramFacade $telegramFacade, private ?string $token = null)
-    {
-        $config = Config::bot();
-
-        $this->token = $config['bot_token'];
+    public function __construct(
+        private TelegramFacade $telegramFacade,
+        private ?string $token = null
+    ) {
+        $this->token = Config::bot()['bot_token'];
     }
 
     public function sendMessage(

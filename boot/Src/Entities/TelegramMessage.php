@@ -3,6 +3,7 @@
 namespace Boot\Src\Entities;
 
 use App\States\DefaultState;
+use App\States\NoState;
 use Boot\Responsibilities;
 use Boot\Interfaces\MessageableEntity;
 use Boot\Src\Abstracts\Telegram;
@@ -118,7 +119,10 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
      */
     public function responsibilize(Responsibilities $responsibility): void
     {
-        if ($this->getChat()->getChatState() instanceof DefaultState) {
+        if (
+            $this->getChat()->getChatState() instanceof DefaultState ||
+            $this->getChat()->getChatState() instanceof NoState
+        ) {
             if ($this->isCommand()) {
                 $responsibility->handleCommand($this);
             }

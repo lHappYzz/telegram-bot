@@ -6,7 +6,7 @@ use Boot\Factories\CallbackableFactory;
 use Boot\Factories\MessageableUpdateFactory;
 use Boot\Factories\UpdateFactory;
 use Boot\Log\Logger;
-use Exception;
+use JsonException;
 use RuntimeException;
 
 class TelegramUpdateParser
@@ -33,14 +33,18 @@ class TelegramUpdateParser
     public function parseTelegramRequest(): UpdateFactory
     {
         try {
-            $tgData = json_decode(file_get_contents('php://input'), 1, 512, JSON_THROW_ON_ERROR);
+            $tgData = json_decode(
+                file_get_contents('php://input'),
+                true,
+                flags: JSON_THROW_ON_ERROR
+            );
 
             Logger::logInfo(print_r($tgData, true));
 
             return $this->createUpdateFactory($tgData);
-        } catch (Exception $e) {
+        } catch (JsonException $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
-            die();
+            throw new RuntimeException('Failed to parse telegram request', $e->getCode(), $e);
         }
     }
 
