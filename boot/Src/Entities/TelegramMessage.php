@@ -2,6 +2,8 @@
 
 namespace Boot\Src\Entities;
 
+use App\States\DefaultState;
+use Boot\Responsibilities;
 use Boot\Interfaces\MessageableEntity;
 use Boot\Src\Abstracts\Telegram;
 use Boot\Src\Abstracts\UpdateUnit;
@@ -106,6 +108,23 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
     public function isCommand(): bool
     {
         return ($this->text[0] === '/') && !str_contains($this->text, ' ');
+    }
+
+    /**
+     * Method describes how and when the responsible code base should run for each of update unit
+     *
+     * @param Responsibilities $responsibility
+     * @return void
+     */
+    public function responsibilize(Responsibilities $responsibility): void
+    {
+        if ($this->getChat()->getChatState() instanceof DefaultState) {
+            if ($this->isCommand()) {
+                $responsibility->handleCommand($this);
+            }
+        } else {
+            $responsibility->handleTelegramChatState($this);
+        }
     }
 
     private function setTelegramFile(array $messageData): void

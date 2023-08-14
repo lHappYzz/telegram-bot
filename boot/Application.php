@@ -5,11 +5,8 @@ namespace Boot;
 use App\Bot;
 use App\Commands\BaseCommand;
 use App\Config\Config;
-use App\States\DefaultState;
 use Boot\Facades\TelegramFacade;
-use Boot\Src\Abstracts\CallbackQueryHandler;
 use Boot\Src\Abstracts\Singleton;
-use Boot\Src\Entities\CallbackQuery;
 use Boot\Src\Entities\TelegramMessage;
 use Boot\Traits\DirectoryHelpers;
 use Boot\Traits\Helpers;
@@ -46,16 +43,11 @@ class Application extends Singleton
 
         date_default_timezone_set(Config::timezone());
 
-        $this->handleCallbackQuery();
-        $unit = $this->telegramFacade->getUpdate()->updateUnit;
-
-        if ($unit instanceof TelegramMessage) {
-            if ($unit->getChat()->getChatState() instanceof DefaultState) {
-                $this->telegramFacade->getUpdate()->tryBootCommand();
-            } else {
-                $unit->getChat()->getChatState()->handle($this->bot, $unit);
-            }
-        }
+        $this
+            ->telegramFacade
+            ->getUpdate()
+            ->updateUnit
+            ->responsibilize(new Responsibilities($this->bot));
     }
 
     /**
@@ -73,23 +65,6 @@ class Application extends Singleton
 
         if ($instance instanceof BaseCommand) {
             $instance->boot(self::getInstance()->bot, $telegramMessage, $parameters);
-        }
-    }
-
-    /**
-     * @return void
-     */
-    private function handleCallbackQuery(): void
-    {
-        if ($this->telegramFacade->getUpdate()->isCallbackableQueryUpdate()) {
-            /** @var CallbackQuery $callbackQuery */
-            $callbackQuery = $this->telegramFacade->getUpdate()->updateUnit;
-
-            $handler = $this->getClassInstance($this->resolveCallbackQueryHandlerName($callbackQuery->getData()));
-
-            if ($handler instanceof CallbackQueryHandler) {
-                $handler->handle($this->bot, $callbackQuery);
-            }
         }
     }
 }

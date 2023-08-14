@@ -3,6 +3,7 @@
 namespace Boot\Src\Entities;
 
 use Boot\Interfaces\CallbackableQueryEntity;
+use Boot\Responsibilities;
 use Boot\Src\Abstracts\UpdateUnit;
 use Boot\Src\ReplyMarkup\InlineKeyboardButton;
 use Boot\Traits\Helpers;
@@ -77,5 +78,16 @@ class CallbackQuery extends UpdateUnit implements CallbackableQueryEntity
     public function getChat(): TelegramChat
     {
         return $this->getMessage()?->getChat();
+    }
+
+    /**
+     * Method describes how and when the responsible code base should run for each of update unit
+     *
+     * @param Responsibilities $responsibility
+     * @return void
+     */
+    public function responsibilize(Responsibilities $responsibility): void
+    {
+        $responsibility->handleCallbackQuery($this);
     }
 }
