@@ -52,7 +52,13 @@ class Responsibilities
     {
         $handler = $this->getClassInstance($this->resolveCallbackQueryHandlerName($callbackQuery->getData()));
 
-        if ($handler instanceof CallbackQueryHandler) {
+        if (!$handler instanceof CallbackQueryHandler) {
+            return;
+        }
+
+        if ($handler->specificChatState === null) {
+            $handler->handle($this->bot, $callbackQuery);
+        } elseif ($callbackQuery->getChat()->getChatState()::class === $handler->specificChatState) {
             $handler->handle($this->bot, $callbackQuery);
         }
     }
