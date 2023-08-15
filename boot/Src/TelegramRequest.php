@@ -3,9 +3,8 @@
 namespace Boot\Src;
 
 use App\Config\Config;
+use Boot\TelegramUpdateParser;
 use Boot\Traits\Http;
-use Exception;
-use Boot\Log\Logger;
 
 class TelegramRequest
 {
@@ -19,23 +18,9 @@ class TelegramRequest
      */
     public Update $update;
 
-    public function __construct()
+    public function __construct(TelegramUpdateParser $telegramUpdateParser)
     {
-        $this->update = $this->parseTelegramRequest();
-    }
-
-    private function parseTelegramRequest(): Update
-    {
-        try {
-            $tgData = json_decode(file_get_contents('php://input'), 1, 512, JSON_THROW_ON_ERROR);
-
-            Logger::logInfo(print_r($tgData, true));
-
-            return new Update($tgData);
-        } catch (Exception $e) {
-            Logger::logException($e, Logger::LEVEL_ERROR);
-            die();
-        }
+        $this->update = $telegramUpdateParser->parseTelegramRequest()->createUpdate();
     }
 
     /**
