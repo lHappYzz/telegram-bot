@@ -1,24 +1,41 @@
 <?php
 
-namespace App\Commands;
+namespace Boot\Src\Abstracts;
 
 use App\Bot;
-use Boot\Src\Abstracts\Singleton;
 use Boot\Src\Entities\TelegramMessage;
 
 abstract class BaseCommand extends Singleton
 {
+    /** @var string */
+    protected string $description = '';
+
+    /** @var string */
+    protected string $signature = '';
+
+    /**
+     * @param Bot $bot
+     * @param TelegramMessage $telegramMessage
+     * @param array $parameters
+     * @return void
+     */
     abstract public function boot(
         Bot $bot,
         TelegramMessage $telegramMessage,
         array $parameters = []
     ): void;
 
+    /**
+     * @return string
+     */
     public function getDescription(): string
     {
         return $this->description;
     }
 
+    /**
+     * @return string
+     */
     public function getSignature(): string
     {
         return $this->signature;

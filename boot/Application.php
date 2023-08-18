@@ -3,13 +3,14 @@
 namespace Boot;
 
 use App\Bot;
-use App\Commands\BaseCommand;
 use App\Config\Config;
 use Boot\Facades\TelegramFacade;
+use Boot\Src\Abstracts\BaseCommand;
 use Boot\Src\Abstracts\Singleton;
 use Boot\Src\Entities\TelegramMessage;
 use Boot\Traits\DirectoryHelpers;
 use Exception;
+use RuntimeException;
 
 class Application extends Singleton
 {
@@ -29,15 +30,19 @@ class Application extends Singleton
     }
 
     /**
-     * Starts the application by doing some things like getting the configuration or parsing telegram request
-     * In success case new bot instance will be returned else an exception will be thrown
+     * Entry point of the application. Ensures if the config file exists, sets server timezone
+     * launches application components according to received telegram Update
      *
      * @throws Exception
      */
     public function boot(): void
     {
         if (!Config::exists()) {
-            throw new Exception('Missing application configuration file');
+            throw new RuntimeException('Missing application configuration file.');
+        }
+
+        if (!Config::bot()['token']) {
+            throw new RuntimeException('Missing bot token.');
         }
 
         date_default_timezone_set(Config::timezone());

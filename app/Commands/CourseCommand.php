@@ -4,6 +4,7 @@ namespace App\Commands;
 
 use App\Api\Api;
 use App\Bot;
+use Boot\Src\Abstracts\BaseCommand;
 use Boot\Src\Entities\TelegramMessage;
 
 class CourseCommand extends BaseCommand
