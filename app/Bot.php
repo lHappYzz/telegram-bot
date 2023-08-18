@@ -5,8 +5,8 @@ namespace App;
 use App\Config\Config;
 use Boot\Facades\TelegramFacade;
 use Boot\Log\Logger;
+use Boot\Src\Entities\ReplyMarkup\ReplyMarkup;
 use Boot\Src\Entities\TelegramChat;
-use Boot\Src\ReplyMarkup\ReplyMarkup;
 use Boot\Src\TelegramFile;
 use Throwable;
 

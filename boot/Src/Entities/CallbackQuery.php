@@ -5,7 +5,7 @@ namespace Boot\Src\Entities;
 use Boot\Interfaces\CallbackableQueryEntity;
 use Boot\Responsibilities;
 use Boot\Src\Abstracts\UpdateUnit;
-use Boot\Src\ReplyMarkup\InlineKeyboardButton;
+use Boot\Src\Entities\ReplyMarkup\InlineKeyboardButton;
 use Boot\Traits\Helpers;
 
 /**

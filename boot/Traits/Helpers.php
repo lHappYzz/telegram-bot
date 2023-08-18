@@ -3,7 +3,7 @@
 namespace Boot\Traits;
 
 use Boot\Src\Abstracts\CallbackQueryHandler;
-use Boot\Src\ReplyMarkup\InlineKeyboardButton;
+use Boot\Src\Entities\ReplyMarkup\InlineKeyboardButton;
 use Boot\Src\Abstracts\Telegram;
 
 trait Helpers
