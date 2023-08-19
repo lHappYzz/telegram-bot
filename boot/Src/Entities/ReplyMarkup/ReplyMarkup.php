@@ -1,8 +1,8 @@
 <?php
 
-namespace Boot\Src\ReplyMarkup;
+namespace Boot\Src\Entities\ReplyMarkup;
 
-use JsonSerializable;
+use Boot\Src\Abstracts\JsonSerializableEntity;
 
 /**
  * Additional interface options.
@@ -11,7 +11,7 @@ use JsonSerializable;
  * to force a reply from the user.
  * @link https://core.telegram.org/bots/api#callbackquery
  */
-abstract class ReplyMarkup implements JsonSerializable
+abstract class ReplyMarkup extends JsonSerializableEntity
 {
     //
 }

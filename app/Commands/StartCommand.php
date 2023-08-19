@@ -6,6 +6,7 @@ use App\Bot;
 use App\Records\ChatRecord;
 use App\Records\StatusRecord;
 use App\Records\UserRecord;
+use Boot\Src\Abstracts\BaseCommand;
 use Boot\Src\Entities\TelegramChat;
 use Boot\Src\Entities\TelegramMessage;
 use Boot\Src\Entities\TelegramUser;
