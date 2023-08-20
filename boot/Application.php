@@ -41,7 +41,7 @@ class Application extends Singleton
             throw new RuntimeException('Missing application configuration file.');
         }
 
-        if (!Config::bot()['token']) {
+        if (!Config::bot()['bot_token']) {
             throw new RuntimeException('Missing bot token.');
         }
 
@@ -51,7 +51,7 @@ class Application extends Singleton
             ->telegramFacade
             ->getUpdate()
             ->updateUnit
-            ->responsibilize(new Responsibilities($this->bot));
+            ->responsibilize(new Responsibilities($this->bot, new Gate()));
     }
 
     /**

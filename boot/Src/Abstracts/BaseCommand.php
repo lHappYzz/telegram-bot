@@ -40,4 +40,13 @@ abstract class BaseCommand extends Singleton
     {
         return $this->signature;
     }
+
+    /**
+     * Contains ids of users authorized for command. If empty array is returned command is public.
+     * @return array
+     */
+    public function getAllowedUsers(): array
+    {
+        return [];
+    }
 }

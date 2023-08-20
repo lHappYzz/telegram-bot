@@ -4,6 +4,7 @@ namespace Boot;
 
 use App\Bot;
 use App\States\DefaultState;
+use Boot\Interfaces\PermissionManager;
 use Boot\Src\Abstracts\CallbackQueryHandler;
 use Boot\Src\Entities\CallbackQuery;
 use Boot\Src\Entities\TelegramMessage;
@@ -21,8 +22,9 @@ class Responsibilities
 
     /**
      * @param Bot $bot
+     * @param PermissionManager $manager
      */
-    public function __construct(private Bot $bot) {}
+    public function __construct(private Bot $bot, protected PermissionManager $manager) {}
 
     /**
      * @param TelegramMessage $telegramMessage
@@ -30,7 +32,9 @@ class Responsibilities
      */
     public function handleCommand(TelegramMessage $telegramMessage): void
     {
-        Application::bootCommand($telegramMessage->getCommandClassName(), $telegramMessage);
+        if ($this->manager->hasCommandAccess($telegramMessage->getFrom(), $telegramMessage->getCommandClassName())) {
+            Application::bootCommand($telegramMessage->getCommandClassName(), $telegramMessage);
+        }
     }
 
     /**
