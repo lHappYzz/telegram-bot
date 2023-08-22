@@ -2,14 +2,15 @@
 
 namespace Boot\Interfaces;
 
+use Boot\Src\Abstracts\BaseCommand;
 use Boot\Src\Entities\TelegramUser;
 
 interface PermissionManager
 {
     /**
      * @param TelegramUser $telegramUser
-     * @param string $abstract
+     * @param BaseCommand $command
      * @return bool
      */
-    public function hasCommandAccess(TelegramUser $telegramUser, string $abstract): bool;
+    public function hasCommandAccess(TelegramUser $telegramUser, BaseCommand $command): bool;
 }

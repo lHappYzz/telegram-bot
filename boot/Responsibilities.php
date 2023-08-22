@@ -4,11 +4,11 @@ namespace Boot;
 
 use App\Bot;
 use App\States\DefaultState;
+use Boot\Interfaces\ContainerInterface;
 use Boot\Interfaces\PermissionManager;
 use Boot\Src\Abstracts\CallbackQueryHandler;
 use Boot\Src\Entities\CallbackQuery;
 use Boot\Src\Entities\TelegramMessage;
-use Boot\Traits\DirectoryHelpers;
 use Boot\Traits\Helpers;
 
 /**
@@ -18,13 +18,18 @@ use Boot\Traits\Helpers;
  */
 class Responsibilities
 {
-    use Helpers, DirectoryHelpers;
+    use Helpers;
 
     /**
      * @param Bot $bot
      * @param PermissionManager $manager
+     * @param Container $container
      */
-    public function __construct(private Bot $bot, protected PermissionManager $manager) {}
+    public function __construct(
+        private Bot $bot,
+        protected PermissionManager $manager,
+        protected ContainerInterface $container,
+    ) {}
 
     /**
      * @param TelegramMessage $telegramMessage
@@ -32,7 +37,10 @@ class Responsibilities
      */
     public function handleCommand(TelegramMessage $telegramMessage): void
     {
-        if ($this->manager->hasCommandAccess($telegramMessage->getFrom(), $telegramMessage->getCommandClassName())) {
+        if ($this->manager->hasCommandAccess(
+            $telegramMessage->getFrom(),
+            $this->container->get($telegramMessage->getCommandClassName())
+        )) {
             Application::bootCommand($telegramMessage->getCommandClassName(), $telegramMessage);
         }
     }
@@ -54,15 +62,16 @@ class Responsibilities
      */
     public function handleCallbackQuery(CallbackQuery $callbackQuery): void
     {
-        $handler = $this->getClassInstance($this->resolveCallbackQueryHandlerName($callbackQuery->getData()));
+        $handler = $this->container->get($this->resolveCallbackQueryHandlerName($callbackQuery->getData()));
 
         if (!$handler instanceof CallbackQueryHandler) {
             return;
         }
 
-        if ($handler->specificChatState === null) {
-            $handler->handle($this->bot, $callbackQuery);
-        } elseif ($callbackQuery->getChat()->getChatState()::class === $handler->specificChatState) {
+        if (
+            $handler->specificChatState === null ||
+            $callbackQuery->getChat()->getChatState()::class === $handler->specificChatState
+        ) {
             $handler->handle($this->bot, $callbackQuery);
         }
     }
