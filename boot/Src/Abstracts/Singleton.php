@@ -2,6 +2,13 @@
 
 namespace Boot\Src\Abstracts;
 
+use Boot\Container;
+
+/**
+ * @todo Remove pattern and use dependency injection through container
+ * @see Container
+ * @deprecated Do not use
+ */
 abstract class Singleton
 {
     private static array $aoInstance = [];
@@ -25,12 +32,12 @@ abstract class Singleton
         return self::$aoInstance[$calledClassName];
     }
 
-    final private function __clone()
+    private function __clone()
     {
         //
     }
 
-    final private function __wakeup()
+    private function __wakeup()
     {
         //
     }

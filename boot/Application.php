@@ -4,29 +4,35 @@ namespace Boot;
 
 use App\Bot;
 use App\Config\Config;
-use Boot\Facades\TelegramFacade;
+use App\Config\ContainerConfig;
+use Boot\Interfaces\ContainerInterface;
 use Boot\Src\Abstracts\BaseCommand;
-use Boot\Src\Abstracts\Singleton;
 use Boot\Src\Entities\TelegramMessage;
-use Boot\Traits\DirectoryHelpers;
+use Boot\Src\TelegramRequest;
 use Exception;
 use RuntimeException;
 
-class Application extends Singleton
+class Application
 {
-    use DirectoryHelpers;
-
     /** @var Bot */
-    private Bot $bot;
+    protected Bot $bot;
 
-    /** @var TelegramFacade */
-    private TelegramFacade $telegramFacade;
+    /** @var TelegramRequest */
+    protected TelegramRequest $telegramRequest;
 
-    public function __construct()
+    /** @var self */
+    protected static self $instance;
+
+    /**
+     * @param Container $container
+     */
+    public function __construct(protected Container $container)
     {
-        parent::__construct();
-        $this->telegramFacade = new TelegramFacade(new TelegramUpdateParser());
-        $this->bot = new Bot($this->telegramFacade);
+        $this->registerBaseBindings();
+
+        $this->telegramRequest = $this->container->get(TelegramRequest::class);
+
+        $this->bot = $this->container->get(Bot::class);
     }
 
     /**
@@ -41,17 +47,17 @@ class Application extends Singleton
             throw new RuntimeException('Missing application configuration file.');
         }
 
-        if (!Config::bot()['token']) {
+        if (!Config::bot()['bot_token']) {
             throw new RuntimeException('Missing bot token.');
         }
 
         date_default_timezone_set(Config::timezone());
 
         $this
-            ->telegramFacade
+            ->telegramRequest
             ->getUpdate()
             ->updateUnit
-            ->responsibilize(new Responsibilities($this->bot));
+            ->responsibilize($this->container->get(Responsibilities::class));
     }
 
     /**
@@ -65,10 +71,25 @@ class Application extends Singleton
     public static function bootCommand(string $commandName, TelegramMessage $telegramMessage, array $parameters = []): void
     {
         /** @var BaseCommand $instance */
-        $instance = self::getInstance()->getClassInstance($commandName);
+        $instance = self::$instance->container->get($commandName);
 
         if ($instance instanceof BaseCommand) {
-            $instance->boot(self::getInstance()->bot, $telegramMessage, $parameters);
+            $instance->boot(self::$instance->bot, $telegramMessage, $parameters);
         }
+    }
+
+    /**
+     * @return void
+     */
+    protected function registerBaseBindings(): void
+    {
+        self::$instance = $this;
+        $this->container->singleton(self::class, $this);
+        $this->container->singleton(ContainerInterface::class, $this->container);
+        $this->container->singleton(Container::class, $this->container);
+
+        $this->container->singleton(TelegramRequest::class);
+
+        $this->container->get(ContainerConfig::class)->bindings();
     }
 }

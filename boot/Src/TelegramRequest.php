@@ -16,11 +16,19 @@ class TelegramRequest
      * @var Update
      * @see parseTelegramRequest
      */
-    public Update $update;
+    protected Update $update;
 
     public function __construct(TelegramUpdateParser $telegramUpdateParser)
     {
         $this->update = $telegramUpdateParser->parseTelegramRequest()->createUpdate();
+    }
+
+    /**
+     * @return Update
+     */
+    public function getUpdate(): Update
+    {
+        return $this->update;
     }
 
     /**
