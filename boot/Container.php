@@ -2,22 +2,45 @@
 
 namespace Boot;
 
+use Boot\Interfaces\ContainerExceptionInterface;
 use Boot\Interfaces\ContainerInterface;
+use Boot\Src\Abstracts\Entity;
 use Boot\Src\Abstracts\Singleton;
+use Boot\Src\Abstracts\UpdateUnit;
 use Boot\Src\Exceptions\ContainerException;
 use Boot\Src\Exceptions\NotFoundException;
 use Boot\Src\Exceptions\UnresolvableInstanceGivenException;
+use Boot\Src\Exceptions\UnresolvableParameterGivenException;
+use Closure;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionParameter;
 
 class Container implements ContainerInterface
 {
+
+    /** @var self */
+    protected static self $instance;
+
     /** @var object[] */
     protected array $instances = [];
 
     /** @var array */
     protected array $bindings = [];
+
+    /** @var array */
+    protected array $primitiveBuildImplementations = [];
+
+    /** @var string */
+    protected string $currentCreatingConcrete = '';
+
+    /** @var bool */
+    protected bool $resolvingTelegramEntity = false;
+
+    public function __construct()
+    {
+        self::$instance = $this;
+    }
 
     /**
      * @inheritDoc
@@ -41,6 +64,24 @@ class Container implements ContainerInterface
     public function has(string $id): bool
     {
         return isset($this->instances[$id]) || isset($this->bindings[$id]);
+    }
+
+    /**
+     * @param string $abstract
+     * @param array $parameters
+     * @return mixed
+     * @throws ContainerExceptionInterface
+     */
+    public function make(string $abstract, array $parameters): mixed
+    {
+        try {
+            $this->resolvingTelegramEntity = is_subclass_of($abstract, Entity::class) ||
+                is_subclass_of($abstract, UpdateUnit::class);
+
+            return $this->resolve($abstract, $parameters);
+        } catch (UnresolvableInstanceGivenException $e) {
+            throw new ContainerException($e);
+        }
     }
 
     /**
@@ -77,6 +118,42 @@ class Container implements ContainerInterface
     }
 
     /**
+     * Describe how to resolve parameter while creating concrete
+     *
+     * @param string|array $concrete
+     * @return ParameterResolveBinder
+     */
+    public function when(string|array $concrete): ParameterResolveBinder
+    {
+        return new ParameterResolveBinder($concrete, $this);
+    }
+
+    /**
+     * Add parameter implementation so the container can resolve it correctly
+     *
+     * @param string $concrete
+     * @param string $needs
+     * @param mixed $implementation
+     * @return void
+     */
+    public function addBuildImplementation(string $concrete, string $needs, mixed $implementation): void
+    {
+        $this->primitiveBuildImplementations[$concrete][$needs] = $implementation;
+    }
+
+    /**
+     * @return static
+     */
+    public static function getInstance(): self
+    {
+        if (is_null(self::$instance)) {
+            return self::$instance = new self();
+        }
+
+        return self::$instance;
+    }
+
+    /**
      * Get created instance for given abstract or try to create one
      *
      * @param string $abstract
@@ -84,7 +161,7 @@ class Container implements ContainerInterface
      * @return object
      * @throws UnresolvableInstanceGivenException
      */
-    protected function resolve(string $abstract, array $parameters = []): mixed
+    protected function resolve(string $abstract, array $parameters = []): object
     {
         if (isset($this->instances[$abstract])) {
             return $this->instances[$abstract];
@@ -110,7 +187,9 @@ class Container implements ContainerInterface
     protected function create(string $abstract, array $parameters): object
     {
         try {
-            $reflection = new ReflectionClass($this->getConcrete($abstract));
+            $reflection = new ReflectionClass(
+                $this->currentCreatingConcrete = $this->getConcrete($abstract)
+            );
 
             if ($reflection->isSubclassOf(Singleton::class)) {
                 return $this->createSingleton($reflection, $parameters);
@@ -121,11 +200,14 @@ class Container implements ContainerInterface
             }
 
             if (!empty($constructor = $reflection->getConstructor())) {
-                $parameters = $this->resolveConstructorParameters($constructor->getParameters(), $parameters);
+                $parameters = $this->resolveConstructorParameters(
+                    $constructor->getParameters(),
+                    $parameters,
+                );
             }
 
             return $reflection->newInstanceArgs($parameters);
-        } catch (ReflectionException $e) {
+        } catch (ReflectionException|UnresolvableParameterGivenException $e) {
             throw new UnresolvableInstanceGivenException($e);
         }
     }
@@ -151,9 +233,9 @@ class Container implements ContainerInterface
      * @param ReflectionClass $reflection
      * @param array $parameters
      * @return object
-     * @see Singleton
      * @throws ReflectionException
-     * @throws UnresolvableInstanceGivenException
+     * @throws UnresolvableInstanceGivenException|UnresolvableParameterGivenException
+     * @see Singleton
      * @todo Remove when the Singleton pattern will be removed
      */
     protected function createSingleton(ReflectionClass $reflection, array $parameters): object
@@ -186,32 +268,22 @@ class Container implements ContainerInterface
      * @param ReflectionParameter[] $parameters
      * @param array $initiatedParameters
      * @return array
-     * @throws UnresolvableInstanceGivenException
+     * @throws UnresolvableParameterGivenException
      */
-    protected function resolveConstructorParameters(array $parameters, array $initiatedParameters): array
-    {
+    protected function resolveConstructorParameters(
+        array $parameters,
+        array $initiatedParameters,
+    ): array {
         $result = [];
 
         foreach ($parameters as $parameter) {
-            if (in_array($parameter->getName(), $initiatedParameters)) {
-                $result[] = $initiatedParameters[$parameter->getName()];
-                continue;
-            }
+            $this->resolvingTelegramEntity ?
+                $parameterName = camel_case_to_snake_case($parameter->getName()) :
+                $parameterName = $parameter->getName();
 
-            if ($parameter->isDefaultValueAvailable()) {
-                $result[] = $parameter->getDefaultValue();
-                continue;
-            }
-
-            if (!$parameter->getType() || $parameter->getType()->isBuiltin()) {
-                throw new UnresolvableInstanceGivenException(
-                    'Can not resolve parameter (' .
-                    $parameter->getType() . ')' .
-                    $parameter->getName()
-                );
-            }
-
-            $result[] = $this->resolve($parameter->getType(), []);
+            $parameter->getType() && !$parameter->getType()->isBuiltin() ?
+                $result[] = $this->resolveClass($parameter, $initiatedParameters[$parameterName]) :
+                $result[] = $this->resolvePrimitive($parameter, $initiatedParameters[$parameterName]);
         }
 
         return $result;
@@ -230,5 +302,96 @@ class Container implements ContainerInterface
         }
 
         return $this->bindings[$abstract]['singleton'] ?? false;
+    }
+
+    /**
+     * @param ReflectionParameter $parameter
+     * @throws UnresolvableParameterGivenException
+     */
+    private function unresolvableParameter(ReflectionParameter $parameter): void
+    {
+        throw new UnresolvableParameterGivenException(
+            'Can not resolve parameter ' .
+            '(' . $parameter->getType() . ')' .
+            $parameter->getName()
+        );
+    }
+
+    /**
+     * @param ReflectionParameter $parameter
+     * @param mixed|null $givenValue
+     * @return mixed|null
+     * @throws UnresolvableParameterGivenException
+     */
+    private function resolvePrimitive(ReflectionParameter $parameter, mixed $givenValue = null): mixed
+    {
+        if ($implemented = $this->getParameterImplementation($parameter, $givenValue)) {
+            return $implemented;
+        }
+
+        if ($givenValue !== null) {
+            return $givenValue;
+        }
+
+        return $this->getParameterDefaultValue($parameter);
+    }
+
+    /**
+     * @param ReflectionParameter $parameter
+     * @param mixed $givenValue
+     * @return mixed
+     * @throws UnresolvableParameterGivenException
+     */
+    private function resolveClass(
+        ReflectionParameter $parameter,
+        mixed $givenValue,
+    ): mixed {
+        try {
+            if ($implemented = $this->getParameterImplementation($parameter, $givenValue)) {
+                return $implemented;
+            }
+
+            return $this->resolve(
+                ltrim($parameter->getType(), '?'),
+                $givenValue ?? [],
+            );
+        } catch (UnresolvableInstanceGivenException) {
+            return $this->getParameterDefaultValue($parameter);
+        }
+    }
+
+    /**
+     * @param ReflectionParameter $parameter
+     * @param mixed $givenValue
+     * @return mixed
+     */
+    private function getParameterImplementation(ReflectionParameter $parameter, mixed $givenValue): mixed
+    {
+        $implementation = $this->primitiveBuildImplementations[$this->currentCreatingConcrete]
+            [$this->getConcrete($parameter->getName())];
+
+        if ($implementation instanceof Closure) {
+            return $implementation($this, $givenValue);
+        }
+
+        return $implementation;
+    }
+
+    /**
+     * @param ReflectionParameter $parameter
+     * @return mixed
+     * @throws UnresolvableParameterGivenException
+     */
+    private function getParameterDefaultValue(ReflectionParameter $parameter): mixed
+    {
+        if ($parameter->isDefaultValueAvailable()) {
+            return $parameter->getDefaultValue();
+        }
+
+        if ($parameter->allowsNull()) {
+            return null;
+        }
+
+        $this->unresolvableParameter($parameter);
     }
 }

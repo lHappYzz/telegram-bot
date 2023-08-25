@@ -4,7 +4,6 @@ namespace Boot\Src\Entities;
 
 use Boot\Interfaces\Recordable;
 use Boot\Src\Abstracts\Entity;
-use Boot\Traits\Helpers;
 
 /**
  * Class TelegramUser
@@ -12,24 +11,15 @@ use Boot\Traits\Helpers;
  */
 class TelegramUser extends Entity implements Recordable
 {
-    use Helpers;
 
-    private int $id;
-    private bool $isBot;
-    private string $firstName;
-    private ?string $lastName;
-    private ?string $userName;
-    private ?string $languageCode;
-
-    public function __construct($userData)
-    {
-        $this->id = $userData['id'];
-        $this->firstName = $userData['first_name'];
-        $this->lastName = $userData['last_name'];
-        $this->userName = $userData['username'];
-        $this->languageCode = $userData['language_code'];
-        $this->isBot = $userData['is_bot'];
-    }
+    public function __construct(
+        protected int $id,
+        protected bool $isBot,
+        protected string $firstName,
+        protected ?string $lastName,
+        protected ?string $username,
+        protected ?string $languageCode,
+    ) {}
 
     public function getId(): int
     {
@@ -46,9 +36,9 @@ class TelegramUser extends Entity implements Recordable
         return $this->lastName;
     }
 
-    public function getUserName(): ?string
+    public function getUsername(): ?string
     {
-        return $this->userName;
+        return $this->username;
     }
 
     public function getLanguageCode(): ?string
@@ -56,7 +46,7 @@ class TelegramUser extends Entity implements Recordable
         return $this->languageCode;
     }
 
-    public function getIsBot(): bool
+    public function isBot(): bool
     {
         return $this->isBot;
     }
@@ -66,7 +56,7 @@ class TelegramUser extends Entity implements Recordable
         $arrayOfAttributes = [];
 
         foreach ($fillableColumns as $fillableColumn) {
-            $propertyValue = $this->{$this->snakeCaseToCamelCase($fillableColumn)};
+            $propertyValue = $this->{snake_case_to_camel_case($fillableColumn)};
             $arrayOfAttributes[$fillableColumn] = $propertyValue;
         }
 

@@ -14,7 +14,7 @@ class CallbackableFactory extends UpdateFactory
     {
         return new Update(
             $this->updateId,
-            new CallbackQuery($this->components)
+            container(CallbackQuery::class, $this->components),
         );
     }
 }

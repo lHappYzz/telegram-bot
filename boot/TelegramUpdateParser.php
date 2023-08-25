@@ -61,7 +61,13 @@ class TelegramUpdateParser
     {
         foreach ($this->factoryBindings as $type => $binding) {
             if (array_key_exists($type, $requestData)) {
-                return new $this->factoryBindings[$type]($requestData['update_id'], $requestData[$type]);
+                return container(
+                    $this->factoryBindings[$type],
+                    [
+                        'updateId' => $requestData['update_id'],
+                        'components' => $requestData[$type],
+                    ],
+                );
             }
         }
         throw new RuntimeException('Update type is not supported.');

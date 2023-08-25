@@ -8,56 +8,36 @@ use Boot\Responsibilities;
 use Boot\Interfaces\MessageableEntity;
 use Boot\Src\Abstracts\Telegram;
 use Boot\Src\Abstracts\UpdateUnit;
-use Boot\Src\Entities\ReplyMarkup\InlineKeyboardButton;
 use Boot\Src\Entities\ReplyMarkup\InlineKeyboardMarkup;
-use Boot\Src\TelegramFile;
-use Boot\Src\TelegramPhoto;
-use Boot\Src\TelegramVideo;
-use Boot\Traits\Helpers;
+use Boot\Src\PhotoSize;
 use JetBrains\PhpStorm\Pure;
 
 class TelegramMessage extends UpdateUnit implements MessageableEntity
 {
-    use Helpers;
 
-    private int $messageID;
-    private TelegramUser $from;
-    private TelegramChat $chat;
-    private int $date;
-    private ?string $text;
-
-    /** @var ?TelegramFile File that comes with message */
-    private ?TelegramFile $telegramFile;
-
+    /** @var string */
     private string $commandClassName;
-    private TelegramMessage $replyToMessage;
-    private ?InlineKeyboardMarkup $inlineKeyboardMarkup;
 
     private bool $hasFile = false;
     private ?string $fileType = null;
 
-    public function __construct(array $messageData)
-    {
-        $this->messageID = $messageData['message_id'];
-
-        $this->from = new TelegramUser($messageData['from']);
-        $this->chat = new TelegramChat($messageData['chat']);
-
-        $this->date = $messageData['date'];
-        $this->text = $messageData['text'];
-
-        if (array_key_exists('reply_markup', $messageData)) {
-            $this->setInlineKeyboardMarkup($messageData['reply_markup']);
-        }
-
-        $this->setTelegramFile($messageData);
+    public function __construct(
+        protected int $messageId,
+        protected TelegramChat $chat,
+        protected int $date,
+        protected ?TelegramUser $from = null,
+        protected ?string $text = null,
+        protected ?TelegramMessage $replyToMessage = null,
+        protected ?InlineKeyboardMarkup $replyMarkup = null,
+        /** @var PhotoSize[] */
+        protected ?array $photo = null,
+    ) {
         $this->setCommandClassName();
-        $this->setReplyToMessage($messageData);
     }
 
-    public function getMessageID(): int
+    public function getMessageId(): int
     {
-        return $this->messageID;
+        return $this->messageId;
     }
 
     public function getFrom(): TelegramUser
@@ -85,11 +65,6 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
         return $this->commandClassName;
     }
 
-    public function getTelegramFile(): ?TelegramFile
-    {
-        return $this->telegramFile;
-    }
-
     /**
      * Get message that was replied otherwise null is returned,
      * so always check your var for not being null
@@ -101,14 +76,17 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
         return $this->replyToMessage ?? null;
     }
 
-    public function getInlineKeyboardMarkup(): ?InlineKeyboardMarkup
-    {
-        return $this->inlineKeyboardMarkup;
-    }
-
     public function isCommand(): bool
     {
         return ($this->text[0] === '/') && !str_contains($this->text, ' ');
+    }
+
+    /**
+     * @return InlineKeyboardMarkup|null
+     */
+    public function getReplyMarkup(): ?InlineKeyboardMarkup
+    {
+        return $this->replyMarkup;
     }
 
     /**
@@ -131,28 +109,6 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
         }
     }
 
-    private function setTelegramFile(array $messageData): void
-    {
-        if ($photoExists = array_key_exists(TelegramFile::MESSAGE_FILE_PHOTO, $messageData)) {
-            $this->telegramFile = new TelegramPhoto($this->arrayLast($messageData[TelegramFile::MESSAGE_FILE_PHOTO]), $messageData['caption']);
-        }
-
-        if ($videoExists = array_key_exists(TelegramFile::MESSAGE_FILE_VIDEO, $messageData)) {
-            $this->telegramFile = new TelegramVideo($messageData[TelegramFile::MESSAGE_FILE_VIDEO], $messageData['caption']);
-        }
-
-        if (!$photoExists && !$videoExists) {
-            $this->telegramFile = null;
-        }
-    }
-
-    private function setReplyToMessage($messageData): void
-    {
-        if (array_key_exists('reply_to_message', $messageData)) {
-            $this->replyToMessage = new TelegramMessage($messageData['reply_to_message']);
-        }
-    }
-
     private function setCommandClassName(): void
     {
         if ($this->isCommand()) {
@@ -160,21 +116,5 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
         } else {
             $this->commandClassName = '';
         }
-    }
-
-    private function setInlineKeyboardMarkup(array $replyMarkup): void
-    {
-        $inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        foreach ($replyMarkup['inline_keyboard'] as $keyboardRow) {
-            $inlineKeyboardRow = $inlineKeyboardMarkup->addKeyboardRow();
-            foreach ($keyboardRow as $rowButton) {
-                $settings = [];
-                $settings[] = $this->resolveCallbackQueryHandlerName($rowButton['callback_data']);
-                $settings[] = $this->arrayLast(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $rowButton['callback_data']));
-
-                $inlineKeyboardRow->addButton($rowButton['text'], $settings);
-            }
-        }
-        $this->inlineKeyboardMarkup = $inlineKeyboardMarkup;
     }
 }

@@ -18,8 +18,8 @@ class TelegramVideo extends TelegramFile
     private int $height;
     private int $duration;
 
-    /** @var ?TelegramPhotoSize */
-    private ?TelegramPhotoSize $thumb;
+    /** @var ?PhotoSize */
+    private ?PhotoSize $thumb;
 
     private ?string $fileName;
     private ?string $mimeType;
@@ -36,8 +36,8 @@ class TelegramVideo extends TelegramFile
         $this->mimeType = $videoData['mime_type'];
         $this->fileSize = $videoData['file_size'];
 
-        $this->telegramPhotoSize = new TelegramPhotoSize($videoData);
-        $this->thumb = new TelegramPhotoSize($videoData['thumb']);
+        $this->telegramPhotoSize = new PhotoSize($videoData);
+        $this->thumb = new PhotoSize($videoData['thumb']);
         $this->type = TelegramFile::MESSAGE_FILE_VIDEO;
         $this->caption = $caption;
     }
@@ -123,17 +123,17 @@ class TelegramVideo extends TelegramFile
     }
 
     /**
-     * @return TelegramPhotoSize
+     * @return PhotoSize
      */
-    public function getThumb(): TelegramPhotoSize
+    public function getThumb(): PhotoSize
     {
         return $this->thumb;
     }
 
     /**
-     * @param TelegramPhotoSize $thumb
+     * @param PhotoSize $thumb
      */
-    public function setThumb(TelegramPhotoSize $thumb): void
+    public function setThumb(PhotoSize $thumb): void
     {
         $this->thumb = $thumb;
     }

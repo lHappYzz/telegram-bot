@@ -14,7 +14,7 @@ class MessageableUpdateFactory extends UpdateFactory
     {
         return new Update(
             $this->updateId,
-            new TelegramMessage($this->components)
+            container(TelegramMessage::class, $this->components),
         );
     }
 }
