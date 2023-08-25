@@ -4,12 +4,9 @@ namespace App\Records;
 
 use Boot\Database\Record;
 use Boot\Src\Entities\TelegramChat;
-use Boot\Traits\Helpers;
 
 class ChatRecord extends Record
 {
-    use Helpers;
-
     protected string $table = 'chat';
 
     protected array $fillable = ['id', 'status_id', 'user_id', 'type'];
@@ -19,6 +16,6 @@ class ChatRecord extends Record
 
     public function getState(): int
     {
-        return $this->arrayFirst($this->newQuery()->select(['status_id'])->get());
+        return array_first($this->newQuery()->select(['status_id'])->get());
     }
 }

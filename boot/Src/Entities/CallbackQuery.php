@@ -6,7 +6,6 @@ use Boot\Interfaces\CallbackableQueryEntity;
 use Boot\Responsibilities;
 use Boot\Src\Abstracts\UpdateUnit;
 use Boot\Src\Entities\ReplyMarkup\InlineKeyboardButton;
-use Boot\Traits\Helpers;
 
 /**
  * Class CallbackQuery
@@ -14,7 +13,6 @@ use Boot\Traits\Helpers;
  */
 class CallbackQuery extends UpdateUnit implements CallbackableQueryEntity
 {
-    use Helpers;
 
     public function __construct(
         protected string $id,
@@ -63,7 +61,7 @@ class CallbackQuery extends UpdateUnit implements CallbackableQueryEntity
 
     public function getButtonUserData(): string
     {
-        return $this->arrayLast(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $this->data));
+        return array_last(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $this->data));
     }
 
     public function getChat(): TelegramChat
