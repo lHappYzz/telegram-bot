@@ -351,10 +351,14 @@ class Container implements ContainerInterface
                 return $implemented;
             }
 
-            return $this->resolve(
-                ltrim($parameter->getType(), '?'),
-                $givenValue ?? [],
-            );
+            if (is_array($givenValue) || $givenValue === null) {
+                return $this->resolve(
+                    ltrim($parameter->getType(), '?'),
+                    $givenValue ?? [],
+                );
+            }
+
+            return $givenValue;
         } catch (UnresolvableInstanceGivenException) {
             return $this->getParameterDefaultValue($parameter);
         }
