@@ -12,11 +12,11 @@ use Boot\Src\Abstracts\Entity;
 class Location extends Entity
 {
     public function __construct(
-        public float $longitude,
-        public float $latitude,
-        public ?float $horizontalAccuracy = null,
-        public ?int$livePeriod = null,
-        public ?int $heading = null,
-        public ?int $proximityAlertRadius = null,
+        protected float $longitude,
+        protected float $latitude,
+        protected ?float $horizontalAccuracy = null,
+        protected ?int$livePeriod = null,
+        protected ?int $heading = null,
+        protected ?int $proximityAlertRadius = null,
     ) {}
 }
