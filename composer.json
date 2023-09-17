@@ -4,7 +4,10 @@
       "App\\": "app/",
       "Boot\\": "boot/",
       "Boot\\Database\\": "boot/Database"
-    }
+    },
+    "files": [
+      "boot/helpers.php"
+    ]
   },
   "require": {
     "ext-json": "*",

@@ -7,8 +7,8 @@ abstract class TelegramFile
     public const MESSAGE_FILE_PHOTO = 'photo';
     public const MESSAGE_FILE_VIDEO = 'video';
 
-    /** @var ?TelegramPhotoSize represents one size of a photo or a file / sticker thumbnail. */
-    protected ?TelegramPhotoSize $telegramPhotoSize = null;
+    /** @var ?PhotoSize represents one size of a photo or a file / sticker thumbnail. */
+    protected ?PhotoSize $telegramPhotoSize = null;
     protected ?string $caption;
     protected ?string $type;
 

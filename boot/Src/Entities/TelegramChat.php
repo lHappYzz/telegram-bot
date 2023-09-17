@@ -9,8 +9,8 @@ use Boot\Interfaces\ChatState;
 use Boot\Interfaces\Recordable;
 use Boot\Log\Logger;
 use Boot\Src\Abstracts\Entity;
-use Boot\Traits\Helpers;
 use ReflectionClass;
+use ReflectionException;
 
 /**
  * Class telegramChat
@@ -18,14 +18,7 @@ use ReflectionClass;
  */
 class TelegramChat extends Entity implements Recordable
 {
-    use Helpers;
-
-    private int $id;
-    private string $type;
-    private ?string $firstName;
-    private ?string $lastName;
-    private ?string $userName;
-
+    /** @var string */
     private string $chatStateCacheKey;
 
     /**
@@ -35,14 +28,13 @@ class TelegramChat extends Entity implements Recordable
      */
     protected ChatState $state;
 
-    public function __construct(array $telegramChatData)
-    {
-        $this->id = $telegramChatData['id'];
-        $this->type = $telegramChatData['type'];
-        $this->firstName = $telegramChatData['firstName'];
-        $this->lastName = $telegramChatData['lastName'];
-        $this->userName = $telegramChatData['userName'];
-
+    public function __construct(
+        protected int $id,
+        protected string $type,
+        protected ?string $firstName,
+        protected ?string $lastName,
+        protected ?string $username,
+    ) {
         $this->chatStateCacheKey = 'chat_status' . $this->getId();
         $this->transitionTo($this->getStatusId());
     }
@@ -70,9 +62,9 @@ class TelegramChat extends Entity implements Recordable
         return $this->lastName;
     }
 
-    public function getUserName(): string
+    public function getUsername(): string
     {
-        return $this->userName;
+        return $this->username;
     }
 
     public function getArrayOfAttributes(array $fillableColumns): array
@@ -80,7 +72,7 @@ class TelegramChat extends Entity implements Recordable
         $arrayOfAttributes = [];
 
         foreach ($fillableColumns as $fillableColumn) {
-            $propertyValue = $this->{$this->snakeCaseToCamelCase($fillableColumn)};
+            $propertyValue = $this->{snake_case_to_camel_case($fillableColumn)};
             $arrayOfAttributes[$fillableColumn] = $propertyValue;
         }
 
@@ -104,7 +96,7 @@ class TelegramChat extends Entity implements Recordable
     public function getStatusId(): ?int
     {
         return Cache::getInstance()->get($this->chatStateCacheKey) ??
-            $this->arrayFirst(
+            array_first(
                 ChatRecord::query()
                     ->select(['status_id'])
                     ->where('id', $this->getId())
@@ -133,7 +125,7 @@ class TelegramChat extends Entity implements Recordable
             $fullPathToStateClass = $reflection->getName();
 
             $this->state = new $fullPathToStateClass($this);
-        } catch (\ReflectionException $e) {
+        } catch (ReflectionException $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
             die;
         }

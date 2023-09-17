@@ -8,13 +8,13 @@ class TelegramPhoto extends TelegramFile
 {
     public function __construct(array $photoData, string $caption)
     {
-        $this->telegramPhotoSize = new TelegramPhotoSize($photoData);
+        $this->telegramPhotoSize = new PhotoSize($photoData);
         $this->type = TelegramFile::MESSAGE_FILE_PHOTO;
         $this->caption = $caption;
     }
 
     #[Pure] public function getFileID(): string
     {
-        return $this->telegramPhotoSize->getFileID();
+        return $this->telegramPhotoSize->getFileId();
     }
 }

@@ -119,4 +119,22 @@ class Bot
             'reply_markup' => $replyMarkup ? json_encode($replyMarkup, JSON_THROW_ON_ERROR) : null,
         ]);
     }
+
+    public function answerInlineQuery(
+        string $inlineQueryId,
+        array $results,
+        ?int $cacheTime = null,
+        ?bool $isPersonal = null,
+        ?string $nextOffset = null,
+    ): void {
+        $this->telegramFacade->sendTelegramRequest([
+            'token' => $this->token,
+            'method' => 'answerInlineQuery',
+            'inline_query_id' => $inlineQueryId,
+            'cache_time' => $cacheTime,
+            'is_personal' => $isPersonal,
+            'next_offset' => $nextOffset,
+            'results' => json_encode($results),
+        ]);
+    }
 }

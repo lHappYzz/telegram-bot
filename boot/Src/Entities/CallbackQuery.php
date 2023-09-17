@@ -6,7 +6,6 @@ use Boot\Interfaces\CallbackableQueryEntity;
 use Boot\Responsibilities;
 use Boot\Src\Abstracts\UpdateUnit;
 use Boot\Src\Entities\ReplyMarkup\InlineKeyboardButton;
-use Boot\Traits\Helpers;
 
 /**
  * Class CallbackQuery
@@ -14,26 +13,16 @@ use Boot\Traits\Helpers;
  */
 class CallbackQuery extends UpdateUnit implements CallbackableQueryEntity
 {
-    use Helpers;
 
-    private string $id;
-    private TelegramUser $from;
-    private ?TelegramMessage $message;
-    private ?string $inlineMessageId;
-    private ?string $chatInstance;
-    private ?string $data;
-    private ?string $gameShortName;
-
-    public function __construct(array $callbackQueryData)
-    {
-        $this->id = $callbackQueryData['id'];
-        $this->from = new TelegramUser($callbackQueryData['from']);
-        $this->message = new TelegramMessage($callbackQueryData['message']);
-        $this->inlineMessageId = $callbackQueryData['inline_message_id'];
-        $this->chatInstance = $callbackQueryData['chat_instance'];
-        $this->data = $callbackQueryData['data'];
-        $this->gameShortName = $callbackQueryData['game_short_name'];
-    }
+    public function __construct(
+        protected string $id,
+        protected TelegramUser $from,
+        protected ?TelegramMessage $message,
+        protected ?string $inlineMessageId,
+        protected ?string $chatInstance,
+        protected ?string $data,
+        protected ?string $gameShortName,
+    ) {}
 
     public function getId(): string
     {
@@ -72,7 +61,7 @@ class CallbackQuery extends UpdateUnit implements CallbackableQueryEntity
 
     public function getButtonUserData(): string
     {
-        return $this->arrayLast(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $this->data));
+        return array_last(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $this->data));
     }
 
     public function getChat(): TelegramChat

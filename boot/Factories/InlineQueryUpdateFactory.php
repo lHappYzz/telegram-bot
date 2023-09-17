@@ -2,19 +2,19 @@
 
 namespace Boot\Factories;
 
-use Boot\Src\Entities\TelegramMessage;
+use Boot\Src\Entities\InlineQuery;
 use Boot\Src\Update;
 
-class MessageableUpdateFactory extends UpdateFactory
+class InlineQueryUpdateFactory extends UpdateFactory
 {
     /**
-     * @return Update
+     * @inheritDoc
      */
     function createUpdate(): Update
     {
         return new Update(
             $this->updateId,
-            container(TelegramMessage::class, $this->components),
+            container(InlineQuery::class, $this->components),
         );
     }
 }

@@ -8,45 +8,13 @@ use Boot\Src\Abstracts\Telegram;
 
 trait Helpers
 {
+    /**
+     * @param string $callbackData
+     * @return string
+     */
     private function resolveCallbackQueryHandlerName(string $callbackData): string
     {
-        return  Telegram::CALLBACK_QUERY_NAMESPACE.$this->arrayFirst(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $callbackData)) .
+        return Telegram::CALLBACK_QUERY_NAMESPACE . array_first(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $callbackData)) .
             CallbackQueryHandler::CALLBACK_QUERY_HANDLERS_ENDING;
-    }
-
-    /**
-     * Convert string camel case style to snake case
-     * @param string $input
-     * @return string
-     */
-    private function camelCaseToSnakeCase(string $input): string
-    {
-        return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $input));
-    }
-
-    /**
-     * Convert string snake case style to camel case
-     * @param string $input
-     * @return string
-     */
-    private function snakeCaseToCamelCase(string $input): string
-    {
-        return lcfirst(str_replace('_', '', ucwords($input, '_')));
-    }
-
-    private function arrayFirst(array $array)
-    {
-        if (($firstElement = reset($array)) === false) {
-            return '';
-        }
-        return $firstElement;
-    }
-
-    private function arrayLast(array $array)
-    {
-        if (($lastElement = end($array)) === false) {
-            return '';
-        }
-        return $lastElement;
     }
 }

@@ -7,13 +7,19 @@ use App\Config\Config;
 use App\Config\ContainerConfig;
 use Boot\Interfaces\ContainerInterface;
 use Boot\Src\Abstracts\BaseCommand;
+use Boot\Src\Entities\ReplyMarkup\InlineKeyboardButton;
+use Boot\Src\Entities\ReplyMarkup\InlineKeyboardMarkup;
 use Boot\Src\Entities\TelegramMessage;
+use Boot\Src\PhotoSize;
 use Boot\Src\TelegramRequest;
+use Boot\Traits\Helpers;
 use Exception;
 use RuntimeException;
 
 class Application
 {
+    use Helpers;
+
     /** @var Bot */
     protected Bot $bot;
 
@@ -87,9 +93,53 @@ class Application
         $this->container->singleton(self::class, $this);
         $this->container->singleton(ContainerInterface::class, $this->container);
         $this->container->singleton(Container::class, $this->container);
-
         $this->container->singleton(TelegramRequest::class);
 
         $this->container->get(ContainerConfig::class)->bindings();
+        $this->registerTelegramEntitiesBindings();
+    }
+
+    /**
+     * @return void
+     */
+    protected function registerTelegramEntitiesBindings(): void
+    {
+        $this
+            ->container
+            ->when(TelegramMessage::class)
+            ->needs('$photo')
+            ->give(function ($container, array $data) {
+                $result = [];
+                foreach ($data as $photoSizeData) {
+                    $container->make(PhotoSize::class, $photoSizeData);
+                }
+                return $result;
+            });
+
+        $this
+            ->container
+            ->when(TelegramMessage::class)
+            ->needs('$replyMarkup')
+            ->give(function ($container, array $inlineKeyboardMarkupData) {
+                /** @var InlineKeyboardMarkup $inlineKeyboardMarkup */
+                $inlineKeyboardMarkup = $container->make(InlineKeyboardMarkup::class);
+
+                foreach ($inlineKeyboardMarkupData['inline_keyboard'] as $keyboardRow) {
+                    $inlineKeyboardRow = $inlineKeyboardMarkup->addKeyboardRow();
+                    foreach ($keyboardRow as $rowButton) {
+                        $inlineKeyboardRow
+                            ->addButton($rowButton['text'])
+                            ->addCallbackHandler(
+                                $this->resolveCallbackQueryHandlerName($rowButton['callback_data']),
+                                array_last(explode(
+                                        InlineKeyboardButton::CALLBACK_DATA_DELIMITER,
+                                        $rowButton['callback_data'])
+                                )
+                            );
+                    }
+                }
+
+                return $inlineKeyboardMarkup;
+            });
     }
 }

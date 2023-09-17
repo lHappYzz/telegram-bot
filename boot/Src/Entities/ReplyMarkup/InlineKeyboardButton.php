@@ -5,7 +5,6 @@ namespace Boot\Src\Entities\ReplyMarkup;
 use Boot\Interfaces\Keyboard\KeyboardButtonInterface;
 use Boot\Src\Abstracts\CallbackQueryHandler;
 use Boot\Src\Abstracts\JsonSerializableEntity;
-use Boot\Traits\Helpers;
 use RuntimeException;
 
 /**
@@ -14,8 +13,6 @@ use RuntimeException;
  */
 class InlineKeyboardButton extends JsonSerializableEntity implements KeyboardButtonInterface
 {
-    use Helpers;
-
     /** @var string */
     public const CALLBACK_DATA_DELIMITER = ':';
 
@@ -127,11 +124,8 @@ class InlineKeyboardButton extends JsonSerializableEntity implements KeyboardBut
         $handlerClassName = str_replace(
             CallbackQueryHandler::CALLBACK_QUERY_HANDLERS_ENDING,
             '',
-            $this->arrayLast(
-                explode(
-                    '\\',
-                    $handlerFullName
-                )
+            array_last(
+                explode('\\', $handlerFullName)
             )
         );
 

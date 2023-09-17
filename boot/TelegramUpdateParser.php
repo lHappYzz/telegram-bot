@@ -3,6 +3,7 @@
 namespace Boot;
 
 use Boot\Factories\CallbackableFactory;
+use Boot\Factories\InlineQueryUpdateFactory;
 use Boot\Factories\MessageableUpdateFactory;
 use Boot\Factories\UpdateFactory;
 use Boot\Log\Logger;
@@ -20,11 +21,15 @@ class TelegramUpdateParser
     /** @var string */
     protected const UPDATE_TYPE_CALLBACK_QUERY = 'callback_query';
 
+    /** @var string */
+    protected const UPDATE_TYPE_INLINE_QUERY = 'inline_query';
+
     /** @var array|string[] */
     protected array $factoryBindings = [
         self::UPDATE_TYPE_MESSAGE => MessageableUpdateFactory::class,
         self::UPDATE_TYPE_EDITED_MESSAGE => MessageableUpdateFactory::class,
         self::UPDATE_TYPE_CALLBACK_QUERY => CallbackableFactory::class,
+        self::UPDATE_TYPE_INLINE_QUERY => InlineQueryUpdateFactory::class,
     ];
 
     /**
@@ -56,7 +61,13 @@ class TelegramUpdateParser
     {
         foreach ($this->factoryBindings as $type => $binding) {
             if (array_key_exists($type, $requestData)) {
-                return new $this->factoryBindings[$type]($requestData['update_id'], $requestData[$type]);
+                return container(
+                    $this->factoryBindings[$type],
+                    [
+                        'updateId' => $requestData['update_id'],
+                        'components' => $requestData[$type],
+                    ],
+                );
             }
         }
         throw new RuntimeException('Update type is not supported.');

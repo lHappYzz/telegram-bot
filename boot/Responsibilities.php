@@ -3,11 +3,13 @@
 namespace Boot;
 
 use App\Bot;
+use App\InlineQuery\InlineQueryHandler;
 use App\States\DefaultState;
 use Boot\Interfaces\ContainerInterface;
 use Boot\Interfaces\PermissionManager;
 use Boot\Src\Abstracts\CallbackQueryHandler;
 use Boot\Src\Entities\CallbackQuery;
+use Boot\Src\Entities\InlineQuery;
 use Boot\Src\Entities\TelegramMessage;
 use Boot\Traits\Helpers;
 
@@ -74,5 +76,14 @@ class Responsibilities
         ) {
             $handler->handle($this->bot, $callbackQuery);
         }
+    }
+
+    /**
+     * @param InlineQuery $inlineQuery
+     * @return void
+     */
+    public function handleInlineQuery(InlineQuery $inlineQuery): void
+    {
+        container(InlineQueryHandler::class, ['inlineQuery' => $inlineQuery])->handle();
     }
 }
