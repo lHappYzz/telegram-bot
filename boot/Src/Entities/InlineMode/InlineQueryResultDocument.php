@@ -2,30 +2,30 @@
 
 namespace Boot\Src\Entities\InlineMode;
 
-use Boot\Traits\WithInputMessageContent;
-
 /**
- * @link https://core.telegram.org/bots/api#inlinequeryresultarticle
+ * @link https://core.telegram.org/bots/api#inlinequeryresultdocument
  */
-class InlineQueryResultArticle extends InlineQueryResult
+class InlineQueryResultDocument extends InlineQueryFileResult
 {
-    use WithInputMessageContent;
-
     /**
      * @param string $id
      * @param string $title
-     * @param string|null $url
-     * @param bool|null $hideUrl
+     * @param string $documentUrl
+     * @param string $mimeType
+     * MIME type of the content of the file, either “application/pdf” or “application/zip”
+     * @param string|null $caption
      * @param string|null $description
      * @param string|null $thumbnailUrl
+     * URL of the thumbnail (JPEG only) for the file
      * @param int|null $thumbnailWidth
      * @param int|null $thumbnailHeight
      */
     public function __construct(
         string $id,
         protected string $title,
-        protected ?string $url = null,
-        protected ?bool $hideUrl = null,
+        protected string $documentUrl,
+        protected string $mimeType,
+        protected ?string $caption = null,
         protected ?string $description = null,
         protected ?string $thumbnailUrl = null,
         protected ?int $thumbnailWidth = null,
@@ -39,6 +39,6 @@ class InlineQueryResultArticle extends InlineQueryResult
      */
     protected function getType(): string
     {
-        return 'article';
+        return 'document';
     }
 }

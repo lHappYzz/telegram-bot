@@ -2,14 +2,10 @@
 
 namespace Boot\Src\Entities\InlineMode;
 
-use Boot\Src\Entities\InlineMode\InputMessageContent\InputMessageContent;
-use Boot\Src\Entities\MessageEntity;
-use Boot\Src\Entities\ReplyMarkup\InlineKeyboardMarkup;
-
 /**
  * @link https://core.telegram.org/bots/api#inlinequeryresultgif
  */
-class InlineQueryResultGif extends InlineQueryResult
+class InlineQueryResultGif extends InlineQueryFileResult
 {
     /**
      * @param string $id
@@ -21,10 +17,6 @@ class InlineQueryResultGif extends InlineQueryResult
      * @param string|null $thumbnailMimeType
      * @param string|null $title
      * @param string|null $caption
-     * @param string|null $parseMode
-     * @param MessageEntity[]|null $captionEntities
-     * @param InlineKeyboardMarkup|null $replyMarkup
-     * @param InputMessageContent|null $inputMessageContent
      */
     public function __construct(
         string $id,
@@ -36,10 +28,6 @@ class InlineQueryResultGif extends InlineQueryResult
         protected ?string $thumbnailMimeType = null,
         protected ?string $title = null,
         protected ?string $caption = null,
-        protected ?string $parseMode = null,
-        protected ?array $captionEntities = null,
-        protected ?InlineKeyboardMarkup $replyMarkup = null,
-        protected ?InputMessageContent $inputMessageContent = null,
     ) {
         parent::__construct($id);
     }
@@ -117,50 +105,6 @@ class InlineQueryResultGif extends InlineQueryResult
     public function setCaption(string $caption): self
     {
         $this->caption = $caption;
-
-        return $this;
-    }
-
-    /**
-     * @param string $parseMode
-     * @return InlineQueryResultGif
-     */
-    public function setParseMode(string $parseMode): self
-    {
-        $this->parseMode = $parseMode;
-
-        return $this;
-    }
-
-    /**
-     * @param MessageEntity $messageEntity
-     * @return InlineQueryResultGif
-     */
-    public function addCaptionEntity(MessageEntity $messageEntity): self
-    {
-        $this->captionEntities[] = $messageEntity;
-
-        return $this;
-    }
-
-    /**
-     * @param InlineKeyboardMarkup $replyMarkup
-     * @return InlineQueryResultGif
-     */
-    public function setReplyMarkup(InlineKeyboardMarkup $replyMarkup): self
-    {
-        $this->replyMarkup = $replyMarkup;
-
-        return $this;
-    }
-
-    /**
-     * @param InputMessageContent $inputMessageContent
-     * @return InlineQueryResultGif
-     */
-    public function setInputMessageContent(InputMessageContent $inputMessageContent): self
-    {
-        $this->inputMessageContent = $inputMessageContent;
 
         return $this;
     }

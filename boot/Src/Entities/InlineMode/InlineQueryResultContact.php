@@ -5,28 +5,30 @@ namespace Boot\Src\Entities\InlineMode;
 use Boot\Traits\WithInputMessageContent;
 
 /**
- * @link https://core.telegram.org/bots/api#inlinequeryresultarticle
+ * @link https://core.telegram.org/bots/api#inlinequeryresultcontact
+ * @link https://en.wikipedia.org/wiki/VCard
  */
-class InlineQueryResultArticle extends InlineQueryResult
+class InlineQueryResultContact extends InlineQueryResult
 {
     use WithInputMessageContent;
 
     /**
      * @param string $id
-     * @param string $title
-     * @param string|null $url
-     * @param bool|null $hideUrl
-     * @param string|null $description
+     * @param string $phoneNumber
+     * @param string $firstName
+     * @param string|null $lastName
+     * @param string|null $vcard
+     * Additional data about the contact in the form of a vCard, 0-2048 bytes
      * @param string|null $thumbnailUrl
      * @param int|null $thumbnailWidth
      * @param int|null $thumbnailHeight
      */
     public function __construct(
         string $id,
-        protected string $title,
-        protected ?string $url = null,
-        protected ?bool $hideUrl = null,
-        protected ?string $description = null,
+        protected string $phoneNumber,
+        protected string $firstName,
+        protected ?string $lastName = null,
+        protected ?string $vcard = null,
         protected ?string $thumbnailUrl = null,
         protected ?int $thumbnailWidth = null,
         protected ?int $thumbnailHeight = null,
@@ -39,6 +41,6 @@ class InlineQueryResultArticle extends InlineQueryResult
      */
     protected function getType(): string
     {
-        return 'article';
+        return 'contact';
     }
 }
