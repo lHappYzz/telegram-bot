@@ -34,7 +34,9 @@ class ParameterResolveBinder
      */
     public function give(mixed $implementation): void
     {
-        foreach ($this->concrete as $concrete) {
+        $concretes = is_array($this->concrete) ? $this->concrete : [$this->concrete];
+
+        foreach ($concretes as $concrete) {
             $this->container->addBuildImplementation($concrete, $this->needs, $implementation);
         }
     }

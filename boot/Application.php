@@ -107,7 +107,7 @@ class Application
         $this
             ->container
             ->when(TelegramMessage::class)
-            ->needs('$photo')
+            ->needs('photo')
             ->give(function ($container, array $data) {
                 $result = [];
                 foreach ($data as $photoSizeData) {
@@ -119,7 +119,7 @@ class Application
         $this
             ->container
             ->when(TelegramMessage::class)
-            ->needs('$replyMarkup')
+            ->needs('replyMarkup')
             ->give(function ($container, array $inlineKeyboardMarkupData) {
                 /** @var InlineKeyboardMarkup $inlineKeyboardMarkup */
                 $inlineKeyboardMarkup = $container->make(InlineKeyboardMarkup::class);

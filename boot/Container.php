@@ -15,6 +15,7 @@ use Closure;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionParameter;
+use TypeError;
 
 class Container implements ContainerInterface
 {
@@ -31,11 +32,11 @@ class Container implements ContainerInterface
     /** @var array */
     protected array $primitiveBuildImplementations = [];
 
-    /** @var string */
-    protected string $currentCreatingConcrete = '';
-
     /** @var bool */
     protected bool $resolvingTelegramEntity = false;
+
+    /** @var string[] */
+    protected array $buildStack = [];
 
     public function __construct()
     {
@@ -78,7 +79,11 @@ class Container implements ContainerInterface
             $this->resolvingTelegramEntity = is_subclass_of($abstract, Entity::class) ||
                 is_subclass_of($abstract, UpdateUnit::class);
 
-            return $this->resolve($abstract, $parameters);
+            $instance = $this->resolve($abstract, $parameters);
+
+            $this->flush();
+
+            return $instance;
         } catch (UnresolvableInstanceGivenException $e) {
             throw new ContainerException($e);
         }
@@ -188,7 +193,7 @@ class Container implements ContainerInterface
     {
         try {
             $reflection = new ReflectionClass(
-                $this->currentCreatingConcrete = $this->getConcrete($abstract)
+                $concrete = $this->getConcrete($abstract)
             );
 
             if ($reflection->isSubclassOf(Singleton::class)) {
@@ -199,12 +204,16 @@ class Container implements ContainerInterface
                 throw new UnresolvableInstanceGivenException('Given abstract is not instantiable: ' . $abstract);
             }
 
+            $this->buildStack[] = $concrete;
+
             if (!empty($constructor = $reflection->getConstructor())) {
                 $parameters = $this->resolveConstructorParameters(
                     $constructor->getParameters(),
                     $parameters,
                 );
             }
+
+            array_pop($this->buildStack);
 
             return $reflection->newInstanceArgs($parameters);
         } catch (ReflectionException|UnresolvableParameterGivenException $e) {
@@ -281,9 +290,7 @@ class Container implements ContainerInterface
                 $parameterName = camel_case_to_snake_case($parameter->getName()) :
                 $parameterName = $parameter->getName();
 
-            $parameter->getType() && !$parameter->getType()->isBuiltin() ?
-                $result[] = $this->resolveClass($parameter, $initiatedParameters[$parameterName]) :
-                $result[] = $this->resolvePrimitive($parameter, $initiatedParameters[$parameterName]);
+            $result[] = $this->getParameterImplementation($parameter, $initiatedParameters[$parameterName]);
         }
 
         return $result;
@@ -360,6 +367,7 @@ class Container implements ContainerInterface
 
             return $givenValue;
         } catch (UnresolvableInstanceGivenException) {
+            array_pop($this->buildStack);
             return $this->getParameterDefaultValue($parameter);
         }
     }
@@ -368,17 +376,39 @@ class Container implements ContainerInterface
      * @param ReflectionParameter $parameter
      * @param mixed $givenValue
      * @return mixed
+     * @throws UnresolvableParameterGivenException
      */
     private function getParameterImplementation(ReflectionParameter $parameter, mixed $givenValue): mixed
     {
-        $implementation = $this->primitiveBuildImplementations[$this->currentCreatingConcrete]
+        $implementation = $this->primitiveBuildImplementations[end($this->buildStack)]
             [$this->getConcrete($parameter->getName())];
 
         if ($implementation instanceof Closure) {
-            return $implementation($this, $givenValue);
+            try {
+                return $implementation($givenValue);
+            } catch (TypeError) {
+                return $this->getParameterDefaultValue($parameter);
+            }
         }
 
-        return $implementation;
+        if (!is_null($implementation)) {
+            return $implementation;
+        }
+
+        if (is_array($givenValue) || is_null($givenValue)) {
+            try {
+                return $this->resolve(
+                    ltrim($parameter->getType(), '?'),
+                    $givenValue ?? []
+                );
+            } catch (UnresolvableInstanceGivenException) {}
+        }
+
+        if ($givenValue !== null) {
+            return $givenValue;
+        }
+
+        return $this->getParameterDefaultValue($parameter);
     }
 
     /**
@@ -397,5 +427,14 @@ class Container implements ContainerInterface
         }
 
         $this->unresolvableParameter($parameter);
+    }
+
+    /**
+     * @return void
+     */
+    private function flush(): void
+    {
+        $this->buildStack = [];
+        $this->resolvingTelegramEntity = false;
     }
 }
