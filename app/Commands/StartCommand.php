@@ -22,14 +22,14 @@ class StartCommand extends BaseCommand
 
         if (!$this->checkUserInDB($telegramUser) && $this->createUserRecord($telegramUser)) {
             $helloMessage = 'Hello! Nice to meet you, ' . $telegramUser->getFirstName();
-            $bot->sendMessage($helloMessage, $telegramMessage->getChat());
+            $bot->sendMessage($helloMessage, $telegramMessage->getChat()->getId());
         }
 
         if (!$this->checkChatInDB($telegramMessage->getChat())) {
             $this->createChatRecord($telegramMessage->getChat(), $telegramUser);
             return;
         }
-        $bot->sendMessage('👋🏻', $telegramMessage->getChat());
+        $bot->sendMessage('👋🏻', $telegramMessage->getChat()->getId());
     }
 
     private function checkUserInDB(TelegramUser $telegramUser): null|UserRecord

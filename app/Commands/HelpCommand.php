@@ -32,7 +32,7 @@ class HelpCommand extends BaseCommand
             }
         }
 
-        $bot->sendMessage($message, $telegramMessage->getChat());
+        $bot->sendMessage($message, $telegramMessage->getChat()->getId());
     }
 
     /**

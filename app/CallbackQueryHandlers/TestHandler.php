@@ -10,6 +10,6 @@ class TestHandler extends CallbackQueryHandler
 {
     public function handle(Bot $bot, CallbackQuery $callbackQuery): void
     {
-        $bot->sendMessage($callbackQuery->getData(), $callbackQuery->getMessage()->getChat());
+        $bot->sendMessage($callbackQuery->getData(), $callbackQuery->getMessage()->getChat()->getId());
     }
 }

@@ -290,7 +290,7 @@ class Container implements ContainerInterface
                 $parameterName = camel_case_to_snake_case($parameter->getName()) :
                 $parameterName = $parameter->getName();
 
-            $result[] = $this->getParameterImplementation($parameter, $initiatedParameters[$parameterName]);
+            $result[] = $this->getParameterImplementation($parameter, $initiatedParameters[$parameterName] ?? null);
         }
 
         return $result;
@@ -380,8 +380,13 @@ class Container implements ContainerInterface
      */
     private function getParameterImplementation(ReflectionParameter $parameter, mixed $givenValue): mixed
     {
-        $implementation = $this->primitiveBuildImplementations[end($this->buildStack)]
-            [$this->getConcrete($parameter->getName())];
+        $implementationsForCurrentBuildingConcrete = $this->primitiveBuildImplementations[
+            end($this->buildStack)
+        ] ?? [];
+
+        $implementation = $implementationsForCurrentBuildingConcrete[
+            $this->getConcrete($parameter->getName())
+        ] ?? null;
 
         if ($implementation instanceof Closure) {
             try {
