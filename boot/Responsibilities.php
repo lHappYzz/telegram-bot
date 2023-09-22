@@ -41,9 +41,9 @@ class Responsibilities
     {
         if ($this->manager->hasCommandAccess(
             $telegramMessage->getFrom(),
-            $this->container->get($telegramMessage->getCommandClassName())
+            $telegramMessage->getCommand()
         )) {
-            Application::bootCommand($telegramMessage->getCommandClassName(), $telegramMessage);
+            $telegramMessage->getCommand()->boot($this->bot, $telegramMessage);
         }
     }
 

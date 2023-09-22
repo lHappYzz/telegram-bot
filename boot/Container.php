@@ -79,11 +79,7 @@ class Container implements ContainerInterface
             $this->resolvingTelegramEntity = is_subclass_of($abstract, Entity::class) ||
                 is_subclass_of($abstract, UpdateUnit::class);
 
-            $instance = $this->resolve($abstract, $parameters);
-
-            $this->flush();
-
-            return $instance;
+            return $this->resolve($abstract, $parameters);
         } catch (UnresolvableInstanceGivenException $e) {
             throw new ContainerException($e);
         }

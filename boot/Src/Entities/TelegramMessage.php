@@ -4,23 +4,33 @@ namespace Boot\Src\Entities;
 
 use App\States\DefaultState;
 use App\States\NoState;
+use Boot\Application;
 use Boot\Responsibilities;
 use Boot\Interfaces\MessageableEntity;
-use Boot\Src\Abstracts\Telegram;
+use Boot\Src\Abstracts\BaseCommand;
 use Boot\Src\Abstracts\UpdateUnit;
 use Boot\Src\Entities\ReplyMarkup\InlineKeyboardMarkup;
 use Boot\Src\PhotoSize;
-use JetBrains\PhpStorm\Pure;
 
 class TelegramMessage extends UpdateUnit implements MessageableEntity
 {
-
-    /** @var string */
-    private string $commandClassName;
+    /** @var BaseCommand|null */
+    private ?BaseCommand $command = null;
 
     private bool $hasFile = false;
     private ?string $fileType = null;
 
+    /**
+     * @param int $messageId
+     * @param TelegramChat $chat
+     * @param int $date
+     * @param TelegramUser|null $from
+     * @param string|null $text
+     * @param TelegramMessage|null $replyToMessage
+     * @param InlineKeyboardMarkup|null $replyMarkup
+     * @param MessageEntity[]|null $entities
+     * @param PhotoSize[]|null $photo
+     */
     public function __construct(
         protected int $messageId,
         protected TelegramChat $chat,
@@ -29,10 +39,10 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
         protected ?string $text = null,
         protected ?TelegramMessage $replyToMessage = null,
         protected ?InlineKeyboardMarkup $replyMarkup = null,
-        /** @var PhotoSize[] */
+        protected ?array $entities = null,
         protected ?array $photo = null,
     ) {
-        $this->setCommandClassName();
+        $this->setCommand();
     }
 
     public function getMessageId(): int
@@ -55,30 +65,25 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
         return $this->text;
     }
 
-    #[Pure] public function getMessageDate($format = 'Y-m-d H:i:s'): string
+    public function getMessageDate($format = 'Y-m-d H:i:s'): string
     {
         return date($format, $this->date);
     }
 
-    public function getCommandClassName(): string
+    /**
+     * @return BaseCommand|null
+     */
+    public function getCommand(): ?BaseCommand
     {
-        return $this->commandClassName;
+        return $this->command;
     }
 
     /**
-     * Get message that was replied otherwise null is returned,
-     * so always check your var for not being null
-     *
-     * @return ?TelegramMessage
+     * @return TelegramMessage|null
      */
     public function getRepliedMessage(): ?TelegramMessage
     {
-        return $this->replyToMessage ?? null;
-    }
-
-    public function isCommand(): bool
-    {
-        return ($this->text[0] === '/') && !str_contains($this->text, ' ');
+        return $this->replyToMessage;
     }
 
     /**
@@ -87,6 +92,14 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
     public function getReplyMarkup(): ?InlineKeyboardMarkup
     {
         return $this->replyMarkup;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCommand(): bool
+    {
+        return isset($this->command);
     }
 
     /**
@@ -109,12 +122,27 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
         }
     }
 
-    private function setCommandClassName(): void
+    /**
+     * @return void
+     */
+    private function setCommand(): void
     {
-        if ($this->isCommand()) {
-            $this->commandClassName = Telegram::COMMANDS_NAMESPACE . ucfirst(str_replace('/', '', $this->text)) . 'Command';
-        } else {
-            $this->commandClassName = '';
+        foreach ($this->entities as $messageEntity) {
+            if (
+                $messageEntity->getType() === MessageEntity::BOT_COMMAND_TYPE &&
+                $messageEntity->getOffset() === 0
+            ) {
+                $this->command = container(Application::class)
+                    ->getCommand(
+                        substr(
+                            $this->text,
+                            $messageEntity->getOffset(),
+                            $messageEntity->getLength()
+                        )
+                    );
+                return;
+            }
         }
+        $this->command = null;
     }
 }

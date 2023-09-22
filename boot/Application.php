@@ -7,11 +7,15 @@ use App\Config\Config;
 use App\Config\ContainerConfig;
 use Boot\Interfaces\ContainerInterface;
 use Boot\Src\Abstracts\BaseCommand;
+use Boot\Src\Abstracts\Telegram;
+use Boot\Src\Entities\MessageEntity;
 use Boot\Src\Entities\ReplyMarkup\InlineKeyboardButton;
 use Boot\Src\Entities\ReplyMarkup\InlineKeyboardMarkup;
 use Boot\Src\Entities\TelegramMessage;
+use Boot\Src\Exceptions\ContainerException;
 use Boot\Src\PhotoSize;
 use Boot\Src\TelegramRequest;
+use Boot\Traits\DirectoryHelpers;
 use Boot\Traits\Helpers;
 use Exception;
 use RuntimeException;
@@ -19,6 +23,7 @@ use RuntimeException;
 class Application
 {
     use Helpers;
+    use DirectoryHelpers;
 
     /** @var Bot */
     protected Bot $bot;
@@ -69,19 +74,42 @@ class Application
     /**
      * Runs a command from any place of the application
      *
-     * @param string $commandName
+     * @param string $signatureOrFullName
      * @param TelegramMessage $telegramMessage
      * @param array $parameters
      * @return void
      */
-    public static function bootCommand(string $commandName, TelegramMessage $telegramMessage, array $parameters = []): void
+    public static function bootCommand(string $signatureOrFullName, TelegramMessage $telegramMessage, array $parameters = []): void
     {
-        /** @var BaseCommand $instance */
-        $instance = self::$instance->container->get($commandName);
+        $instance = self::$instance->getCommand($signatureOrFullName);
 
-        if ($instance instanceof BaseCommand) {
-            $instance->boot(self::$instance->bot, $telegramMessage, $parameters);
+        $instance?->boot(self::$instance->bot, $telegramMessage, $parameters);
+    }
+
+    /**
+     * @param string $signatureOrFullName
+     * @return BaseCommand|null
+     */
+    public function getCommand(string $signatureOrFullName): ?BaseCommand
+    {
+        try {
+            $command = container($signatureOrFullName);
+
+            if ($command instanceof BaseCommand) {
+                return $command;
+            }
+        } catch (ContainerException) {
+            foreach ($this->getFiles('app' . DIRECTORY_SEPARATOR . 'Commands') as $file) {
+                /** @var BaseCommand $command */
+                $command = container(Telegram::COMMANDS_NAMESPACE . substr($file, 0, -4));
+
+                if ($command->getSignature() === $signatureOrFullName) {
+                    return $command;
+                }
+            }
         }
+
+        return null;
     }
 
     /**
@@ -108,10 +136,10 @@ class Application
             ->container
             ->when(TelegramMessage::class)
             ->needs('photo')
-            ->give(function ($container, array $data) {
+            ->give(function (array $data) {
                 $result = [];
                 foreach ($data as $photoSizeData) {
-                    $container->make(PhotoSize::class, $photoSizeData);
+                    $result[] = container(PhotoSize::class, $photoSizeData);
                 }
                 return $result;
             });
@@ -120,9 +148,9 @@ class Application
             ->container
             ->when(TelegramMessage::class)
             ->needs('replyMarkup')
-            ->give(function ($container, array $inlineKeyboardMarkupData) {
+            ->give(function (array $inlineKeyboardMarkupData) {
                 /** @var InlineKeyboardMarkup $inlineKeyboardMarkup */
-                $inlineKeyboardMarkup = $container->make(InlineKeyboardMarkup::class);
+                $inlineKeyboardMarkup = container(InlineKeyboardMarkup::class);
 
                 foreach ($inlineKeyboardMarkupData['inline_keyboard'] as $keyboardRow) {
                     $inlineKeyboardRow = $inlineKeyboardMarkup->addKeyboardRow();
@@ -131,15 +159,31 @@ class Application
                             ->addButton($rowButton['text'])
                             ->addCallbackHandler(
                                 $this->resolveCallbackQueryHandlerName($rowButton['callback_data']),
-                                array_last(explode(
+                                array_last(
+                                    explode(
                                         InlineKeyboardButton::CALLBACK_DATA_DELIMITER,
-                                        $rowButton['callback_data'])
+                                        $rowButton['callback_data']
+                                    )
                                 )
                             );
                     }
                 }
 
                 return $inlineKeyboardMarkup;
+            });
+
+        $this
+            ->container
+            ->when(TelegramMessage::class)
+            ->needs('entities')
+            ->give(function (array $entitiesFromTelegramRequest) {
+                $result = [];
+
+                foreach ($entitiesFromTelegramRequest as $item) {
+                    $result[] = container(MessageEntity::class, $item);
+                }
+
+                return $result;
             });
     }
 }
