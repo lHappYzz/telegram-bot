@@ -28,6 +28,6 @@ class CourseCommand extends BaseCommand
             $message .= '💰BUY: 1' . $block['ccy'] . ' - ' . $block['buy'] . ' ' . $block['base_ccy'].
                 "\n💱SALE: 1" . $block['ccy'] . ' - ' . $block['sale'] . ' ' . $block['base_ccy'] . "\n\n";
         }
-        $bot->sendMessage($message, $telegramMessage->getChat());
+        $bot->sendMessage($message, $telegramMessage->getChat()->getId());
     }
 }

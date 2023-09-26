@@ -45,4 +45,60 @@ class MessageEntity extends JsonSerializableEntity
         protected ?string $language = null,
         protected ?string $customEmojiId = null,
     ) {}
+
+    /**
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return int
+     */
+    public function getOffset(): int
+    {
+        return $this->offset;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLength(): int
+    {
+        return $this->length;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getUrl(): ?int
+    {
+        return $this->url;
+    }
+
+    /**
+     * @return TelegramUser|null
+     */
+    public function getUser(): ?TelegramUser
+    {
+        return $this->user;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getLanguage(): ?string
+    {
+        return $this->language;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCustomEmojiId(): ?string
+    {
+        return $this->customEmojiId;
+    }
 }
