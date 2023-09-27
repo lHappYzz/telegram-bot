@@ -61,6 +61,13 @@ In general there are two ways of getting Updates from telegram - the polling via
 `webhooks` so first you need to set up your environment, get url to your `index.php` and put it into your `app.ini` file.
 You can use whether any host provider or local web server e.g. with configured `ngrok`. Also make sure you can use`https` protocol.
 
+To set up a webhooks complete previous steps then go to your `index.php` file and uncomment the following row:
+```php
+$application->bot->setWebhook();
+```
+After that access your `index.php` using `GET` HTTP method. If no error occurred you can remove the row from `index.php` file, otherwise go to
+`/storage/logs/error` directory and check logs for errors.
+
 ## :toolbox: Architecture Concepts
 ### 1. Commands
 It is possible to easily create custom bot commands by defining a class with a `boot()` method to specify actions when given command is triggered.
