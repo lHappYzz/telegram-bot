@@ -53,9 +53,7 @@ class Responsibilities
      */
     public function handleTelegramChatState(TelegramMessage $telegramMessage): void
     {
-        if (!$telegramMessage->getChat()->getChatState() instanceof DefaultState) {
-            $telegramMessage->getChat()->getChatState()->handle($this->bot, $telegramMessage);
-        }
+        $telegramMessage->getChat()->getChatState()->handle($this->bot, $telegramMessage);
     }
 
     /**
