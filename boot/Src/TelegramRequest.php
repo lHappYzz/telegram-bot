@@ -24,9 +24,8 @@ class TelegramRequest
      */
     public function getUpdate(): Update
     {
-        return $this->update ?? $this->update =
-                container(TelegramUpdateParser::class)
-                    ->parseTelegramRequest()
-                    ->createUpdate();
+        return $this->update ?? $this->update = container(TelegramUpdateParser::class)
+            ->parseTelegramRequest()
+            ->createUpdate();
     }
 }
