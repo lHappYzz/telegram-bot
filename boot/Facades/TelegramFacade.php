@@ -178,4 +178,61 @@ class TelegramFacade extends Telegram
             'results' => json_encode($results),
         ]);
     }
+
+    /**
+     * Use this method to specify a URL and receive incoming updates via an outgoing webhook.
+     * Whenever there is an update for the bot, we will send an HTTPS POST request to the specified URL,
+     * containing a JSON-serialized Update. In case of an unsuccessful request, we will give up after a reasonable
+     * amount of attempts. Returns True on success.
+     *
+     * If you'd like to make sure that the webhook was set by you, you can specify secret data in the parameter
+     * secret_token. If specified, the request will contain a header “X-Telegram-Bot-Api-Secret-Token” with the
+     * secret token as content.
+     * @link https://core.telegram.org/bots/api#setwebhook
+     * @param string $token
+     * @param string $url
+     * @param string|null $ipAddress
+     * @param int|null $maxConnections
+     * @param array|null $allowUpdates
+     * @param bool|null $dropPendingUpdates
+     * @param string|null $secretToken
+     * @return void
+     */
+    public function setWebhook(
+        string $token,
+        string $url,
+        ?string $ipAddress = null,
+        ?int $maxConnections = null,
+        ?array $allowUpdates = null,
+        bool $dropPendingUpdates = false,
+        ?string $secretToken = null,
+    ): void {
+        self::sendTelegramRequest([
+            'token' => $token,
+            'method' => 'setWebhook',
+            'url' => $url,
+            'ip_address' => $ipAddress,
+            'max_connections' => $maxConnections,
+            'allowed_updates' => $allowUpdates,
+            'drop_pending_updates' => $dropPendingUpdates,
+            'secret_token' => $secretToken,
+        ]);
+    }
+
+    /**
+     * @link https://core.telegram.org/bots/api#deletewebhook
+     * @param string $token
+     * @param bool $dropPendingUpdates
+     * @return void
+     */
+    public function deleteWebhook(
+        string $token,
+        bool $dropPendingUpdates = false,
+    ): void {
+        self::sendTelegramRequest([
+            'token' => $token,
+            'method' => 'deleteWebhook',
+            'drop_pending_updates' => $dropPendingUpdates,
+        ]);
+    }
 }

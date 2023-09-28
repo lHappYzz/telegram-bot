@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Config\Config;
 use Boot\Classes\MethodOptionalFields;
 use Boot\Facades\TelegramFacade;
 use Boot\Src\Entities\ReplyMarkup\ReplyMarkup;
@@ -58,11 +59,34 @@ class Bot
         array $results,
         ?int $cacheTime = null,
         ?bool $isPersonal = null,
-        ?string $nextOffset = null,
+        ?string $nextOffset = null
     ): void {
         $this->telegramFacade->answerInlineQuery(
             $this->token,
             ...func_get_args()
+        );
+    }
+
+    public function setWebhook(
+        ?string $ipAddress = null,
+        ?int $maxConnections = null,
+        ?array $allowUpdates = null,
+        ?bool $dropPendingUpdates = null,
+        ?string $secretToken = null
+    ): void {
+        $this->telegramFacade->setWebhook(
+            $this->token,
+            'https://' . Config::bot()['bot_url'],
+            ...func_get_args(),
+        );
+    }
+
+    public function deleteWebhook(
+        bool $dropPendingUpdates = false
+    ): void {
+        $this->telegramFacade->deleteWebhook(
+            $this->token,
+            $dropPendingUpdates
         );
     }
 }

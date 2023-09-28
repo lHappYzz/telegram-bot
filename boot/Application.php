@@ -26,7 +26,7 @@ class Application
     use DirectoryHelpers;
 
     /** @var Bot */
-    protected Bot $bot;
+    public Bot $bot;
 
     /** @var TelegramRequest */
     protected TelegramRequest $telegramRequest;
@@ -39,21 +39,6 @@ class Application
      */
     public function __construct(protected Container $container)
     {
-        $this->registerBaseBindings();
-
-        $this->telegramRequest = $this->container->get(TelegramRequest::class);
-
-        $this->bot = $this->container->get(Bot::class);
-    }
-
-    /**
-     * Entry point of the application. Ensures if the config file exists, sets server timezone
-     * launches application components according to received telegram Update
-     *
-     * @throws Exception
-     */
-    public function boot(): void
-    {
         if (!Config::exists()) {
             throw new RuntimeException('Missing application configuration file.');
         }
@@ -62,8 +47,22 @@ class Application
             throw new RuntimeException('Missing bot token.');
         }
 
-        date_default_timezone_set(Config::timezone());
+        date_default_timezone_set(Config::timezone() ?? '');
 
+        $this->registerBaseBindings();
+
+        $this->telegramRequest = $this->container->get(TelegramRequest::class);
+
+        $this->bot = $this->container->get(Bot::class);
+    }
+
+    /**
+     * Entry point of the application. Launches application components according to received telegram Update
+     *
+     * @throws Exception
+     */
+    public function boot(): void
+    {
         $this
             ->telegramRequest
             ->getUpdate()
