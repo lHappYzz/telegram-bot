@@ -9,7 +9,14 @@ namespace Boot\Interfaces;
  */
 interface Recordable
 {
+    /**
+     * @return int
+     */
     public function getId(): int;
 
+    /**
+     * @param array $fillableColumns
+     * @return array
+     */
     public function getArrayOfAttributes(array $fillableColumns): array;
 }

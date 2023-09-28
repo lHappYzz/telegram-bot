@@ -7,10 +7,7 @@ use App\Records\StatusRecord;
 use Boot\Cache\Cache;
 use Boot\Interfaces\ChatState;
 use Boot\Interfaces\Recordable;
-use Boot\Log\Logger;
 use Boot\Src\Abstracts\Entity;
-use ReflectionClass;
-use ReflectionException;
 
 /**
  * Class telegramChat
@@ -28,6 +25,13 @@ class TelegramChat extends Entity implements Recordable
      */
     protected ChatState $state;
 
+    /**
+     * @param int $id
+     * @param string $type
+     * @param string|null $firstName
+     * @param string|null $lastName
+     * @param string|null $username
+     */
     public function __construct(
         protected int $id,
         protected string $type,
@@ -39,34 +43,49 @@ class TelegramChat extends Entity implements Recordable
         $this->transitionTo($this->getStatusId());
     }
 
+    /**
+     * @return int
+     */
     public function getId(): int
     {
-        if (empty($this->id)) {
-            return 423303268;
-        }
         return $this->id;
     }
 
+    /**
+     * @return string
+     */
     public function getType(): string
     {
         return $this->type;
     }
 
-    public function getFirstName(): string
+    /**
+     * @return string|null
+     */
+    public function getFirstName(): ?string
     {
         return $this->firstName;
     }
 
-    public function getLastName(): string
+    /**
+     * @return string|null
+     */
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }
 
-    public function getUsername(): string
+    /**
+     * @return string|null
+     */
+    public function getUsername(): ?string
     {
         return $this->username;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getArrayOfAttributes(array $fillableColumns): array
     {
         $arrayOfAttributes = [];
@@ -79,39 +98,35 @@ class TelegramChat extends Entity implements Recordable
         return $arrayOfAttributes;
     }
 
-    public function setStatus(StatusRecord $record): bool
+    /**
+     * @param int $stateId
+     * @return bool
+     */
+    public function setStatus(int $stateId): bool
     {
         $isSuccess = ChatRecord::query()
             ->where('id', $this->getId())
-            ->update(['status_id' => $record->getId()]);
+            ->update(['status_id' => $stateId]);
 
         if ($isSuccess) {
-            Cache::getInstance()->set($this->chatStateCacheKey, $record->getId(), 60*60);
-            $this->transitionTo($record->getId());
+            Cache::getInstance()->set($this->chatStateCacheKey, $stateId, 60*60);
+            $this->transitionTo($stateId);
         }
 
         return $isSuccess;
     }
 
-    public function getStatusId(): ?int
-    {
-        return Cache::getInstance()->get($this->chatStateCacheKey) ??
-            array_first(
-                ChatRecord::query()
-                    ->select(['status_id'])
-                    ->where('id', $this->getId())
-                    ->get()
-                )->status_id;
-    }
-
+    /**
+     * @return ChatState
+     */
     public function getChatState(): ChatState
     {
         return $this->state;
     }
 
     /**
-     * Transition to chat state by given status record identifier
-     * through user defined state bindings
+     * Transition to chat state by given status record identifier through user defined state bindings.
+     *
      * @see StatusRecord::statesBindings
      * @param ?int $statusRecordId
      */
@@ -119,15 +134,20 @@ class TelegramChat extends Entity implements Recordable
     {
         $stateClassName = StatusRecord::$statesBindings[$statusRecordId];
 
-        try {
-            $reflection = new ReflectionClass($stateClassName);
+        $this->state = container($stateClassName);
+    }
 
-            $fullPathToStateClass = $reflection->getName();
-
-            $this->state = new $fullPathToStateClass($this);
-        } catch (ReflectionException $e) {
-            Logger::logException($e, Logger::LEVEL_ERROR);
-            die;
-        }
+    /**
+     * @return int|null
+     */
+    private function getStatusId(): ?int
+    {
+        return Cache::getInstance()->get($this->chatStateCacheKey) ??
+            array_first(
+                ChatRecord::query()
+                    ->select(['status_id'])
+                    ->where('id', $this->getId())
+                    ->get()
+            )->status_id;
     }
 }

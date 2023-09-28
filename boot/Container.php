@@ -398,11 +398,11 @@ class Container implements ContainerInterface
 
         if (is_array($givenValue) || is_null($givenValue)) {
             try {
-                return $this->resolve(
+                return $this->make(
                     ltrim($parameter->getType(), '?'),
                     $givenValue ?? []
                 );
-            } catch (UnresolvableInstanceGivenException) {}
+            } catch (ContainerExceptionInterface) {}
         }
 
         if ($givenValue !== null) {
