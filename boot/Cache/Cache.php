@@ -11,7 +11,9 @@ use Phpfastcache\Exceptions\PhpfastcacheInvalidConfigurationException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Phpfastcache\Exceptions\PhpfastcacheSimpleCacheException;
 use Phpfastcache\Helper\Psr16Adapter;
+use Psr\Cache\InvalidArgumentException;
 use ReflectionException;
+use RuntimeException;
 
 class Cache extends Singleton
 {
@@ -41,12 +43,14 @@ class Cache extends Singleton
      * @param string $key
      * @param $default
      * @return mixed
-     * @throws PhpfastcacheSimpleCacheException
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function get(string $key, $default = null): mixed
     {
-        return $this->psr16Adapter->get($key, $default);
+        try {
+            return $this->psr16Adapter->get($key, $default);
+        } catch (InvalidArgumentException|PhpfastcacheSimpleCacheException $e) {
+            throw new RuntimeException($e);
+        }
     }
 
     /**
@@ -54,32 +58,40 @@ class Cache extends Singleton
      * @param mixed $value
      * @param int $ttl
      * @return bool
-     * @throws PhpfastcacheSimpleCacheException
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function set(string $key, mixed $value, int $ttl): bool
     {
-        return $this->psr16Adapter->set($key, $value, $ttl);
+        try {
+            return $this->psr16Adapter->set($key, $value, $ttl);
+        } catch (InvalidArgumentException|PhpfastcacheSimpleCacheException $e) {
+            throw new RuntimeException($e);
+        }
     }
 
     /**
      * @param string $key
      * @return bool
-     * @throws PhpfastcacheSimpleCacheException
      */
     public function delete(string $key): bool
     {
-        return $this->psr16Adapter->delete($key);
+        try {
+            return $this->psr16Adapter->delete($key);
+        } catch (PhpfastcacheSimpleCacheException $e) {
+            throw new RuntimeException($e);
+        }
     }
 
     /**
      * @param string $key
      * @return bool
-     * @throws PhpfastcacheSimpleCacheException
      */
     public function has(string $key): bool
     {
-        return $this->psr16Adapter->has($key);
+        try {
+            return $this->psr16Adapter->has($key);
+        } catch (PhpfastcacheSimpleCacheException $e) {
+            throw new RuntimeException($e);
+        }
     }
 
 

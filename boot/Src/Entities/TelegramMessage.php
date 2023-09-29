@@ -111,15 +111,14 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
     public function responsibilize(Responsibilities $responsibility): void
     {
         if (
-            $this->getChat()->getChatState() instanceof DefaultState ||
-            $this->getChat()->getChatState() instanceof NoState
+            ($this->getChat()->getChatState() instanceof DefaultState ||
+            $this->getChat()->getChatState() instanceof NoState) &&
+            $this->isCommand()
         ) {
-            if ($this->isCommand()) {
-                $responsibility->handleCommand($this);
-            }
-        } else {
-            $responsibility->handleTelegramChatState($this);
+            $responsibility->handleCommand($this);
+            return;
         }
+        $responsibility->handleTelegramChatState($this);
     }
 
     /**

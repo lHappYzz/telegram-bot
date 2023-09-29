@@ -6,8 +6,9 @@ use App\Config\Config;
 use Boot\Log\Logger;
 use Boot\Src\Abstracts\Singleton;
 use PDO;
+use PDOException;
 use PDOStatement;
-use Throwable;
+use RuntimeException;
 
 class DB extends Singleton
 {
@@ -17,7 +18,7 @@ class DB extends Singleton
     private string $hostname;
 
     /**
-     * @param string $username The MySQL user name.
+     * @param string $username The MySQL username.
      */
     private ?string $username;
 
@@ -34,7 +35,7 @@ class DB extends Singleton
     /**
      * @var PDO Object represents db connection.
      */
-    private $connection;
+    private PDO $connection;
 
     /**
      * @var string Credential for pdo object.
@@ -52,7 +53,6 @@ class DB extends Singleton
         $this->username = $config['db_username'];
         $this->password = $config['db_password'];
         $this->dsn = $this->dataSourceName();
-
     }
 
     /**
@@ -68,9 +68,10 @@ class DB extends Singleton
 
         try {
             $stmt->execute($bindings);
-        } catch (Throwable $e) {
+        } catch (PDOException $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
             Logger::logError(print_r($stmt->errorInfo(), true));
+            throw new RuntimeException($e);
         }
 
         return $stmt;
@@ -81,7 +82,7 @@ class DB extends Singleton
      */
     protected function getConnection(): PDO
     {
-        if (!$this->connection) {
+        if (!isset($this->connection)) {
             $this->connection = $this->makeConnection();
         }
         return $this->connection;

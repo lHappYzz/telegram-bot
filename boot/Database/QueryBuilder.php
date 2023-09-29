@@ -182,10 +182,10 @@ class  QueryBuilder
     /**
      * Add new value binding to bindings array
      * @param string $key
-     * @param string|array $value
+     * @param mixed $value
      * @param string $type
      */
-    private function addBinding(string $key, $value, string $type): void
+    private function addBinding(string $key, mixed $value, string $type): void
     {
         //PDO bad works with boolean so we will convert it to int type
         if (is_bool($value)) {
@@ -200,11 +200,12 @@ class  QueryBuilder
                     $this->bindings[$type][] = $item;
                 $i++;
             }
-        } else {
-            $this->isNamedMarker ?
-                $this->bindings[$type][$key] = $value :
-                $this->bindings[$type][] = $value;
+            return;
         }
+
+        $this->isNamedMarker ?
+            $this->bindings[$type][$key] = $value :
+            $this->bindings[$type][] = $value;
     }
 
     /**
