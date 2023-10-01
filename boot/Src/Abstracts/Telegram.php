@@ -38,7 +38,7 @@ abstract class Telegram
 
         /** @var TelegramResponse $response */
         return container(TelegramResponse::class, [
-            'rawResponse' => $result
+            'rawResponse' => array_keys_to_camel_case($result)
         ]);
     }
 }

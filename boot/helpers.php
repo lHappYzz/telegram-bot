@@ -76,3 +76,29 @@ if (!function_exists('snake_case_to_camel_case')) {
         return lcfirst(str_replace('_', '', ucwords($input, '_')));
     }
 }
+
+if (!function_exists('array_keys_to_camel_case')) {
+    /**
+     * Convert all keys of the given array to camel case style.
+     * Also works with multidimensional arrays
+     *
+     * @param array $array
+     * @return array
+     */
+    function array_keys_to_camel_case(array $array): array
+    {
+        $newArray = [];
+
+        foreach ($array as $key => $value) {
+            $snakeCaseKey = snake_case_to_camel_case($key);
+
+            if (is_array($value)) {
+                $value = array_keys_to_camel_case($value);
+            }
+
+            $newArray[$snakeCaseKey] = $value;
+        }
+
+        return $newArray;
+    }
+}

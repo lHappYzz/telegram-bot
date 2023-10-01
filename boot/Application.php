@@ -9,7 +9,6 @@ use Boot\Interfaces\ContainerInterface;
 use Boot\Src\Abstracts\BaseCommand;
 use Boot\Src\Abstracts\Telegram;
 use Boot\Src\Entities\MessageEntity;
-use Boot\Src\Entities\ReplyMarkup\InlineKeyboardButton;
 use Boot\Src\Entities\ReplyMarkup\InlineKeyboardMarkup;
 use Boot\Src\Entities\TelegramMessage;
 use Boot\Src\Exceptions\ContainerException;
@@ -151,20 +150,28 @@ class Application
                 /** @var InlineKeyboardMarkup $inlineKeyboardMarkup */
                 $inlineKeyboardMarkup = container(InlineKeyboardMarkup::class);
 
-                foreach ($inlineKeyboardMarkupData['inline_keyboard'] as $keyboardRow) {
+                foreach ($inlineKeyboardMarkupData['inlineKeyboard'] as $keyboardRow) {
                     $inlineKeyboardRow = $inlineKeyboardMarkup->addKeyboardRow();
+
                     foreach ($keyboardRow as $rowButton) {
-                        $inlineKeyboardRow
-                            ->addButton($rowButton['text'])
-                            ->addCallbackHandler(
-                                $this->resolveCallbackQueryHandlerName($rowButton['callback_data']),
-                                array_last(
-                                    explode(
-                                        InlineKeyboardButton::CALLBACK_DATA_DELIMITER,
-                                        $rowButton['callback_data']
-                                    )
-                                )
+                        $button = $inlineKeyboardRow->addButton($rowButton['text']);
+
+                        foreach ($rowButton as $methodName => $methodParameter) {
+                            if ($methodName === 'text') {
+                                continue;
+                            }
+
+                            if ($methodName !== 'callbackData') {
+                                $methodName = 'add' . ucfirst($methodName);
+                                $button->$methodName(...(is_array($methodParameter) ? $methodParameter : [$methodParameter]));
+                                continue;
+                            }
+
+                            $button->addCallbackHandler(
+                                $this->resolveCallbackQueryHandlerName($methodParameter),
+                                $this->resolveCallbackQueryData($methodParameter)
                             );
+                        }
                     }
                 }
 

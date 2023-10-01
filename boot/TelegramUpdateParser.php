@@ -65,7 +65,7 @@ class TelegramUpdateParser
                     $this->factoryBindings[$type],
                     [
                         'updateId' => $requestData['update_id'],
-                        'components' => $requestData[$type],
+                        'components' => array_keys_to_camel_case($requestData[$type]),
                     ],
                 );
             }
