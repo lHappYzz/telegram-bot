@@ -4,10 +4,10 @@ namespace Boot;
 
 use Boot\Interfaces\ContainerExceptionInterface;
 use Boot\Interfaces\ContainerInterface;
-use Boot\Src\Abstracts\Entity;
 use Boot\Src\Abstracts\Singleton;
-use Boot\Src\Abstracts\UpdateUnit;
 use Boot\Src\Exceptions\ContainerException;
+use Boot\Src\Exceptions\ImplementationException;
+use Boot\Src\Exceptions\ImplementationNotFoundException;
 use Boot\Src\Exceptions\NotFoundException;
 use Boot\Src\Exceptions\UnresolvableInstanceGivenException;
 use Boot\Src\Exceptions\UnresolvableParameterGivenException;
@@ -19,7 +19,6 @@ use TypeError;
 
 class Container implements ContainerInterface
 {
-
     /** @var self */
     protected static self $instance;
 
@@ -30,10 +29,7 @@ class Container implements ContainerInterface
     protected array $bindings = [];
 
     /** @var array */
-    protected array $primitiveBuildImplementations = [];
-
-    /** @var bool */
-    protected bool $resolvingTelegramEntity = false;
+    protected array $implementations = [];
 
     /** @var string[] */
     protected array $buildStack = [];
@@ -73,12 +69,9 @@ class Container implements ContainerInterface
      * @return mixed
      * @throws ContainerExceptionInterface
      */
-    public function make(string $abstract, array $parameters): mixed
+    public function make(string $abstract, array $parameters): object
     {
         try {
-            $this->resolvingTelegramEntity = is_subclass_of($abstract, Entity::class) ||
-                is_subclass_of($abstract, UpdateUnit::class);
-
             return $this->resolve($abstract, $parameters);
         } catch (UnresolvableInstanceGivenException $e) {
             throw new ContainerException($e);
@@ -139,7 +132,7 @@ class Container implements ContainerInterface
      */
     public function addBuildImplementation(string $concrete, string $needs, mixed $implementation): void
     {
-        $this->primitiveBuildImplementations[$concrete][$needs] = $implementation;
+        $this->implementations[$concrete][$needs] = $implementation;
     }
 
     /**
@@ -282,11 +275,7 @@ class Container implements ContainerInterface
         $result = [];
 
         foreach ($parameters as $parameter) {
-            $this->resolvingTelegramEntity ?
-                $parameterName = camel_case_to_snake_case($parameter->getName()) :
-                $parameterName = $parameter->getName();
-
-            $result[] = $this->getParameterImplementation($parameter, $initiatedParameters[$parameterName] ?? null);
+            $result[] = $this->getParameterImplementation($parameter, $initiatedParameters[$parameter->getName()] ?? null);
         }
 
         return $result;
@@ -322,98 +311,6 @@ class Container implements ContainerInterface
 
     /**
      * @param ReflectionParameter $parameter
-     * @param mixed|null $givenValue
-     * @return mixed|null
-     * @throws UnresolvableParameterGivenException
-     */
-    private function resolvePrimitive(ReflectionParameter $parameter, mixed $givenValue = null): mixed
-    {
-        if ($implemented = $this->getParameterImplementation($parameter, $givenValue)) {
-            return $implemented;
-        }
-
-        if ($givenValue !== null) {
-            return $givenValue;
-        }
-
-        return $this->getParameterDefaultValue($parameter);
-    }
-
-    /**
-     * @param ReflectionParameter $parameter
-     * @param mixed $givenValue
-     * @return mixed
-     * @throws UnresolvableParameterGivenException
-     */
-    private function resolveClass(
-        ReflectionParameter $parameter,
-        mixed $givenValue,
-    ): mixed {
-        try {
-            if ($implemented = $this->getParameterImplementation($parameter, $givenValue)) {
-                return $implemented;
-            }
-
-            if (is_array($givenValue) || $givenValue === null) {
-                return $this->resolve(
-                    ltrim($parameter->getType(), '?'),
-                    $givenValue ?? [],
-                );
-            }
-
-            return $givenValue;
-        } catch (UnresolvableInstanceGivenException) {
-            array_pop($this->buildStack);
-            return $this->getParameterDefaultValue($parameter);
-        }
-    }
-
-    /**
-     * @param ReflectionParameter $parameter
-     * @param mixed $givenValue
-     * @return mixed
-     * @throws UnresolvableParameterGivenException
-     */
-    private function getParameterImplementation(ReflectionParameter $parameter, mixed $givenValue): mixed
-    {
-        $implementationsForCurrentBuildingConcrete = $this->primitiveBuildImplementations[
-            end($this->buildStack)
-        ] ?? [];
-
-        $implementation = $implementationsForCurrentBuildingConcrete[
-            $this->getConcrete($parameter->getName())
-        ] ?? null;
-
-        if ($implementation instanceof Closure) {
-            try {
-                return $implementation($givenValue);
-            } catch (TypeError) {
-                return $this->getParameterDefaultValue($parameter);
-            }
-        }
-
-        if (!is_null($implementation)) {
-            return $implementation;
-        }
-
-        if (is_array($givenValue) || is_null($givenValue)) {
-            try {
-                return $this->make(
-                    ltrim($parameter->getType(), '?'),
-                    $givenValue ?? []
-                );
-            } catch (ContainerExceptionInterface) {}
-        }
-
-        if ($givenValue !== null) {
-            return $givenValue;
-        }
-
-        return $this->getParameterDefaultValue($parameter);
-    }
-
-    /**
-     * @param ReflectionParameter $parameter
      * @return mixed
      * @throws UnresolvableParameterGivenException
      */
@@ -431,11 +328,73 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @return void
+     * @param ReflectionParameter $parameter
+     * @param mixed $givenValue
+     * @return mixed
+     * @throws UnresolvableParameterGivenException
      */
-    private function flush(): void
+    private function getParameterImplementation(ReflectionParameter $parameter, mixed $givenValue): mixed
     {
-        $this->buildStack = [];
-        $this->resolvingTelegramEntity = false;
+        try {
+            return $this->resolveImplementation($parameter, $givenValue);
+        } catch (ImplementationNotFoundException) {
+            return $this->resolveFallbackImplementation($parameter, $givenValue);
+        }  catch (ImplementationException) {
+            return $this->getParameterDefaultValue($parameter);
+        }
+    }
+
+    private function getImplementationsForCurrentBuildingConcrete(): array
+    {
+        return $this->implementations[end($this->buildStack)] ?? [];
+    }
+
+    /**
+     * @param ReflectionParameter $parameter
+     * @param mixed $givenValue
+     * @return mixed
+     * @throws ImplementationException|ImplementationNotFoundException
+     */
+    private function resolveImplementation(
+        ReflectionParameter $parameter,
+        mixed $givenValue,
+    ): mixed {
+        $implementationsForCurrentBuildingConcrete = $this->getImplementationsForCurrentBuildingConcrete();
+        $implementation = $implementationsForCurrentBuildingConcrete[$this->getConcrete($parameter->getName())] ?? null;
+
+        if (is_null($implementation)) {
+            throw new ImplementationNotFoundException('No implementation found for given parameter: ' . $parameter->getName());
+        }
+
+        if ($implementation instanceof Closure) {
+            try {
+                return $implementation($givenValue);
+            } catch (TypeError $e) {
+                throw new ImplementationException($e);
+            }
+        }
+
+        return $implementation;
+    }
+
+    /**
+     * @param ReflectionParameter $parameter
+     * @param mixed $givenValue
+     * @return mixed
+     * @throws UnresolvableParameterGivenException
+     */
+    private function resolveFallbackImplementation(ReflectionParameter $parameter, mixed $givenValue): mixed
+    {
+        if ($parameter->getType()?->isBuiltin()) {
+            if ($givenValue !== null) {
+                return $givenValue;
+            }
+        } else {
+            try {
+                return $this->make(ltrim($parameter->getType(), '?'), $givenValue ?? []);
+            } catch (ContainerExceptionInterface) {}
+        }
+
+        return $this->getParameterDefaultValue($parameter);
     }
 }

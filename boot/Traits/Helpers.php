@@ -14,7 +14,24 @@ trait Helpers
      */
     private function resolveCallbackQueryHandlerName(string $callbackData): string
     {
-        return Telegram::CALLBACK_QUERY_NAMESPACE . array_first(explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $callbackData)) .
+        return Telegram::CALLBACK_QUERY_NAMESPACE .
+            array_first(
+                explode(InlineKeyboardButton::CALLBACK_DATA_DELIMITER, $callbackData)
+            ) .
             CallbackQueryHandler::CALLBACK_QUERY_HANDLERS_ENDING;
+    }
+
+    /**
+     * @param string $callbackData
+     * @return string
+     */
+    private function resolveCallbackQueryData(string $callbackData): string
+    {
+        return array_last(
+            explode(
+                InlineKeyboardButton::CALLBACK_DATA_DELIMITER,
+                $callbackData
+            )
+        ) ?? '';
     }
 }
