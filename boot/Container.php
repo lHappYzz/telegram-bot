@@ -344,6 +344,9 @@ class Container implements ContainerInterface
         }
     }
 
+    /**
+     * @return array
+     */
     private function getImplementationsForCurrentBuildingConcrete(): array
     {
         return $this->implementations[end($this->buildStack)] ?? [];
@@ -390,6 +393,9 @@ class Container implements ContainerInterface
                 return $givenValue;
             }
         } else {
+            if ($givenValue !== null && !is_array($givenValue)) {
+                return $givenValue;
+            }
             try {
                 return $this->make(ltrim($parameter->getType(), '?'), $givenValue ?? []);
             } catch (ContainerExceptionInterface) {}
