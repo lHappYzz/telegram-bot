@@ -2,89 +2,110 @@
 
 namespace Boot\Database;
 
-use Boot\application;
-use Boot\Src\singleton;
-use Exception;
-use mysqli;
-use mysqli_result;
+use App\Config\Config;
+use Boot\Log\Logger;
+use Boot\Src\Abstracts\Singleton;
+use PDO;
+use PDOException;
+use PDOStatement;
+use RuntimeException;
 
-class DB extends singleton
+class DB extends Singleton
 {
     /**
      * @param string $hostname Can be either a host name or an IP address. Passing the NULL value or the string "localhost" to this parameter, the local host is assumed. When possible, pipes will be used instead of the TCP/IP protocol.
      */
-    private $hostname;
+    private string $hostname;
 
     /**
-     * @param string $username The MySQL user name.
+     * @param string $username The MySQL username.
      */
-    private $username;
+    private ?string $username;
 
     /**
-     * @param string $password If not provided or NULL, the MySQL server will attempt to authenticate the user against those user records which have no password only.
+     * @param string $password The MySQL password.
      */
-    private $password;
+    private ?string $password;
 
     /**
-     * @param string $database If provided will specify the default database to be used when performing queries.
+     * @param string $database Database to be used when performing queries.
      */
-    private $database;
+    private string $database;
 
-    private $connection;
+    /**
+     * @var PDO Object represents db connection.
+     */
+    private PDO $connection;
 
-    protected function __construct() {
+    /**
+     * @var string Credential for pdo object.
+     */
+    private string $dsn;
+
+    protected function __construct()
+    {
         parent::__construct();
 
-        $config = application::$config;
+        $config = Config::database();
+
         $this->hostname = $config['db_host'];
+        $this->database = $config['db_database'];
         $this->username = $config['db_username'];
         $this->password = $config['db_password'];
-        $this->database = $config['db_database'];
-
+        $this->dsn = $this->dataSourceName();
     }
 
     /**
-     * Open a new connection to the MySQL server
-     * @return mysqli
-     * @throws Exception
+     * @param string $query
+     * @param array $bindings
+     * @return PDOStatement
      */
-    private function makeConnection() {
-        $dbconnection = mysqli_connect($this->hostname, $this->username, $this->password, $this->database);
-        if ($dbconnection === false) {
-            throw new Exception('Error while connecting to the database.');
+    public function query(string $query, array $bindings = []): PDOStatement
+    {
+        $pdo = $this->getConnection();
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $stmt = $pdo->prepare($query);
+
+        try {
+            $stmt->execute($bindings);
+        } catch (PDOException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            Logger::logError(print_r($stmt->errorInfo(), true));
+            throw new RuntimeException($e);
         }
-        return $dbconnection;
+
+        return $stmt;
     }
 
-    private function getConnection() {
-        if (!$this->connection) {
-            try {
-                $this->connection = $this->makeConnection();
-            } catch (Exception $e) {
-                application::log($e->getMessage());
-                die($e->getMessage());
-            }
+    /**
+     * @return PDO
+     */
+    protected function getConnection(): PDO
+    {
+        if (!isset($this->connection)) {
+            $this->connection = $this->makeConnection();
         }
         return $this->connection;
     }
 
     /**
-     * @param $sql
-     * SQL string
-     * @return mysqli_result|true
-     * On success mysqli_result or true returned
+     * @return string
      */
-    public function query($sql) {
-        try {
-            $result = $this->getConnection()->query($sql);
-            if ($result === false) {
-                throw new Exception('The query ended with error. ' . mysqli_error($this->getConnection()));
-            }
-        } catch (Exception $e) {
-            application::log($e->getMessage());
-            die($e->getMessage());
-        }
-        return $result;
+    private function dataSourceName(): string
+    {
+        return 'mysql:dbname=' . $this->database . ';host=' . $this->hostname;
     }
 
+    /**
+     * Open a new connection to the MySQL server
+     * @return PDO
+     */
+    private function makeConnection(): PDO
+    {
+        $connection = new PDO($this->dsn, $this->username, $this->password);
+
+        $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        return $connection;
+    }
 }
