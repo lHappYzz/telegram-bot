@@ -5,6 +5,7 @@ namespace App;
 use App\Config\Config;
 use Boot\Classes\MethodOptionalFields;
 use Boot\Facades\TelegramFacade;
+use Boot\Src\Entities\InputFile;
 use Boot\Src\Entities\ReplyMarkup\ReplyMarkup;
 use Boot\Src\Entities\TelegramMessage;
 
@@ -26,6 +27,24 @@ class Bot
         return $this
             ->telegramFacade
             ->sendMessage($this->token, ...func_get_args());
+    }
+
+    /**
+     * @see TelegramFacade::sendPhoto()
+     * For more details.
+     */
+    public function sendPhoto(
+        string $chatId,
+        InputFile|string $photo,
+        ?string $caption = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?string $parseMode = null,
+        bool $hasSpoiler = false,
+        ?MethodOptionalFields $optionalFields = null
+    ): TelegramMessage {
+        return $this
+            ->telegramFacade
+            ->sendPhoto($this->token, ...func_get_args());
     }
 
     public function editMessageText(

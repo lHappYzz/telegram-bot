@@ -15,6 +15,7 @@
     "ext-mysqli": "*",
     "ext-pdo": "*",
     "guzzlehttp/guzzle": "^7",
-    "phpfastcache/phpfastcache": "^8.1"
+    "phpfastcache/phpfastcache": "^8.1",
+    "ext-fileinfo": "*"
   }
 }

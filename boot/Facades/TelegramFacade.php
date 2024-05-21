@@ -5,6 +5,7 @@ namespace Boot\Facades;
 use Boot\Classes\MethodOptionalFields;
 use Boot\Src\Abstracts\Telegram;
 use Boot\Src\Entities\InlineMode\InlineQueryResult;
+use Boot\Src\Entities\InputFile;
 use Boot\Src\Entities\MessageEntity;
 use Boot\Src\Entities\ReplyMarkup\ReplyMarkup;
 use Boot\Src\Entities\TelegramMessage;
@@ -22,7 +23,6 @@ class TelegramFacade extends Telegram
      * @param bool $disableWebPagePreview
      * @param MethodOptionalFields|null $optionalFields
      * @return TelegramMessage
-     *
      */
     public function sendMessage(
         string $token,
@@ -40,6 +40,46 @@ class TelegramFacade extends Telegram
             'chat_id' => $chatId,
             'parse_mode' => $parseMode,
             'disable_web_page_preview' => $disableWebPagePreview,
+            'reply_markup' => $replyMarkup ? json_encode($replyMarkup) : null,
+            ... is_null($optionalFields) ? [] : $optionalFields?->jsonSerialize(),
+        ]);
+
+        return $response->createMessage();
+    }
+
+    /**
+     * Use this method to send photos. On success, the sent Message is returned.
+     * @link https://core.telegram.org/bots/api#sendphoto
+     * @param string $token
+     * @param string $chatId
+     * @param InputFile|string $photo
+     * Use InputFile for uploading file with multipart/form-data or pass string that contains
+     * URL(telegram will download image) or file_id (if image already uploaded to telegram)
+     * @param string|null $caption
+     * @param ReplyMarkup|null $replyMarkup
+     * @param string|null $parseMode
+     * @param bool $hasSpoiler
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendPhoto(
+        string $token,
+        string $chatId,
+        InputFile|string $photo,
+        ?string $caption = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?string $parseMode = null,
+        bool $hasSpoiler = false,
+        ?MethodOptionalFields $optionalFields = null
+    ): TelegramMessage {
+        $response = $this->sendTelegramRequest([
+            'token' => $token,
+            'method' => 'sendPhoto',
+            'photo' => is_string($photo) ? $photo : $photo->getPhoto(),
+            'caption' => $caption,
+            'chat_id' => $chatId,
+            'parse_mode' => $parseMode,
+            'has_spoiler' => $hasSpoiler,
             'reply_markup' => $replyMarkup ? json_encode($replyMarkup) : null,
             ... is_null($optionalFields) ? [] : $optionalFields?->jsonSerialize(),
         ]);
