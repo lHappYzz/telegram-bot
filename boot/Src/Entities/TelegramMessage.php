@@ -10,7 +10,7 @@ use Boot\Interfaces\MessageableEntity;
 use Boot\Src\Abstracts\BaseCommand;
 use Boot\Src\Abstracts\UpdateUnit;
 use Boot\Src\Entities\ReplyMarkup\InlineKeyboardMarkup;
-use Boot\Src\PhotoSize;
+use Boot\Src\Entities\PhotoSize;
 
 class TelegramMessage extends UpdateUnit implements MessageableEntity
 {

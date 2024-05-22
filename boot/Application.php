@@ -12,7 +12,7 @@ use Boot\Src\Entities\MessageEntity;
 use Boot\Src\Entities\ReplyMarkup\InlineKeyboardMarkup;
 use Boot\Src\Entities\TelegramMessage;
 use Boot\Src\Exceptions\ContainerException;
-use Boot\Src\PhotoSize;
+use Boot\Src\Entities\PhotoSize;
 use Boot\Src\TelegramRequest;
 use Boot\Traits\DirectoryHelpers;
 use Boot\Traits\Helpers;
