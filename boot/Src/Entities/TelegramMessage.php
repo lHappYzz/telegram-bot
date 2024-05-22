@@ -30,6 +30,7 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
      * @param InlineKeyboardMarkup|null $replyMarkup
      * @param MessageEntity[]|null $entities
      * @param PhotoSize[]|null $photo
+     * @param Video|null $video
      */
     public function __construct(
         protected int $messageId,
@@ -41,6 +42,7 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
         protected ?InlineKeyboardMarkup $replyMarkup = null,
         protected ?array $entities = null,
         protected ?array $photo = null,
+        protected ?Video $video = null,
     ) {
         $this->setCommand();
     }
@@ -92,6 +94,14 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
     public function getReplyMarkup(): ?InlineKeyboardMarkup
     {
         return $this->replyMarkup;
+    }
+
+    /**
+     * @return Video|null
+     */
+    public function getVideo(): ?Video
+    {
+        return $this->video;
     }
 
     /**

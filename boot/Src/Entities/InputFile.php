@@ -32,4 +32,26 @@ class InputFile extends Entity
 
         return new CURLFile(realpath($this->filePath));
     }
+
+    /**
+     * Allows to upload a new video on telegram servers using multipart/form-data
+     *
+     * @return CURLFile
+     */
+    public function getVideo(): CURLFile
+    {
+        container(FileValidator::class)->validateVideo($this->filePath);
+
+        return new CURLFile(realpath($this->filePath));
+    }
+
+    /**
+     * @return CURLFile
+     */
+    public function getThumbnail(): CURLFile
+    {
+        container(FileValidator::class)->validateThumbnail($this->filePath);
+
+        return new CURLFile(realpath($this->filePath));
+    }
 }

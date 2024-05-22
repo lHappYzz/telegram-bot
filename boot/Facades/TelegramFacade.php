@@ -88,6 +88,64 @@ class TelegramFacade extends Telegram
     }
 
     /**
+     * @link https://core.telegram.org/bots/api#sendvideo
+     * @param string $token
+     * @param string $chatId
+     * @param InputFile|string $video
+     * Use InputFile for uploading file with multipart/form-data or pass string that contains
+     * URL(telegram will download image) or file_id (if image already uploaded to telegram)
+     * @param InputFile|null $thumbnail
+     * Use InputFile for uploading file with multipart/form-data
+     * @param ReplyMarkup|null $replyMarkup
+     * @param int|null $duration
+     * @param int|null $width
+     * @param int|null $height
+     * @param string|null $caption
+     * @param array|null $captionEntities
+     * @param string|null $parseMode
+     * @param bool $hasSpoiler
+     * @param bool $supportsStreaming
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendVideo(
+        string $token,
+        string $chatId,
+        InputFile|string $video,
+        InputFile|null $thumbnail = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?int $duration = null,
+        ?int $width = null,
+        ?int $height = null,
+        ?string $caption = null,
+        ?array $captionEntities = null,
+        ?string $parseMode = null,
+        bool $hasSpoiler = false,
+        bool $supportsStreaming = false,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        $response = $this->sendTelegramRequest([
+            'token' => $token,
+            'method' => 'sendVideo',
+            'video' => is_string($video) ? $video : $video->getVideo(),
+            'thumbnail' => $thumbnail?->getThumbnail(),
+            'duration' => $duration,
+            'width' => $width,
+            'height' => $height,
+            'caption' => $caption,
+            'caption_entities' => $captionEntities,
+            'chat_id' => $chatId,
+            'parse_mode' => $parseMode,
+            'has_spoiler' => $hasSpoiler,
+            'supports_streaming' => $supportsStreaming,
+            'reply_markup' => $replyMarkup ? json_encode($replyMarkup) : null,
+            ... is_null($optionalFields) ? [] : $optionalFields?->jsonSerialize(),
+        ]);
+
+        return $response->createMessage();
+    }
+
+    /**
      * Use this method to edit text and game messages. On success the edited Message is returned.
      * @link https://core.telegram.org/bots/api#sendmessage
      * @param string $token

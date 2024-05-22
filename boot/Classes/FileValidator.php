@@ -14,6 +14,8 @@ class FileValidator
     private const MAX_PHOTO_SIZE_MB = 10;
     private const MAX_PHOTO_HEIGHT_WIDTH_SUM = 10000;
     private const MAX_PHOTO_RATIO = 20;
+    private const MAX_VIDEO_SIZE_MB = 50;
+    private const MAX_VIDEO_THUMBNAIL_SIZE_KB = 200;
 
     /**
      * @param string $path
@@ -25,13 +27,10 @@ class FileValidator
         $this->baseRules($path);
         $this->ensureFileSize($path, self::MAX_PHOTO_SIZE_MB * 1024 * 1024);
 
-        $imageSize = getimagesize($path);
-        if ($imageSize === false) {
+        [$width, $height] = getimagesize($path);
+        if (!$width || !$height) {
             throw new InvalidArgumentException("Unable to get image size: $path");
         }
-
-        $width = $imageSize[0];
-        $height = $imageSize[1];
 
         if (($width + $height) > self::MAX_PHOTO_HEIGHT_WIDTH_SUM) {
             throw new InvalidArgumentException("The photo's width and height must not exceed " . self::MAX_PHOTO_HEIGHT_WIDTH_SUM . " in total.");
@@ -42,21 +41,44 @@ class FileValidator
             throw new InvalidArgumentException("Width and height ratio must be at most " . self::MAX_PHOTO_RATIO);
         }
 
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-
-        if (!$finfo) {
-            throw new RuntimeException("Unable to initialize Fileinfo resource.");
-        }
-
-        $mimeType = finfo_file($finfo, $path);
-        finfo_close($finfo);
-
-        if (!in_array($mimeType, [
+        $this->ensureFileMimeType($path, [
             'image/jpeg',
             'image/png',
             'image/webp',
-        ], true)) {
-            throw new InvalidArgumentException("File has wrong MIME type: $mimeType");
+        ]);
+    }
+
+    /**
+     * @param string $path
+     * @return void
+     */
+    public function validateVideo(string $path): void
+    {
+        $this->baseRules($path);
+        $this->ensureFileSize($path, self::MAX_VIDEO_SIZE_MB * 1024 * 1024);
+        $this->ensureFileMimeType($path, [
+            'video/mp4',
+            'video/mpeg4',
+        ]);
+    }
+
+    /**
+     * @param string $path
+     * @return void
+     */
+    public function validateThumbnail(string $path): void
+    {
+        $this->baseRules($path);
+        $this->ensureFileSize($path, self::MAX_VIDEO_THUMBNAIL_SIZE_KB * 1024);
+        $this->ensureFileMimeType($path, ['image/jpeg']);
+
+        [$width, $height] = getimagesize($path);
+        if (!$width || !$height) {
+            throw new InvalidArgumentException("Unable to get image size: $path");
+        }
+
+        if ($width > 320 || $height > 320) {
+            throw new InvalidArgumentException("Thumbnail dimensions should not exceed 320x320: $path");
         }
     }
 
@@ -93,6 +115,27 @@ class FileValidator
 
         if ($fileSize > $maxSize) {
             throw new InvalidArgumentException("File is too large. Maximum allowed size is " . ($maxSize / 1024 / 1024) . " MB.");
+        }
+    }
+
+    /**
+     * @param string $path
+     * @param string[] $allowedMimeTypes
+     * @return void
+     */
+    private function ensureFileMimeType(string $path, array $allowedMimeTypes): void
+    {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+
+        if (!$finfo) {
+            throw new RuntimeException("Unable to initialize Fileinfo resource.");
+        }
+
+        $mimeType = finfo_file($finfo, $path);
+        finfo_close($finfo);
+
+        if (!in_array($mimeType, $allowedMimeTypes, true)) {
+            throw new InvalidArgumentException("File has wrong MIME type: $mimeType");
         }
     }
 }

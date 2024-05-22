@@ -47,6 +47,30 @@ class Bot
             ->sendPhoto($this->token, ...func_get_args());
     }
 
+    /**
+     * @see TelegramFacade::sendVideo()
+     * For more details.
+     */
+    public function sendVideo(
+        string $chatId,
+        InputFile|string $video,
+        InputFile|null $thumbnail = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?int $duration = null,
+        ?int $width = null,
+        ?int $height = null,
+        ?string $caption = null,
+        ?array $captionEntities = null,
+        ?string $parseMode = null,
+        bool $hasSpoiler = false,
+        bool $supportsStreaming = false,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        return $this
+            ->telegramFacade
+            ->sendVideo($this->token, ...func_get_args());
+    }
+
     public function editMessageText(
         string $text,
         string $chatId,
