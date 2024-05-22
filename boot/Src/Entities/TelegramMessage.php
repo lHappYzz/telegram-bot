@@ -31,6 +31,8 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
      * @param MessageEntity[]|null $entities
      * @param PhotoSize[]|null $photo
      * @param Video|null $video
+     * @param Audio|null $audio
+     * @param Voice|null $voice
      */
     public function __construct(
         protected int $messageId,
@@ -43,6 +45,8 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
         protected ?array $entities = null,
         protected ?array $photo = null,
         protected ?Video $video = null,
+        protected ?Audio $audio = null,
+        protected ?Voice $voice = null,
     ) {
         $this->setCommand();
     }
@@ -102,6 +106,14 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
     public function getVideo(): ?Video
     {
         return $this->video;
+    }
+
+    /**
+     * @return Audio|null
+     */
+    public function getAudio(): ?Audio
+    {
+        return $this->audio;
     }
 
     /**

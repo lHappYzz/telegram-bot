@@ -54,4 +54,14 @@ class InputFile extends Entity
 
         return new CURLFile(realpath($this->filePath));
     }
+
+    /**
+     * @return CURLFile
+     */
+    public function getAudio(): CURLFile
+    {
+        container(FileValidator::class)->validateAudio($this->filePath);
+
+        return new CURLFile(realpath($this->filePath));
+    }
 }

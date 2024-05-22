@@ -16,6 +16,7 @@ class FileValidator
     private const MAX_PHOTO_RATIO = 20;
     private const MAX_VIDEO_SIZE_MB = 50;
     private const MAX_VIDEO_THUMBNAIL_SIZE_KB = 200;
+    private const MAX_AUDIO_SIZE_MB = 50;
 
     /**
      * @param string $path
@@ -80,6 +81,17 @@ class FileValidator
         if ($width > 320 || $height > 320) {
             throw new InvalidArgumentException("Thumbnail dimensions should not exceed 320x320: $path");
         }
+    }
+
+    /**
+     * @param string $path
+     * @return void
+     */
+    public function validateAudio(string $path): void
+    {
+        $this->baseRules($path);
+        $this->ensureFileSize($path, self::MAX_AUDIO_SIZE_MB * 1024 * 1024);
+        $this->ensureFileMimeType($path, ['audio/mpeg', 'audio/m4a', 'audio/x-m4a']);
     }
 
     /**

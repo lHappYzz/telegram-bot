@@ -71,6 +71,47 @@ class Bot
             ->sendVideo($this->token, ...func_get_args());
     }
 
+    /**
+     * @see TelegramFacade::sendAudio()
+     * For more details.
+     */
+    public function sendAudio(
+        string $chatId,
+        InputFile|string $audio,
+        InputFile|null $thumbnail = null,
+        ?string $caption = null,
+        ?array $captionEntities = null,
+        ?string $parseMode = null,
+        ?int $duration = null,
+        ?string $performer = null,
+        ?string $title = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        return $this
+            ->telegramFacade
+            ->sendAudio($this->token, ...func_get_args());
+    }
+
+    /**
+     * @see TelegramFacade::sendVoice()
+     * For more details.
+     */
+    public function sendVoice(
+        string $chatId,
+        InputFile|string $voice,
+        ?string $caption = null,
+        ?array $captionEntities = null,
+        ?string $parseMode = null,
+        ?int $duration = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        return $this
+            ->telegramFacade
+            ->sendVoice($this->token, ...func_get_args());
+    }
+
     public function editMessageText(
         string $text,
         string $chatId,

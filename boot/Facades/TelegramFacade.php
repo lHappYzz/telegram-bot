@@ -54,7 +54,7 @@ class TelegramFacade extends Telegram
      * @param string $chatId
      * @param InputFile|string $photo
      * Use InputFile for uploading file with multipart/form-data or pass string that contains
-     * URL(telegram will download image) or file_id (if image already uploaded to telegram)
+     * URL(telegram will download file) or file_id (if file already uploaded to telegram)
      * @param string|null $caption
      * @param ReplyMarkup|null $replyMarkup
      * @param string|null $parseMode
@@ -93,7 +93,7 @@ class TelegramFacade extends Telegram
      * @param string $chatId
      * @param InputFile|string $video
      * Use InputFile for uploading file with multipart/form-data or pass string that contains
-     * URL(telegram will download image) or file_id (if image already uploaded to telegram)
+     * URL(telegram will download file) or file_id (if file already uploaded to telegram)
      * @param InputFile|null $thumbnail
      * Use InputFile for uploading file with multipart/form-data
      * @param ReplyMarkup|null $replyMarkup
@@ -138,6 +138,98 @@ class TelegramFacade extends Telegram
             'parse_mode' => $parseMode,
             'has_spoiler' => $hasSpoiler,
             'supports_streaming' => $supportsStreaming,
+            'reply_markup' => $replyMarkup ? json_encode($replyMarkup) : null,
+            ... is_null($optionalFields) ? [] : $optionalFields?->jsonSerialize(),
+        ]);
+
+        return $response->createMessage();
+    }
+
+    /**
+     * @param string $token
+     * @param string $chatId
+     * @param InputFile|string $audio
+     * Use InputFile for uploading file with multipart/form-data or pass string that contains
+     * URL(telegram will download image) or file_id (if image already uploaded to telegram)
+     * @param InputFile|null $thumbnail
+     * Use InputFile for uploading file with multipart/form-data
+     * @param string|null $caption
+     * @param array|null $captionEntities
+     * @param string|null $parseMode
+     * @param int|null $duration
+     * @param string|null $performer
+     * @param string|null $title
+     * @param ReplyMarkup|null $replyMarkup
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendAudio(
+        string $token,
+        string $chatId,
+        InputFile|string $audio,
+        InputFile|null $thumbnail = null,
+        ?string $caption = null,
+        ?array $captionEntities = null,
+        ?string $parseMode = null,
+        ?int $duration = null,
+        ?string $performer = null,
+        ?string $title = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        $response = $this->sendTelegramRequest([
+            'token' => $token,
+            'chat_id' => $chatId,
+            'method' => 'sendAudio',
+            'audio' => is_string($audio) ? $audio : $audio->getAudio(),
+            'thumbnail' => $thumbnail?->getThumbnail(),
+            'caption' => $caption,
+            'performer' => $performer,
+            'title' => $title,
+            'caption_entities' => $captionEntities,
+            'duration' => $duration,
+            'parse_mode' => $parseMode,
+            'reply_markup' => $replyMarkup ? json_encode($replyMarkup) : null,
+            ... is_null($optionalFields) ? [] : $optionalFields?->jsonSerialize(),
+        ]);
+
+        return $response->createMessage();
+    }
+
+    /**
+     * @param string $token
+     * @param string $chatId
+     * @param InputFile|string $voice
+     * Use InputFile for uploading file with multipart/form-data or pass string that contains
+     * URL(telegram will download image) or file_id (if image already uploaded to telegram)
+     * @param string|null $caption
+     * @param array|null $captionEntities
+     * @param string|null $parseMode
+     * @param int|null $duration
+     * @param ReplyMarkup|null $replyMarkup
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendVoice(
+        string $token,
+        string $chatId,
+        InputFile|string $voice,
+        ?string $caption = null,
+        ?array $captionEntities = null,
+        ?string $parseMode = null,
+        ?int $duration = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        $response = $this->sendTelegramRequest([
+            'token' => $token,
+            'chat_id' => $chatId,
+            'method' => 'sendVoice',
+            'voice' => is_string($voice) ? $voice : $voice->getAudio(),
+            'caption' => $caption,
+            'caption_entities' => $captionEntities,
+            'duration' => $duration,
+            'parse_mode' => $parseMode,
             'reply_markup' => $replyMarkup ? json_encode($replyMarkup) : null,
             ... is_null($optionalFields) ? [] : $optionalFields?->jsonSerialize(),
         ]);
