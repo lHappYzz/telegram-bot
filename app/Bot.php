@@ -72,6 +72,24 @@ class Bot
     }
 
     /**
+     * @see TelegramFacade::sendVideoNote()
+     * For more details.
+     */
+    public function sendVideoNote(
+        string $chatId,
+        InputFile|string $videoNote,
+        ?InputFile $thumbnail = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?int $duration = null,
+        ?int $length = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        return $this
+            ->telegramFacade
+            ->sendVideoNote($this->token, ...func_get_args());
+    }
+
+    /**
      * @see TelegramFacade::sendAudio()
      * For more details.
      */

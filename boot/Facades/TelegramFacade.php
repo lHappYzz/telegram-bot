@@ -146,6 +146,46 @@ class TelegramFacade extends Telegram
     }
 
     /**
+     * @link https://core.telegram.org/bots/api#sendvideonote
+     * @param string $token
+     * @param string $chatId
+     * @param InputFile|string $videoNote
+     * Use InputFile for uploading file with multipart/form-data or pass string that contains
+     * URL(telegram will download file) or file_id (if file already uploaded to telegram)
+     * @param InputFile|null $thumbnail
+     * Use InputFile for uploading file with multipart/form-data
+     * @param ReplyMarkup|null $replyMarkup
+     * @param int|null $duration
+     * @param int|null $length
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendVideoNote(
+        string $token,
+        string $chatId,
+        InputFile|string $videoNote,
+        ?InputFile $thumbnail = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?int $duration = null,
+        ?int $length = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        $response = $this->sendTelegramRequest([
+            'token' => $token,
+            'method' => 'sendVideoNote',
+            'video_note' => is_string($videoNote) ? $videoNote : $videoNote->getVideoNote(),
+            'thumbnail' => $thumbnail?->getThumbnail(),
+            'duration' => $duration,
+            'length' => $length,
+            'chat_id' => $chatId,
+            'reply_markup' => $replyMarkup ? json_encode($replyMarkup) : null,
+            ... is_null($optionalFields) ? [] : $optionalFields?->jsonSerialize(),
+        ]);
+
+        return $response->createMessage();
+    }
+
+    /**
      * @param string $token
      * @param string $chatId
      * @param InputFile|string $audio

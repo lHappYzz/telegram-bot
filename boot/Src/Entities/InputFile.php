@@ -15,11 +15,18 @@ use CURLFile;
 class InputFile extends Entity
 {
     /**
+     * @var FileValidator
+     */
+    private FileValidator $validator;
+
+    /**
      * @param string $filePath
      */
     public function __construct(
         private string $filePath,
-    ) {}
+    ) {
+        $this->validator = container(FileValidator::class, ['path' => $this->filePath]);
+    }
 
     /**
      * Allows to upload a new photo on telegram servers using multipart/form-data
@@ -28,7 +35,7 @@ class InputFile extends Entity
      */
     public function getPhoto(): CURLFile
     {
-        container(FileValidator::class)->validatePhoto($this->filePath);
+        $this->validator->validatePhoto();
 
         return new CURLFile(realpath($this->filePath));
     }
@@ -40,7 +47,19 @@ class InputFile extends Entity
      */
     public function getVideo(): CURLFile
     {
-        container(FileValidator::class)->validateVideo($this->filePath);
+        $this->validator->validateVideo();
+
+        return new CURLFile(realpath($this->filePath));
+    }
+
+    /**
+     * Allows to upload a new rounded video on telegram servers using multipart/form-data
+     *
+     * @return CURLFile
+     */
+    public function getVideoNote(): CURLFile
+    {
+        $this->validator->validateVideoNote();
 
         return new CURLFile(realpath($this->filePath));
     }
@@ -50,7 +69,7 @@ class InputFile extends Entity
      */
     public function getThumbnail(): CURLFile
     {
-        container(FileValidator::class)->validateThumbnail($this->filePath);
+        $this->validator->validateThumbnail();
 
         return new CURLFile(realpath($this->filePath));
     }
@@ -60,7 +79,7 @@ class InputFile extends Entity
      */
     public function getAudio(): CURLFile
     {
-        container(FileValidator::class)->validateAudio($this->filePath);
+        $this->validator->validateAudio();
 
         return new CURLFile(realpath($this->filePath));
     }
