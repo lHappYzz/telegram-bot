@@ -130,6 +130,26 @@ class Bot
             ->sendVoice($this->token, ...func_get_args());
     }
 
+    /**
+     * @see TelegramFacade::sendDocument()
+     * For more details.
+     */
+    public function sendDocument(
+        string $chatId,
+        InputFile|string $document,
+        ?InputFile $thumbnail = null,
+        ?string $caption = null,
+        ?string $parseMode = null,
+        ?array $captionEntities = null,
+        bool $disableContentTypeDetection = false,
+        ?ReplyMarkup $replyMarkup = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        return $this
+            ->telegramFacade
+            ->sendDocument($this->token, ...func_get_args());
+    }
+
     public function editMessageText(
         string $text,
         string $chatId,

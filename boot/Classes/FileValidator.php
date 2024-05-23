@@ -22,6 +22,8 @@ class FileValidator
 
     private const MAX_AUDIO_SIZE_MB = 50;
 
+    private const MAX_DOCUMENT_SIZE_MB = 50;
+
     /**
      * @var array
      * ArrayShape is not full
@@ -132,6 +134,25 @@ class FileValidator
         $this->baseRules();
         $this->ensureFileSize(self::MAX_AUDIO_SIZE_MB * 1024 * 1024);
         $this->ensureFileMimeType(['audio/mpeg', 'audio/m4a', 'audio/x-m4a']);
+    }
+
+    /**
+     * @return void
+     */
+    public function validateDocument(): void
+    {
+        $this->baseRules();
+        $this->ensureFileSize(self::MAX_DOCUMENT_SIZE_MB * 1024 * 1024);
+        $this->ensureFileMimeType([
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/pdf',
+            'application/zip',
+        ]);
     }
 
     /**

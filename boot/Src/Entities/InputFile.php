@@ -83,4 +83,14 @@ class InputFile extends Entity
 
         return new CURLFile(realpath($this->filePath));
     }
+
+    /**
+     * @return CURLFile
+     */
+    public function getDocument(): CURLFile
+    {
+        $this->validator->validateDocument();
+
+        return new CURLFile(realpath($this->filePath));
+    }
 }

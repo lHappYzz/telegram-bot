@@ -278,6 +278,51 @@ class TelegramFacade extends Telegram
     }
 
     /**
+     * @param string $token
+     * @param string $chatId
+     * @param InputFile|string $document
+     * Use InputFile for uploading file with multipart/form-data or pass string that contains
+     * URL(telegram will download image) or file_id (if image already uploaded to telegram)
+     * @param InputFile|null $thumbnail
+     * Use InputFile for uploading file with multipart/form-data
+     * @param string|null $caption
+     * @param string|null $parseMode
+     * @param array|null $captionEntities
+     * @param bool $disableContentTypeDetection
+     * @param ReplyMarkup|null $replyMarkup
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendDocument(
+        string $token,
+        string $chatId,
+        InputFile|string $document,
+        ?InputFile $thumbnail = null,
+        ?string $caption = null,
+        ?string $parseMode = null,
+        ?array $captionEntities = null,
+        bool $disableContentTypeDetection = false,
+        ?ReplyMarkup $replyMarkup = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        $response = $this->sendTelegramRequest([
+            'token' => $token,
+            'chat_id' => $chatId,
+            'method' => 'sendDocument',
+            'document' => is_string($document) ? $document : $document->getDocument(),
+            'thumbnail' => $thumbnail,
+            'caption' => $caption,
+            'caption_entities' => $captionEntities,
+            'disable_content_type_detection' => $disableContentTypeDetection,
+            'parse_mode' => $parseMode,
+            'reply_markup' => $replyMarkup?->jsonSerialize(),
+            ... $optionalFields?->jsonSerialize() ?? [],
+        ]);
+
+        return $response->createMessage();
+    }
+
+    /**
      * Use this method to edit text and game messages. On success the edited Message is returned.
      * @link https://core.telegram.org/bots/api#sendmessage
      * @param string $token
