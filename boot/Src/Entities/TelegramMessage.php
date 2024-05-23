@@ -31,6 +31,7 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
      * @param MessageEntity[]|null $entities
      * @param PhotoSize[]|null $photo
      * @param Video|null $video
+     * @param VideoNote|null $videoNote
      * @param Audio|null $audio
      * @param Voice|null $voice
      */
@@ -45,6 +46,7 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
         protected ?array $entities = null,
         protected ?array $photo = null,
         protected ?Video $video = null,
+        protected ?VideoNote $videoNote = null,
         protected ?Audio $audio = null,
         protected ?Voice $voice = null,
     ) {
