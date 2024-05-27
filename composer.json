@@ -16,6 +16,7 @@
     "ext-pdo": "*",
     "guzzlehttp/guzzle": "^7",
     "phpfastcache/phpfastcache": "^8.1",
-    "james-heinrich/getid3": "^1.9"
+    "james-heinrich/getid3": "^1.9",
+    "ext-mbstring": "*"
   }
 }

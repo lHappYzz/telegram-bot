@@ -2,7 +2,6 @@
 
 namespace Boot\Src\Entities;
 
-use Boot\Classes\FileValidator;
 use Boot\Src\Abstracts\Entity;
 use CURLFile;
 
@@ -15,82 +14,19 @@ use CURLFile;
 class InputFile extends Entity
 {
     /**
-     * @var FileValidator
-     */
-    private FileValidator $validator;
-
-    /**
      * @param string $filePath
      */
     public function __construct(
-        private string $filePath,
-    ) {
-        $this->validator = container(FileValidator::class, ['path' => $this->filePath]);
-    }
+        public string $filePath,
+    ) {}
 
     /**
-     * Allows to upload a new photo on telegram servers using multipart/form-data
+     * Allows to upload a new file on telegram servers using multipart/form-data
      *
      * @return CURLFile
      */
-    public function getPhoto(): CURLFile
+    public function getFile(): CURLFile
     {
-        $this->validator->validatePhoto();
-
-        return new CURLFile(realpath($this->filePath));
-    }
-
-    /**
-     * Allows to upload a new video on telegram servers using multipart/form-data
-     *
-     * @return CURLFile
-     */
-    public function getVideo(): CURLFile
-    {
-        $this->validator->validateVideo();
-
-        return new CURLFile(realpath($this->filePath));
-    }
-
-    /**
-     * Allows to upload a new rounded video on telegram servers using multipart/form-data
-     *
-     * @return CURLFile
-     */
-    public function getVideoNote(): CURLFile
-    {
-        $this->validator->validateVideoNote();
-
-        return new CURLFile(realpath($this->filePath));
-    }
-
-    /**
-     * @return CURLFile
-     */
-    public function getThumbnail(): CURLFile
-    {
-        $this->validator->validateThumbnail();
-
-        return new CURLFile(realpath($this->filePath));
-    }
-
-    /**
-     * @return CURLFile
-     */
-    public function getAudio(): CURLFile
-    {
-        $this->validator->validateAudio();
-
-        return new CURLFile(realpath($this->filePath));
-    }
-
-    /**
-     * @return CURLFile
-     */
-    public function getDocument(): CURLFile
-    {
-        $this->validator->validateDocument();
-
         return new CURLFile(realpath($this->filePath));
     }
 }

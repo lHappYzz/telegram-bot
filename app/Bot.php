@@ -29,12 +29,10 @@ class Bot
 
     /**
      * @param TelegramFacade $telegramFacade
-     * @param string $token
      */
     public function __construct(
         TelegramFacade $telegramFacade,
-        string $token
     ) {
-        $this->setTelegramFacade($telegramFacade, $token);
+        $this->telegramFacade = $telegramFacade;
     }
 }

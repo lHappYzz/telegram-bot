@@ -14,6 +14,7 @@ use Boot\Src\Entities\TelegramMessage;
 use Boot\Src\Exceptions\ContainerException;
 use Boot\Src\Entities\PhotoSize;
 use Boot\Src\TelegramRequest;
+use Boot\Src\TelegramWebhook;
 use Boot\Traits\DirectoryHelpers;
 use Boot\Traits\Helpers;
 use Exception;
@@ -27,8 +28,8 @@ class Application
     /** @var Bot */
     public Bot $bot;
 
-    /** @var TelegramRequest */
-    protected TelegramRequest $telegramRequest;
+    /** @var TelegramWebhook */
+    protected TelegramWebhook $telegramWebhook;
 
     /** @var self */
     protected static self $instance;
@@ -50,7 +51,7 @@ class Application
 
         $this->registerBaseBindings();
 
-        $this->telegramRequest = $this->container->get(TelegramRequest::class);
+        $this->telegramWebhook = $this->container->get(TelegramWebhook::class);
 
         $this->bot = $this->container->get(Bot::class);
     }
@@ -63,7 +64,7 @@ class Application
     public function boot(): void
     {
         $this
-            ->telegramRequest
+            ->telegramWebhook
             ->getUpdate()
             ->updateUnit
             ->responsibilize($this->container->get(Responsibilities::class));
@@ -119,7 +120,7 @@ class Application
         $this->container->singleton(self::class, $this);
         $this->container->singleton(ContainerInterface::class, $this->container);
         $this->container->singleton(Container::class, $this->container);
-        $this->container->singleton(TelegramRequest::class);
+        $this->container->singleton(TelegramWebhook::class);
 
         $this->container->get(ContainerConfig::class)->bindings();
         $this->registerTelegramEntitiesBindings();
@@ -191,5 +192,11 @@ class Application
 
                 return $result;
             });
+
+        $this
+            ->container
+            ->when(TelegramRequest::class)
+            ->needs('token')
+            ->give(Config::bot()['bot_token']);
     }
 }

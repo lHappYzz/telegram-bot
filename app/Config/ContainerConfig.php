@@ -23,11 +23,5 @@ class ContainerConfig
     {
         $this->container->singleton(Bot::class);
         $this->container->singleton(PermissionManager::class, Gate::class);
-
-        $this
-            ->container
-            ->when(Bot::class)
-            ->needs('token')
-            ->give(Config::bot()['bot_token']);
     }
 }

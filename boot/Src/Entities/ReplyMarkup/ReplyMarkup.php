@@ -13,5 +13,11 @@ use Boot\Src\Abstracts\JsonSerializableEntity;
  */
 abstract class ReplyMarkup extends JsonSerializableEntity
 {
-    //
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return json_encode($this);
+    }
 }
