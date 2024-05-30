@@ -4,6 +4,7 @@ namespace App;
 
 use Boot\Classes\MethodOptionalFields;
 use Boot\Facades\TelegramFacade;
+use Boot\Src\Entities\File;
 use Boot\Src\Entities\InputFile;
 use Boot\Src\Entities\ReplyMarkup\ReplyMarkup;
 use Boot\Src\Entities\TelegramMessage;
@@ -19,6 +20,7 @@ use Boot\Traits\DynamicTelegramCall;
  * @method TelegramMessage sendDocument(string $chatId, InputFile|string $document, ?InputFile $thumbnail = null, ?string $caption = null, ?string $parseMode = null, ?array $captionEntities = null, bool $disableContentTypeDetection = false, ?ReplyMarkup $replyMarkup = null, ?MethodOptionalFields $optionalFields = null);
  * @method TelegramMessage sendAnimation(string $chatId, InputFile|string $animation, InputFile|null $thumbnail = null, ?int $duration = null, ?int $width = null, ?int $height = null, ?string $caption = null, ?string $parseMode = null, ?array $captionEntities = null, bool $showCaptionAboveMedia = false, bool $hasSpoiler = false, ?ReplyMarkup $replyMarkup = null, ?MethodOptionalFields $optionalFields = null);
  * @method TelegramMessage[] sendMediaGroup(string $chatId, array $media, ?MethodOptionalFields $optionalFields = null);
+ * @method File getFile(string $fileId);
  * @method TelegramMessage editMessageText(string $text, string $chatId, int $messageId, ?ReplyMarkup $replyMarkup = null, ?string $parseMode = null, bool $disableWebPagePreview = false);
  * @method void answerCallbackQuery(string $callbackQueryId, ?string $text = null, ?bool $showAlert = null, ?string $url = null, ?int $cacheTime = null);
  * @method void answerInlineQuery(string $inlineQueryId, array $results, ?int $cacheTime = null, ?bool $isPersonal = null, ?string $nextOffset = null);

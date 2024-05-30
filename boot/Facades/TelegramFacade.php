@@ -10,6 +10,7 @@ use Boot\Src\APIMethods\AnswerInlineQuery;
 use Boot\Src\APIMethods\DeleteWebhook;
 use Boot\Src\APIMethods\EditInlineMessageText;
 use Boot\Src\APIMethods\EditMessageText;
+use Boot\Src\APIMethods\GetFile;
 use Boot\Src\APIMethods\SendAnimation;
 use Boot\Src\APIMethods\SendAudio;
 use Boot\Src\APIMethods\SendDocument;
@@ -20,6 +21,7 @@ use Boot\Src\APIMethods\SendVideo;
 use Boot\Src\APIMethods\SendVideoNote;
 use Boot\Src\APIMethods\SendVoice;
 use Boot\Src\APIMethods\SetWebhook;
+use Boot\Src\Entities\File;
 use Boot\Src\Entities\InlineMode\InlineQueryResult;
 use Boot\Src\Entities\InputFile;
 use Boot\Src\Entities\InputMedia\InputMedia;
@@ -51,15 +53,16 @@ class TelegramFacade extends Telegram
         ?MethodOptionalFields $optionalFields = null
     ): TelegramMessage {
         try {
+            /** @var TelegramMessage $response */
             $response = $this->request->prepare(new SendMessage(
                 $text, $chatId, $replyMarkup, $parseMode, $disableWebPagePreview, $optionalFields
-            ))->send();
+            ))->send()->createEntity(TelegramMessage::class);
         } catch (TelegramRequestException $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return $response->createMessage();
+        return $response;
     }
 
     /**
@@ -86,15 +89,16 @@ class TelegramFacade extends Telegram
         ?MethodOptionalFields $optionalFields = null
     ): TelegramMessage {
         try {
+            /** @var TelegramMessage $response */
             $response = $this->request->prepare(new SendPhoto(
                 $chatId, $photo, $caption, $replyMarkup, $parseMode, $hasSpoiler, $optionalFields
-            ))->send();
+            ))->send()->createEntity(TelegramMessage::class);
         } catch (TelegramRequestException $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return $response->createMessage();
+        return $response;
     }
 
     /**
@@ -133,16 +137,17 @@ class TelegramFacade extends Telegram
         ?MethodOptionalFields $optionalFields = null,
     ): TelegramMessage {
         try {
+            /** @var TelegramMessage $response */
             $response = $this->request->prepare(new SendVideo(
                 $chatId, $video, $thumbnail, $replyMarkup, $duration, $width, $height, $caption,
                 $captionEntities, $parseMode, $hasSpoiler, $supportsStreaming, $optionalFields
-            ))->send();
+            ))->send()->createEntity(TelegramMessage::class);
         } catch (TelegramRequestException $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return $response->createMessage();
+        return $response;
     }
 
     /**
@@ -169,15 +174,16 @@ class TelegramFacade extends Telegram
         ?MethodOptionalFields $optionalFields = null,
     ): TelegramMessage {
         try {
+            /** @var TelegramMessage $response */
             $response = $this->request->prepare(new SendVideoNote(
                 $chatId, $videoNote, $thumbnail, $replyMarkup, $duration, $length, $optionalFields
-            ))->send();
+            ))->send()->createEntity(TelegramMessage::class);
         } catch (TelegramRequestException $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return $response->createMessage();
+        return $response;
     }
 
     /**
@@ -212,16 +218,17 @@ class TelegramFacade extends Telegram
         ?MethodOptionalFields $optionalFields = null,
     ): TelegramMessage {
         try {
+            /** @var TelegramMessage $response */
             $response = $this->request->prepare(new SendAudio(
                 $chatId, $audio, $thumbnail, $caption, $captionEntities, $parseMode,
                 $duration, $performer, $title, $replyMarkup, $optionalFields
-            ))->send();
+            ))->send()->createEntity(TelegramMessage::class);
         } catch (TelegramRequestException $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return $response->createMessage();
+        return $response;
     }
 
     /**
@@ -249,15 +256,16 @@ class TelegramFacade extends Telegram
         ?MethodOptionalFields $optionalFields = null,
     ): TelegramMessage {
         try {
+            /** @var TelegramMessage $response */
             $response = $this->request->prepare(new SendVoice(
                 $chatId, $voice, $caption, $captionEntities, $parseMode, $duration, $replyMarkup, $optionalFields
-            ))->send();
+            ))->send()->createEntity(TelegramMessage::class);
         } catch (TelegramRequestException $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return $response->createMessage();
+        return $response;
     }
 
     /**
@@ -287,16 +295,17 @@ class TelegramFacade extends Telegram
         ?MethodOptionalFields $optionalFields = null,
     ): TelegramMessage {
         try {
+            /** @var TelegramMessage $response */
             $response = $this->request->prepare(new SendDocument(
                 $chatId, $document, $thumbnail, $caption, $parseMode, $captionEntities,
                 $disableContentTypeDetection, $replyMarkup, $optionalFields
-            ))->send();
+            ))->send()->createEntity(TelegramMessage::class);
         } catch (TelegramRequestException $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return $response->createMessage();
+        return $response;
     }
 
     /**
@@ -357,15 +366,37 @@ class TelegramFacade extends Telegram
         ?MethodOptionalFields $optionalFields = null,
     ): TelegramMessage {
         try {
+            /** @var TelegramMessage $response */
             $response = $this->request->prepare(new SendAnimation(
                 ...func_get_args()
-            ))->send();
+            ))->send()->createEntity(TelegramMessage::class);
         } catch (TelegramRequestException $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return $response->createMessage();
+        return $response;
+    }
+
+    /**
+     * Use this method to get basic information about a file and prepare it for downloading.
+     * The file can then be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>,
+     * where <file_path> is taken from the response.
+     * @link https://core.telegram.org/bots/api#file
+     * @param string $fileId
+     * @return File
+     */
+    public function getFile(string $fileId): File
+    {
+        try {
+            /** @var File $response */
+            $response = $this->request->prepare(new GetFile($fileId))->send()->createEntity(File::class);
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $response;
     }
 
     /**
@@ -390,15 +421,16 @@ class TelegramFacade extends Telegram
         ?array $entities = null
     ): TelegramMessage {
         try {
+            /** @var TelegramMessage $response */
             $response = $this->request->prepare(new EditMessageText(
                 $text, $chatId, $messageId, $replyMarkup, $parseMode, $disableWebPagePreview, $entities
-            ))->send();
+            ))->send()->createEntity(TelegramMessage::class);
         } catch (TelegramRequestException $e) {
             Logger::logException($e, Logger::LEVEL_ERROR);
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return $response->createMessage();
+        return $response;
     }
 
     /**

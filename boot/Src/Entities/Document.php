@@ -14,7 +14,7 @@ class Document extends Entity
     /**
      * @param string $fileId
      * @param string $fileUniqueId
-     * @param string|null $thumbnail
+     * @param PhotoSize|null $thumbnail
      * @param string|null $fileName
      * @param string|null $mimeType
      * @param string|null $fileSize
@@ -22,7 +22,7 @@ class Document extends Entity
     public function __construct(
         protected string $fileId,
         protected string $fileUniqueId,
-        protected ?string $thumbnail = null,
+        protected ?PhotoSize $thumbnail = null,
         protected ?string $fileName = null,
         protected ?string $mimeType = null,
         protected ?string $fileSize = null,
@@ -45,9 +45,9 @@ class Document extends Entity
     }
 
     /**
-     * @return string|null
+     * @return PhotoSize|null
      */
-    public function getThumbnail(): ?string
+    public function getThumbnail(): ?PhotoSize
     {
         return $this->thumbnail;
     }
