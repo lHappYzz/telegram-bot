@@ -10,6 +10,7 @@ use Boot\Src\APIMethods\AnswerInlineQuery;
 use Boot\Src\APIMethods\DeleteWebhook;
 use Boot\Src\APIMethods\EditInlineMessageText;
 use Boot\Src\APIMethods\EditMessageText;
+use Boot\Src\APIMethods\SendAnimation;
 use Boot\Src\APIMethods\SendAudio;
 use Boot\Src\APIMethods\SendDocument;
 use Boot\Src\APIMethods\SendMediaGroup;
@@ -320,6 +321,51 @@ class TelegramFacade extends Telegram
         }
 
         return $response->createMessages();
+    }
+
+    /**
+     * Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound).
+     * @link https://core.telegram.org/bots/api#sendanimation
+     * @param string $chatId
+     * @param InputFile|string $animation
+     * @param InputFile|null $thumbnail
+     * @param int|null $duration
+     * @param int|null $width
+     * @param int|null $height
+     * @param string|null $caption
+     * @param string|null $parseMode
+     * @param MessageEntity[]|null $captionEntities
+     * @param bool $showCaptionAboveMedia
+     * @param bool $hasSpoiler
+     * @param ReplyMarkup|null $replyMarkup
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendAnimation(
+        string $chatId,
+        InputFile|string $animation,
+        InputFile|null $thumbnail = null,
+        ?int $duration = null,
+        ?int $width = null,
+        ?int $height = null,
+        ?string $caption = null,
+        ?string $parseMode = null,
+        ?array $captionEntities = null,
+        bool $showCaptionAboveMedia = false,
+        bool $hasSpoiler = false,
+        ?ReplyMarkup $replyMarkup = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        try {
+            $response = $this->request->prepare(new SendAnimation(
+                ...func_get_args()
+            ))->send();
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $response->createMessage();
     }
 
     /**
