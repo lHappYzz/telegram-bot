@@ -157,6 +157,21 @@ class FileValidator
 
     /**
      * @return void
+     */
+    public function validateAnimation(): void
+    {
+        $this->baseRules();
+        $this->ensureFileSize(self::MAX_VIDEO_SIZE_MB * 1024 * 1024);
+        $this->ensureFileMimeType([
+            'image/gif',
+            'video/mp4',
+            'video/x-m4v',
+            'video/h264',
+        ]);
+    }
+
+    /**
+     * @return void
      * @throws InvalidArgumentException
      */
     private function baseRules(): void

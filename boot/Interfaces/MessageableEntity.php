@@ -29,7 +29,7 @@ interface MessageableEntity
      * 
      * @return ?string
      */
-    public function getMessageText(): ?string;
+    public function getText(): ?string;
 
     /**
      * @return int
@@ -37,11 +37,11 @@ interface MessageableEntity
     public function getMessageId(): int;
 
     /**
-     * TODO: Change return type to DateTime object
-     * @param string $format
-     * @return string
+     * Date the message was sent in Unix time. It is always a positive number, representing a valid date.
+     *
+     * @return int
      */
-    public function getMessageDate(string $format = 'Y-m-d H:i:s'): string;
+    public function getDate(): int;
 
     /**
      * Check if message is command

@@ -2,19 +2,11 @@
 
 namespace Boot\Src\APIMethods;
 
+use Boot\Interfaces\TelegramRequirementsValidate;
 use Boot\Src\Abstracts\JsonSerializableEntity;
-use Boot\Src\Exceptions\TelegramMethod\TelegramMethodException;
 
-abstract class TelegramMethod extends JsonSerializableEntity
+abstract class TelegramMethod extends JsonSerializableEntity implements TelegramRequirementsValidate
 {
-    /**
-     * Validate fields to be sent according to telegram requirements.
-     *
-     * @return void
-     * @throws TelegramMethodException
-     */
-    abstract public function validate(): void;
-
     /**
      * Return telegram-side method name.
      *

@@ -12,6 +12,7 @@ use Boot\Src\APIMethods\EditInlineMessageText;
 use Boot\Src\APIMethods\EditMessageText;
 use Boot\Src\APIMethods\SendAudio;
 use Boot\Src\APIMethods\SendDocument;
+use Boot\Src\APIMethods\SendMediaGroup;
 use Boot\Src\APIMethods\SendMessage;
 use Boot\Src\APIMethods\SendPhoto;
 use Boot\Src\APIMethods\SendVideo;
@@ -20,6 +21,7 @@ use Boot\Src\APIMethods\SendVoice;
 use Boot\Src\APIMethods\SetWebhook;
 use Boot\Src\Entities\InlineMode\InlineQueryResult;
 use Boot\Src\Entities\InputFile;
+use Boot\Src\Entities\InputMedia\InputMedia;
 use Boot\Src\Entities\MessageEntity;
 use Boot\Src\Entities\ReplyMarkup\ReplyMarkup;
 use Boot\Src\Entities\TelegramMessage;
@@ -178,6 +180,7 @@ class TelegramFacade extends Telegram
     }
 
     /**
+     * @link https://core.telegram.org/bots/api#sendaudio
      * @param string $chatId
      * @param InputFile|string $audio
      * Use InputFile for uploading file with multipart/form-data or pass string that contains
@@ -221,6 +224,7 @@ class TelegramFacade extends Telegram
     }
 
     /**
+     * @link https://core.telegram.org/bots/api#sendvoice
      * @param string $chatId
      * @param InputFile|string $voice
      * Use InputFile for uploading file with multipart/form-data or pass string that contains
@@ -292,6 +296,30 @@ class TelegramFacade extends Telegram
         }
 
         return $response->createMessage();
+    }
+
+    /**
+     * @link https://core.telegram.org/bots/api#sendmediagroup
+     * @param string $chatId
+     * @param InputMedia[] $media
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage[]
+     */
+    public function sendMediaGroup(
+        string $chatId,
+        array $media,
+        ?MethodOptionalFields $optionalFields = null,
+    ): array {
+        try {
+            $response = $this->request->prepare(new SendMediaGroup(
+                $chatId, $media, $optionalFields
+            ))->send();
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $response->createMessages();
     }
 
     /**

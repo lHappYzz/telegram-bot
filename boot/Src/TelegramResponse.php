@@ -23,4 +23,18 @@ class TelegramResponse
     {
         return container(TelegramMessage::class, $this->result);
     }
+
+    /**
+     * @return TelegramMessage[]
+     */
+    public function createMessages(): array
+    {
+        $messages = [];
+
+        foreach ($this->result as $item) {
+            $messages[] = container(TelegramMessage::class, $item);
+        }
+
+        return $messages;
+    }
 }
