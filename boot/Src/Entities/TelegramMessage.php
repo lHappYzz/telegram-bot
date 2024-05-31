@@ -10,15 +10,11 @@ use Boot\Interfaces\MessageableEntity;
 use Boot\Src\Abstracts\BaseCommand;
 use Boot\Src\Abstracts\UpdateUnit;
 use Boot\Src\Entities\ReplyMarkup\InlineKeyboardMarkup;
-use Boot\Src\PhotoSize;
 
 class TelegramMessage extends UpdateUnit implements MessageableEntity
 {
     /** @var BaseCommand|null */
     private ?BaseCommand $command = null;
-
-    private bool $hasFile = false;
-    private ?string $fileType = null;
 
     /**
      * @param int $messageId
@@ -30,6 +26,13 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
      * @param InlineKeyboardMarkup|null $replyMarkup
      * @param MessageEntity[]|null $entities
      * @param PhotoSize[]|null $photo
+     * @param Video|null $video
+     * @param VideoNote|null $videoNote
+     * @param Audio|null $audio
+     * @param Voice|null $voice
+     * @param Document|null $document
+     * @param string|null $mediaGroupId
+     * @param bool|null $hasProtectedContent
      */
     public function __construct(
         protected int $messageId,
@@ -41,33 +44,95 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
         protected ?InlineKeyboardMarkup $replyMarkup = null,
         protected ?array $entities = null,
         protected ?array $photo = null,
+        protected ?Video $video = null,
+        protected ?VideoNote $videoNote = null,
+        protected ?Audio $audio = null,
+        protected ?Voice $voice = null,
+        protected ?Document $document = null,
+        protected ?string $mediaGroupId = null,
+        protected ?bool $hasProtectedContent = null,
     ) {
         $this->setCommand();
     }
 
+    /**
+     * @return string|null
+     */
+    public function getMediaGroupId(): ?string
+    {
+        return $this->mediaGroupId;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getHasProtectedContent(): ?bool
+    {
+        return $this->hasProtectedContent;
+    }
+
+    /**
+     * @return PhotoSize[]|null
+     */
+    public function getPhoto(): ?array
+    {
+        return $this->photo;
+    }
+
+    /**
+     * @return VideoNote|null
+     */
+    public function getVideoNote(): ?VideoNote
+    {
+        return $this->videoNote;
+    }
+
+    /**
+     * @return Voice|null
+     */
+    public function getVoice(): ?Voice
+    {
+        return $this->voice;
+    }
+
+    /**
+     * @return Document|null
+     */
+    public function getDocument(): ?Document
+    {
+        return $this->document;
+    }
+
+    /**
+     * @return int
+     */
     public function getMessageId(): int
     {
         return $this->messageId;
     }
 
+    /**
+     * @return TelegramUser
+     */
     public function getFrom(): TelegramUser
     {
         return $this->from;
     }
 
+    /**
+     * @return TelegramChat
+     */
     public function getChat(): TelegramChat
     {
         return $this->chat;
     }
 
-    public function getMessageText(): ?string
+    /**
+     * @return string|null
+     */
+    public function getText(): ?string
     {
         return $this->text;
-    }
-
-    public function getMessageDate($format = 'Y-m-d H:i:s'): string
-    {
-        return date($format, $this->date);
     }
 
     /**
@@ -79,19 +144,51 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
     }
 
     /**
-     * @return TelegramMessage|null
-     */
-    public function getRepliedMessage(): ?TelegramMessage
-    {
-        return $this->replyToMessage;
-    }
-
-    /**
      * @return InlineKeyboardMarkup|null
      */
     public function getReplyMarkup(): ?InlineKeyboardMarkup
     {
         return $this->replyMarkup;
+    }
+
+    /**
+     * @return Video|null
+     */
+    public function getVideo(): ?Video
+    {
+        return $this->video;
+    }
+
+    /**
+     * @return Audio|null
+     */
+    public function getAudio(): ?Audio
+    {
+        return $this->audio;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDate(): int
+    {
+        return $this->date;
+    }
+
+    /**
+     * @return TelegramMessage|null
+     */
+    public function getReplyToMessage(): ?TelegramMessage
+    {
+        return $this->replyToMessage;
+    }
+
+    /**
+     * @return MessageEntity[]|null
+     */
+    public function getEntities(): ?array
+    {
+        return $this->entities;
     }
 
     /**

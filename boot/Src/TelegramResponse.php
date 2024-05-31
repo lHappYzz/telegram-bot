@@ -2,6 +2,7 @@
 
 namespace Boot\Src;
 
+use Boot\Src\Abstracts\Entity;
 use Boot\Src\Entities\TelegramMessage;
 
 class TelegramResponse
@@ -17,10 +18,25 @@ class TelegramResponse
     }
 
     /**
-     * @return TelegramMessage
+     * @return TelegramMessage[]
      */
-    public function createMessage(): TelegramMessage
+    public function createMessages(): array
     {
-        return container(TelegramMessage::class, $this->result);
+        $messages = [];
+
+        foreach ($this->result as $item) {
+            $messages[] = container(TelegramMessage::class, $item);
+        }
+
+        return $messages;
+    }
+
+    /**
+     * @param string $abstract
+     * @return Entity
+     */
+    public function createEntity(string $abstract): Entity
+    {
+        return container($abstract, $this->result);
     }
 }

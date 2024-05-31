@@ -3,18 +3,39 @@
 namespace Boot\Facades;
 
 use Boot\Classes\MethodOptionalFields;
+use Boot\Log\Logger;
 use Boot\Src\Abstracts\Telegram;
+use Boot\Src\APIMethods\AnswerCallbackQuery;
+use Boot\Src\APIMethods\AnswerInlineQuery;
+use Boot\Src\APIMethods\DeleteWebhook;
+use Boot\Src\APIMethods\EditInlineMessageText;
+use Boot\Src\APIMethods\EditMessageText;
+use Boot\Src\APIMethods\GetFile;
+use Boot\Src\APIMethods\SendAnimation;
+use Boot\Src\APIMethods\SendAudio;
+use Boot\Src\APIMethods\SendDocument;
+use Boot\Src\APIMethods\SendMediaGroup;
+use Boot\Src\APIMethods\SendMessage;
+use Boot\Src\APIMethods\SendPhoto;
+use Boot\Src\APIMethods\SendVideo;
+use Boot\Src\APIMethods\SendVideoNote;
+use Boot\Src\APIMethods\SendVoice;
+use Boot\Src\APIMethods\SetWebhook;
+use Boot\Src\Entities\File;
 use Boot\Src\Entities\InlineMode\InlineQueryResult;
+use Boot\Src\Entities\InputFile;
+use Boot\Src\Entities\InputMedia\InputMedia;
 use Boot\Src\Entities\MessageEntity;
 use Boot\Src\Entities\ReplyMarkup\ReplyMarkup;
 use Boot\Src\Entities\TelegramMessage;
+use Boot\Src\Exceptions\Request\TelegramRequestException;
+use RuntimeException;
 
 class TelegramFacade extends Telegram
 {
     /**
      * Use this method to send text messages. On success, the sent Message is returned.
      * @link https://core.telegram.org/bots/api#sendmessage
-     * @param string $token
      * @param string $text
      * @param string $chatId
      * @param ReplyMarkup|null $replyMarkup
@@ -22,10 +43,8 @@ class TelegramFacade extends Telegram
      * @param bool $disableWebPagePreview
      * @param MethodOptionalFields|null $optionalFields
      * @return TelegramMessage
-     *
      */
     public function sendMessage(
-        string $token,
         string $text,
         string $chatId,
         ?ReplyMarkup $replyMarkup = null,
@@ -33,24 +52,356 @@ class TelegramFacade extends Telegram
         bool $disableWebPagePreview = false,
         ?MethodOptionalFields $optionalFields = null
     ): TelegramMessage {
-        $response = $this->sendTelegramRequest([
-            'token' => $token,
-            'method' => 'sendMessage',
-            'text' => $text,
-            'chat_id' => $chatId,
-            'parse_mode' => $parseMode,
-            'disable_web_page_preview' => $disableWebPagePreview,
-            'reply_markup' => $replyMarkup ? json_encode($replyMarkup) : null,
-            ... is_null($optionalFields) ? [] : $optionalFields?->jsonSerialize(),
-        ]);
+        try {
+            /** @var TelegramMessage $response */
+            $response = $this->request->prepare(new SendMessage(
+                $text, $chatId, $replyMarkup, $parseMode, $disableWebPagePreview, $optionalFields
+            ))->send()->createEntity(TelegramMessage::class);
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
 
-        return $response->createMessage();
+        return $response;
+    }
+
+    /**
+     * Use this method to send photos. On success, the sent Message is returned.
+     * @link https://core.telegram.org/bots/api#sendphoto
+     * @param string $chatId
+     * @param InputFile|string $photo
+     * Use InputFile for uploading file with multipart/form-data or pass string that contains
+     * URL(telegram will download file) or file_id (if file already uploaded to telegram)
+     * @param string|null $caption
+     * @param ReplyMarkup|null $replyMarkup
+     * @param string|null $parseMode
+     * @param bool $hasSpoiler
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendPhoto(
+        string $chatId,
+        InputFile|string $photo,
+        ?string $caption = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?string $parseMode = null,
+        bool $hasSpoiler = false,
+        ?MethodOptionalFields $optionalFields = null
+    ): TelegramMessage {
+        try {
+            /** @var TelegramMessage $response */
+            $response = $this->request->prepare(new SendPhoto(
+                $chatId, $photo, $caption, $replyMarkup, $parseMode, $hasSpoiler, $optionalFields
+            ))->send()->createEntity(TelegramMessage::class);
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @link https://core.telegram.org/bots/api#sendvideo
+     * @param string $chatId
+     * @param InputFile|string $video
+     * Use InputFile for uploading file with multipart/form-data or pass string that contains
+     * URL(telegram will download file) or file_id (if file already uploaded to telegram)
+     * @param InputFile|null $thumbnail
+     * Use InputFile for uploading file with multipart/form-data
+     * @param ReplyMarkup|null $replyMarkup
+     * @param int|null $duration
+     * @param int|null $width
+     * @param int|null $height
+     * @param string|null $caption
+     * @param array|null $captionEntities
+     * @param string|null $parseMode
+     * @param bool $hasSpoiler
+     * @param bool $supportsStreaming
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendVideo(
+        string $chatId,
+        InputFile|string $video,
+        InputFile|null $thumbnail = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?int $duration = null,
+        ?int $width = null,
+        ?int $height = null,
+        ?string $caption = null,
+        ?array $captionEntities = null,
+        ?string $parseMode = null,
+        bool $hasSpoiler = false,
+        bool $supportsStreaming = false,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        try {
+            /** @var TelegramMessage $response */
+            $response = $this->request->prepare(new SendVideo(
+                $chatId, $video, $thumbnail, $replyMarkup, $duration, $width, $height, $caption,
+                $captionEntities, $parseMode, $hasSpoiler, $supportsStreaming, $optionalFields
+            ))->send()->createEntity(TelegramMessage::class);
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @link https://core.telegram.org/bots/api#sendvideonote
+     * @param string $chatId
+     * @param InputFile|string $videoNote
+     * Use InputFile for uploading file with multipart/form-data or pass string that contains
+     * URL(telegram will download file) or file_id (if file already uploaded to telegram)
+     * @param InputFile|null $thumbnail
+     * Use InputFile for uploading file with multipart/form-data
+     * @param ReplyMarkup|null $replyMarkup
+     * @param int|null $duration
+     * @param int|null $length
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendVideoNote(
+        string $chatId,
+        InputFile|string $videoNote,
+        ?InputFile $thumbnail = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?int $duration = null,
+        ?int $length = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        try {
+            /** @var TelegramMessage $response */
+            $response = $this->request->prepare(new SendVideoNote(
+                $chatId, $videoNote, $thumbnail, $replyMarkup, $duration, $length, $optionalFields
+            ))->send()->createEntity(TelegramMessage::class);
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @link https://core.telegram.org/bots/api#sendaudio
+     * @param string $chatId
+     * @param InputFile|string $audio
+     * Use InputFile for uploading file with multipart/form-data or pass string that contains
+     * URL(telegram will download image) or file_id (if image already uploaded to telegram)
+     * @param InputFile|null $thumbnail
+     * Use InputFile for uploading file with multipart/form-data
+     * @param string|null $caption
+     * @param array|null $captionEntities
+     * @param string|null $parseMode
+     * @param int|null $duration
+     * @param string|null $performer
+     * @param string|null $title
+     * @param ReplyMarkup|null $replyMarkup
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendAudio(
+        string $chatId,
+        InputFile|string $audio,
+        InputFile|null $thumbnail = null,
+        ?string $caption = null,
+        ?array $captionEntities = null,
+        ?string $parseMode = null,
+        ?int $duration = null,
+        ?string $performer = null,
+        ?string $title = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        try {
+            /** @var TelegramMessage $response */
+            $response = $this->request->prepare(new SendAudio(
+                $chatId, $audio, $thumbnail, $caption, $captionEntities, $parseMode,
+                $duration, $performer, $title, $replyMarkup, $optionalFields
+            ))->send()->createEntity(TelegramMessage::class);
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @link https://core.telegram.org/bots/api#sendvoice
+     * @param string $chatId
+     * @param InputFile|string $voice
+     * Use InputFile for uploading file with multipart/form-data or pass string that contains
+     * URL(telegram will download image) or file_id (if image already uploaded to telegram)
+     * @param string|null $caption
+     * @param array|null $captionEntities
+     * @param string|null $parseMode
+     * @param int|null $duration
+     * @param ReplyMarkup|null $replyMarkup
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendVoice(
+        string $chatId,
+        InputFile|string $voice,
+        ?string $caption = null,
+        ?array $captionEntities = null,
+        ?string $parseMode = null,
+        ?int $duration = null,
+        ?ReplyMarkup $replyMarkup = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        try {
+            /** @var TelegramMessage $response */
+            $response = $this->request->prepare(new SendVoice(
+                $chatId, $voice, $caption, $captionEntities, $parseMode, $duration, $replyMarkup, $optionalFields
+            ))->send()->createEntity(TelegramMessage::class);
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param string $chatId
+     * @param InputFile|string $document
+     * Use InputFile for uploading file with multipart/form-data or pass string that contains
+     * URL(telegram will download image) or file_id (if image already uploaded to telegram)
+     * @param InputFile|null $thumbnail
+     * Use InputFile for uploading file with multipart/form-data
+     * @param string|null $caption
+     * @param string|null $parseMode
+     * @param array|null $captionEntities
+     * @param bool $disableContentTypeDetection
+     * @param ReplyMarkup|null $replyMarkup
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendDocument(
+        string $chatId,
+        InputFile|string $document,
+        ?InputFile $thumbnail = null,
+        ?string $caption = null,
+        ?string $parseMode = null,
+        ?array $captionEntities = null,
+        bool $disableContentTypeDetection = false,
+        ?ReplyMarkup $replyMarkup = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        try {
+            /** @var TelegramMessage $response */
+            $response = $this->request->prepare(new SendDocument(
+                $chatId, $document, $thumbnail, $caption, $parseMode, $captionEntities,
+                $disableContentTypeDetection, $replyMarkup, $optionalFields
+            ))->send()->createEntity(TelegramMessage::class);
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @link https://core.telegram.org/bots/api#sendmediagroup
+     * @param string $chatId
+     * @param InputMedia[] $media
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage[]
+     */
+    public function sendMediaGroup(
+        string $chatId,
+        array $media,
+        ?MethodOptionalFields $optionalFields = null,
+    ): array {
+        try {
+            $response = $this->request->prepare(new SendMediaGroup(
+                $chatId, $media, $optionalFields
+            ))->send();
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $response->createMessages();
+    }
+
+    /**
+     * Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound).
+     * @link https://core.telegram.org/bots/api#sendanimation
+     * @param string $chatId
+     * @param InputFile|string $animation
+     * @param InputFile|null $thumbnail
+     * @param int|null $duration
+     * @param int|null $width
+     * @param int|null $height
+     * @param string|null $caption
+     * @param string|null $parseMode
+     * @param MessageEntity[]|null $captionEntities
+     * @param bool $showCaptionAboveMedia
+     * @param bool $hasSpoiler
+     * @param ReplyMarkup|null $replyMarkup
+     * @param MethodOptionalFields|null $optionalFields
+     * @return TelegramMessage
+     */
+    public function sendAnimation(
+        string $chatId,
+        InputFile|string $animation,
+        InputFile|null $thumbnail = null,
+        ?int $duration = null,
+        ?int $width = null,
+        ?int $height = null,
+        ?string $caption = null,
+        ?string $parseMode = null,
+        ?array $captionEntities = null,
+        bool $showCaptionAboveMedia = false,
+        bool $hasSpoiler = false,
+        ?ReplyMarkup $replyMarkup = null,
+        ?MethodOptionalFields $optionalFields = null,
+    ): TelegramMessage {
+        try {
+            /** @var TelegramMessage $response */
+            $response = $this->request->prepare(new SendAnimation(
+                ...func_get_args()
+            ))->send()->createEntity(TelegramMessage::class);
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Use this method to get basic information about a file and prepare it for downloading.
+     * The file can then be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>,
+     * where <file_path> is taken from the response.
+     * @link https://core.telegram.org/bots/api#file
+     * @param string $fileId
+     * @return File
+     */
+    public function getFile(string $fileId): File
+    {
+        try {
+            /** @var File $response */
+            $response = $this->request->prepare(new GetFile($fileId))->send()->createEntity(File::class);
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $response;
     }
 
     /**
      * Use this method to edit text and game messages. On success the edited Message is returned.
      * @link https://core.telegram.org/bots/api#sendmessage
-     * @param string $token
      * @param string $text
      * @param string $chatId
      * @param int $messageId
@@ -61,7 +412,6 @@ class TelegramFacade extends Telegram
      * @return TelegramMessage
      */
     public function editMessageText(
-        string $token,
         string $text,
         string $chatId,
         int $messageId,
@@ -70,25 +420,22 @@ class TelegramFacade extends Telegram
         bool $disableWebPagePreview = false,
         ?array $entities = null
     ): TelegramMessage {
-        $response = $this->sendTelegramRequest([
-            'token' => $token,
-            'method' => 'editMessageText',
-            'text' => $text,
-            'chat_id' => $chatId,
-            'message_id' => $messageId,
-            'parse_mode' => $parseMode,
-            'disable_web_page_preview' => $disableWebPagePreview,
-            'reply_markup' => $replyMarkup ? json_encode($replyMarkup) : null,
-            'entities' => $entities ? json_encode($entities) : null,
-        ]);
+        try {
+            /** @var TelegramMessage $response */
+            $response = $this->request->prepare(new EditMessageText(
+                $text, $chatId, $messageId, $replyMarkup, $parseMode, $disableWebPagePreview, $entities
+            ))->send()->createEntity(TelegramMessage::class);
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
 
-        return $response->createMessage();
+        return $response;
     }
 
     /**
      * Use this method to edit inline message text.
      * @link https://core.telegram.org/bots/api#sendmessage
-     * @param string $token
      * @param string $text
      * @param int $inlineMessageId
      * @param ReplyMarkup|null $replyMarkup
@@ -97,7 +444,6 @@ class TelegramFacade extends Telegram
      * @param MessageEntity[]|null $entities
      */
     public function editInlineMessageText(
-        string $token,
         string $text,
         int $inlineMessageId,
         ?ReplyMarkup $replyMarkup = null,
@@ -105,23 +451,20 @@ class TelegramFacade extends Telegram
         bool $disableWebPagePreview = false,
         ?array $entities = null
     ): void {
-        $this->sendTelegramRequest([
-            'token' => $token,
-            'method' => 'editMessageText',
-            'text' => $text,
-            'inline_message_id' => $inlineMessageId,
-            'parse_mode' => $parseMode,
-            'disable_web_page_preview' => $disableWebPagePreview,
-            'reply_markup' => $replyMarkup ? json_encode($replyMarkup) : null,
-            'entities' => $entities ? json_encode($entities) : null,
-        ]);
+        try {
+            $this->request->prepare(new EditInlineMessageText(
+                $text, $inlineMessageId, $replyMarkup, $parseMode, $disableWebPagePreview, $entities
+            ))->send();
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
      * Use this method to send answers to callback queries sent from inline keyboards.
      * The answer will be displayed to the user as a notification at the top of the chat screen or as an alert.
      * @link https://core.telegram.org/bots/api#answercallbackquery
-     * @param string $token
      * @param string $callbackQueryId
      * @param string|null $text
      * @param bool|null $showAlert
@@ -130,29 +473,26 @@ class TelegramFacade extends Telegram
      * @return void
      */
     public function answerCallbackQuery(
-        string $token,
         string $callbackQueryId,
         ?string $text = null,
         ?bool $showAlert = null,
         ?string $url = null,
         ?int $cacheTime = null
     ): void {
-        $this->sendTelegramRequest([
-            'token' => $token,
-            'method' => 'answerCallbackQuery',
-            'callback_query_id' => $callbackQueryId,
-            'text' => $text,
-            'show_alert' => $showAlert,
-            'url' => $url,
-            'cache_time' => $cacheTime,
-        ]);
+        try {
+            $this->request->prepare(new AnswerCallbackQuery(
+                $callbackQueryId, $text, $showAlert, $url, $cacheTime
+            ))->send();
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
      * Use this method to send answers to an inline query.
      * No more than 50 results per query are allowed.
-     * @link https://core.telegram.org/bots/api#answercallbackquery
-     * @param string $token
+     * @link https://core.telegram.org/bots/api#answerinlinequery
      * @param string $inlineQueryId
      * @param InlineQueryResult[] $results
      * @param int|null $cacheTime
@@ -161,22 +501,20 @@ class TelegramFacade extends Telegram
      * @return void
      */
     public function answerInlineQuery(
-        string $token,
         string $inlineQueryId,
         array $results,
         ?int $cacheTime = null,
         ?bool $isPersonal = null,
         ?string $nextOffset = null,
     ): void {
-        $this->sendTelegramRequest([
-            'token' => $token,
-            'method' => 'answerInlineQuery',
-            'inline_query_id' => $inlineQueryId,
-            'cache_time' => $cacheTime,
-            'is_personal' => $isPersonal,
-            'next_offset' => $nextOffset,
-            'results' => json_encode($results),
-        ]);
+        try {
+            $this->request->prepare(new AnswerInlineQuery(
+                $inlineQueryId, $results, $cacheTime, $isPersonal, $nextOffset
+            ))->send();
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -189,7 +527,6 @@ class TelegramFacade extends Telegram
      * secret_token. If specified, the request will contain a header “X-Telegram-Bot-Api-Secret-Token” with the
      * secret token as content.
      * @link https://core.telegram.org/bots/api#setwebhook
-     * @param string $token
      * @param string $url
      * @param string|null $ipAddress
      * @param int|null $maxConnections
@@ -199,7 +536,6 @@ class TelegramFacade extends Telegram
      * @return void
      */
     public function setWebhook(
-        string $token,
         string $url,
         ?string $ipAddress = null,
         ?int $maxConnections = null,
@@ -207,32 +543,31 @@ class TelegramFacade extends Telegram
         bool $dropPendingUpdates = false,
         ?string $secretToken = null,
     ): void {
-        self::sendTelegramRequest([
-            'token' => $token,
-            'method' => 'setWebhook',
-            'url' => $url,
-            'ip_address' => $ipAddress,
-            'max_connections' => $maxConnections,
-            'allowed_updates' => $allowUpdates,
-            'drop_pending_updates' => $dropPendingUpdates,
-            'secret_token' => $secretToken,
-        ]);
+        try {
+            $this->request->prepare(new SetWebhook(
+                $url, $ipAddress, $maxConnections, $allowUpdates, $dropPendingUpdates, $secretToken
+            ))->send();
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
      * @link https://core.telegram.org/bots/api#deletewebhook
-     * @param string $token
      * @param bool $dropPendingUpdates
      * @return void
      */
     public function deleteWebhook(
-        string $token,
         bool $dropPendingUpdates = false,
     ): void {
-        self::sendTelegramRequest([
-            'token' => $token,
-            'method' => 'deleteWebhook',
-            'drop_pending_updates' => $dropPendingUpdates,
-        ]);
+        try {
+            $this->request->prepare(new DeleteWebhook(
+                $dropPendingUpdates
+            ))->send();
+        } catch (TelegramRequestException $e) {
+            Logger::logException($e, Logger::LEVEL_ERROR);
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 }
