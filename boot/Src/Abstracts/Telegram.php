@@ -7,10 +7,10 @@ use Boot\Src\TelegramRequest;
 abstract class Telegram
 {
     /** @var string */
-    public const COMMANDS_NAMESPACE = 'App\\Commands\\';
+    public const string COMMANDS_NAMESPACE = 'App\\Commands\\';
 
     /** @var string */
-    public const CALLBACK_QUERY_NAMESPACE = 'App\\CallbackQueryHandlers\\';
+    public const string CALLBACK_QUERY_NAMESPACE = 'App\\CallbackQueryHandlers\\';
 
     /**
      * @param TelegramRequest $request

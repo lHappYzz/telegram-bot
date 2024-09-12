@@ -14,7 +14,7 @@ use RuntimeException;
 class InlineKeyboardButton extends JsonSerializableEntity implements KeyboardButtonInterface
 {
     /** @var string */
-    public const CALLBACK_DATA_DELIMITER = ':';
+    public const string CALLBACK_DATA_DELIMITER = ':';
 
     /**
      * @param string $text

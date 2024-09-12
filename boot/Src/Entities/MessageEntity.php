@@ -9,23 +9,23 @@ use Boot\Src\Abstracts\JsonSerializableEntity;
  */
 class MessageEntity extends JsonSerializableEntity
 {
-    public const MENTION_TYPE = 'mention';
-    public const HASHTAG_TYPE = 'hashtag';
-    public const CASHTAG_TYPE = 'cashtag';
-    public const BOT_COMMAND_TYPE = 'bot_command';
-    public const URL_TYPE = 'url';
-    public const EMAIL_TYPE = 'email';
-    public const PHONE_NUMBER_TYPE = 'phone_number';
-    public const BOLD_TYPE = 'bold';
-    public const ITALIC_TYPE = 'italic';
-    public const UNDERLINE_TYPE = 'underline';
-    public const STRIKETHROUGH_TYPE = 'strikethrough';
-    public const SPOILER_TYPE = 'spoiler';
-    public const CODE_TYPE = 'code';
-    public const PRE_TYPE = 'pre';
-    public const TEXT_LINK_TYPE = 'text_link';
-    public const TEXT_MENTION_TYPE = 'text_mention';
-    public const CUSTOM_EMOJI_TYPE = 'custom_emoji';
+    public const string MENTION_TYPE = 'mention';
+    public const string HASHTAG_TYPE = 'hashtag';
+    public const string CASHTAG_TYPE = 'cashtag';
+    public const string BOT_COMMAND_TYPE = 'bot_command';
+    public const string URL_TYPE = 'url';
+    public const string EMAIL_TYPE = 'email';
+    public const string PHONE_NUMBER_TYPE = 'phone_number';
+    public const string BOLD_TYPE = 'bold';
+    public const string ITALIC_TYPE = 'italic';
+    public const string UNDERLINE_TYPE = 'underline';
+    public const string STRIKETHROUGH_TYPE = 'strikethrough';
+    public const string SPOILER_TYPE = 'spoiler';
+    public const string CODE_TYPE = 'code';
+    public const string PRE_TYPE = 'pre';
+    public const string TEXT_LINK_TYPE = 'text_link';
+    public const string TEXT_MENTION_TYPE = 'text_mention';
+    public const string CUSTOM_EMOJI_TYPE = 'custom_emoji';
 
     /**
      * @param string $type

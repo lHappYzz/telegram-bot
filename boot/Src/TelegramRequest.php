@@ -16,7 +16,7 @@ class TelegramRequest
     /**
      * @param string $token
      */
-    public function __construct(private string $token) {}
+    public function __construct(private readonly string $token) {}
 
     /**
      * @var TelegramMethod|null

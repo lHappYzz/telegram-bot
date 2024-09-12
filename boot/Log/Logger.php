@@ -8,8 +8,8 @@ use JetBrains\PhpStorm\Pure;
 
 class Logger extends Singleton
 {
-    public const LEVEL_INFO = 0;
-    public const LEVEL_ERROR = 1;
+    public const int LEVEL_INFO = 0;
+    public const int LEVEL_ERROR = 1;
 
     private array $dirNames = [
         0 => 'info',
