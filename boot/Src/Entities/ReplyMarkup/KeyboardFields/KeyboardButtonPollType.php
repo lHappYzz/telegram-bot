@@ -11,10 +11,10 @@ use Boot\Src\Abstracts\JsonSerializableEntity;
 class KeyboardButtonPollType extends JsonSerializableEntity
 {
     /** @var string */
-    public const QUIZ_POLL_TYPE = 'quiz';
+    public const string QUIZ_POLL_TYPE = 'quiz';
 
     /** @var string */
-    public const REGULAR_POLL_TYPE = 'regular';
+    public const string REGULAR_POLL_TYPE = 'regular';
 
     /**
      * If quiz is passed, the user will be allowed to create only polls in the quiz mode.

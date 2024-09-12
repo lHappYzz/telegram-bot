@@ -13,16 +13,16 @@ use RuntimeException;
  */
 class FileValidator
 {
-    private const MAX_PHOTO_SIZE_MB = 10;
-    private const MAX_PHOTO_HEIGHT_WIDTH_SUM = 10000;
-    private const MAX_PHOTO_RATIO = 20;
+    private const int MAX_PHOTO_SIZE_MB = 10;
+    private const int MAX_PHOTO_HEIGHT_WIDTH_SUM = 10000;
+    private const int MAX_PHOTO_RATIO = 20;
 
-    private const MAX_VIDEO_SIZE_MB = 50;
-    private const MAX_VIDEO_THUMBNAIL_SIZE_KB = 200;
+    private const int MAX_VIDEO_SIZE_MB = 50;
+    private const int MAX_VIDEO_THUMBNAIL_SIZE_KB = 200;
 
-    private const MAX_AUDIO_SIZE_MB = 50;
+    private const int MAX_AUDIO_SIZE_MB = 50;
 
-    private const MAX_DOCUMENT_SIZE_MB = 50;
+    private const int MAX_DOCUMENT_SIZE_MB = 50;
 
     /**
      * @var array
@@ -51,7 +51,7 @@ class FileValidator
      */
     public function __construct(
         protected getID3 $getID3,
-        private string $path
+        private readonly string $path
     ) {
         $this->fileInfo = $this->analyze();
     }

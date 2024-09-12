@@ -13,16 +13,16 @@ use RuntimeException;
 class TelegramUpdateParser
 {
     /** @var string */
-    protected const UPDATE_TYPE_MESSAGE = 'message';
+    protected const string UPDATE_TYPE_MESSAGE = 'message';
 
     /** @var string */
-    protected const UPDATE_TYPE_EDITED_MESSAGE = 'edited_message';
+    protected const string UPDATE_TYPE_EDITED_MESSAGE = 'edited_message';
 
     /** @var string */
-    protected const UPDATE_TYPE_CALLBACK_QUERY = 'callback_query';
+    protected const string UPDATE_TYPE_CALLBACK_QUERY = 'callback_query';
 
     /** @var string */
-    protected const UPDATE_TYPE_INLINE_QUERY = 'inline_query';
+    protected const string UPDATE_TYPE_INLINE_QUERY = 'inline_query';
 
     /** @var array|string[] */
     protected array $factoryBindings = [

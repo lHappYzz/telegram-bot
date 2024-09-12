@@ -4,16 +4,19 @@ namespace App\Records;
 
 use App\States\DefaultState;
 use App\States\NoState;
+use App\States\PostSuggestionState;
 use Boot\Database\Record;
 
 class StatusRecord extends Record
 {
-    public const STATUS_NO_STATUS = null;
-    public const STATUS_DEFAULT = 1;
+    public const null STATUS_NO_STATUS = null;
+    public const int STATUS_DEFAULT = 1;
+    public const int STATUS_POST_SUGGESTION = 5;
 
     public static array $statesBindings = [
         self::STATUS_NO_STATUS => NoState::class,
         self::STATUS_DEFAULT => DefaultState::class,
+        self::STATUS_POST_SUGGESTION => PostSuggestionState::class,
     ];
 
     protected string $table = 'status';
