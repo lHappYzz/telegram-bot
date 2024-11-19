@@ -6,6 +6,7 @@ use App\States\DefaultState;
 use App\States\NoState;
 use App\States\PostSuggestionState;
 use Boot\Database\Record;
+use Boot\Database\Relations\HasManyRelation;
 
 class StatusRecord extends Record
 {
@@ -22,37 +23,11 @@ class StatusRecord extends Record
     protected string $table = 'status';
     protected array $fillable = ['name', 'description'];
 
-    protected int $id;
-    protected string $name;
-    protected ?string $description = null;
-
-    public function getId(): int
+    /**
+     * @return HasManyRelation
+     */
+    public function chats(): HasManyRelation
     {
-        return $this->id;
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setID($id): void
-    {
-        $this->id = $id;
-    }
-
-    public function setName($name): void
-    {
-        $this->name = $name;
-    }
-
-    public function setDescription($description): void
-    {
-        $this->description = $description;
+        return $this->hasMany(ChatRecord::class, 'status_id', 'id');
     }
 }

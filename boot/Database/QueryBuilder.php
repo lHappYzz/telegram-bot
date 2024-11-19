@@ -4,10 +4,14 @@ namespace Boot\Database;
 
 //TODO: Use try catch when exception thrown
 //TODO Updated: see composeUpdate, composeDelete and find out what to do in case when WHERE condition is empty
+use Boot\Database\Relations\Relation;
+use Boot\Log\Logger;
+use Boot\Src\Exceptions\QueryBuilder\BadRelationGivenException;
 use JetBrains\PhpStorm\Pure;
 use PDOStatement;
+use RuntimeException;
 
-class  QueryBuilder
+class QueryBuilder
 {
     /** @var boolean
      * NOTE: When using named marker for binding parameters (:parameter, :name)
@@ -16,10 +20,10 @@ class  QueryBuilder
      */
     private bool $isNamedMarker;
 
-    private string $calledFromClass;
+    private Record $calledOnInstance;
 
-    private string $sqlType;
-    private array $columns = [];
+    private string $sqlType = 'SELECT';
+    private array $columns = ['*'];
     private string $table;
     /**
      * @array array
@@ -49,10 +53,23 @@ class  QueryBuilder
         'IN', 'AND', 'OR', 'BETWEEN', 'EXISTS', 'LIKE', 'NOT',
     ];
 
-    public function init($tableName, $calledFrom): void
+    /**
+     * List of relations that will be loaded after parent records retrieved.
+     * Basically list of names of Records' methods that return Relation instance
+     * @var Relation[]
+     */
+    private array $relations = [];
+
+    /**
+     * List of columns that should be loaded for correct relations load
+     * @var string[]
+     */
+    private array $relationColumns = [];
+
+    public function init(Record $record): void
     {
-        $this->table = $tableName;
-        $this->calledFromClass = $calledFrom;
+        $this->table = $record->getTableName();
+        $this->calledOnInstance = $record;
         $this->isNamedMarker = false;
     }
 
@@ -131,17 +148,36 @@ class  QueryBuilder
         return $this;
     }
 
+    /**
+     * Adds relations that will be loaded with parent records
+     * @param string[] $relations
+     * @return $this
+     */
+    public function withRelations(array $relations): QueryBuilder
+    {
+        foreach ($relations as $relation) {
+            try {
+                $this->addRelation($relation);
+            } catch (BadRelationGivenException $e) {
+                Logger::logException($e);
+                throw new RuntimeException($e);
+            }
+        }
+
+        return $this;
+    }
+
     public function get(): array
     {
         $sql = $this->compose();
         $sqlResult = $this->runQuery($sql);
 
         $records = [];
-        while (($record = $sqlResult->fetchObject($this->calledFromClass)) !== false) {
+        while (($record = $sqlResult->fetchObject($this->calledOnInstance::class)) !== false) {
             $records[] = $record;
         }
 
-        return $records;
+        return $this->loadRelations($records);
     }
 
     public function toSql(bool $bindings = false): string
@@ -153,6 +189,38 @@ class  QueryBuilder
     }
 
     /**
+     * @param array $records
+     * @return array
+     */
+    private function loadRelations(array $records): array
+    {
+        foreach ($this->relations as $relation) {
+            $relation->load($records);
+        }
+
+        return $records;
+    }
+
+    /**
+     * Add new relation to QueryBuilder so they will be loaded after parent records retrieved
+     * @param string $relationName
+     * @return void
+     * @throws BadRelationGivenException
+     */
+    private function addRelation(string $relationName): void
+    {
+        if (method_exists($this->calledOnInstance, $relationName)) {
+            $relation = $this->calledOnInstance->{$relationName}();
+            if($relation instanceof Relation) {
+                $this->relations[] = $relation;
+                array_push($this->relationColumns, ...$relation->getLocalTableRelationColumns());
+                return;
+            }
+        }
+        throw new BadRelationGivenException("Relation $relationName does not exist on ". $this->calledOnInstance::class ." instance.");
+    }
+
+    /**
      * Add new where condition that will be imploded into correct WHERE string
      * @see implodeWhereConditions
      * @param string $column
@@ -160,7 +228,7 @@ class  QueryBuilder
      * @param ?mixed $value
      * @param ?string $boolean
      */
-    private function addWhereCondition(string $column, string $operator, $value, ?string $boolean = 'AND'): void
+    private function addWhereCondition(string $column, string $operator, mixed $value, ?string $boolean = 'AND'): void
     {
         if (!in_array($operator, array_merge($this->comparisonOperators, $this->logicalOperators), true)) {
             $value = $operator;
@@ -247,7 +315,7 @@ class  QueryBuilder
 
     private function composeSelect(): string
     {
-        $select = implode(', ', $this->columns);
+        $select = implode(', ', array_merge($this->columns, $this->relationColumns));
 
         $where = $this->implodeWhereConditions();
 

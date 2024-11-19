@@ -77,7 +77,7 @@ class Logger extends Singleton
      */
     private function pathToLogFile(int $level): string
     {
-        return $this->logDirPath($level) . $this->logFileName();
+        return __DIR__ . '/../../' . $this->logDirPath($level) . $this->logFileName();
     }
 
     /**
