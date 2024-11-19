@@ -3,8 +3,8 @@
 namespace Boot\Log;
 
 use Boot\Src\Abstracts\Singleton;
-use Exception;
 use JetBrains\PhpStorm\Pure;
+use Throwable;
 
 class Logger extends Singleton
 {
@@ -17,19 +17,19 @@ class Logger extends Singleton
     ];
     private string $logDirPath = 'storage/logs/';
 
-    public static function logException(Exception $exception, int $level = self::LEVEL_INFO): void
+    public static function logException(Throwable $exception, int $level = self::LEVEL_INFO): void
     {
         self::getInstance()->log($level, $exception->getMessage(), $exception->getTrace());
     }
 
     public static function logInfo(string $message): void
     {
-        self::getInstance()->log(self::LEVEL_INFO, $message, []);
+        self::getInstance()->log(self::LEVEL_INFO, $message);
     }
 
     public static function logError(string $message): void
     {
-        self::getInstance()->log(self::LEVEL_ERROR, $message, []);
+        self::getInstance()->log(self::LEVEL_ERROR, $message);
     }
 
     /**
@@ -38,17 +38,20 @@ class Logger extends Singleton
      * @param string $message
      * @param array $context
      */
-    private function log(int $level, string $message, array $context): void
+    private function log(int $level, string $message, array $context = []): void
     {
-        file_put_contents($this->makeDir($level),
-            '['. date('H:i:s') . "] -> ". $this->dirNames[$level] . '. ' . $message . PHP_EOL .
+        $logEntry = '[' . date('H:i:s') . "] -> " . $this->dirNames[$level] . '. ' . $message . PHP_EOL;
 
-            print_r(array_map(static function ($element) {
-                return $element['file'] . '(' . $element['line'] . ')' . ': ' . $element['class'] . $element['type'] . $element['function'] . '()';
-            }, $context), true) . PHP_EOL,
+        if (!empty($context)) {
+            $formattedContext = array_map(function ($element) {
+                return $element['file'] . '(' . $element['line'] . '): ' .
+                    $element['class'] . $element['type'] . $element['function'] . '()';
+            }, $context);
 
-            FILE_APPEND
-        );
+            $logEntry .= print_r($formattedContext, true) . PHP_EOL;
+        }
+
+        file_put_contents($this->makeDir($level), $logEntry, FILE_APPEND);
     }
 
     /**

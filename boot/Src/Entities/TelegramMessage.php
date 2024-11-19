@@ -223,6 +223,11 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
      */
     private function setCommand(): void
     {
+        if (empty($this->entities)) {
+            $this->command = null;
+            return;
+        }
+
         foreach ($this->entities as $messageEntity) {
             if (
                 $messageEntity->getType() === MessageEntity::BOT_COMMAND_TYPE &&
@@ -239,6 +244,5 @@ class TelegramMessage extends UpdateUnit implements MessageableEntity
                 return;
             }
         }
-        $this->command = null;
     }
 }
