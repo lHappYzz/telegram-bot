@@ -2,10 +2,16 @@
 
 namespace Boot\Database\Relations;
 
+use Boot\Database\QueryBuilder;
 use Boot\Database\Record;
 
 abstract class Relation
 {
+    /**
+     * @var QueryBuilder
+     */
+    public QueryBuilder $queryBuilder;
+
     /**
      * @param string $localTable
      * @param Record $related
@@ -15,7 +21,9 @@ abstract class Relation
         protected string $localTable,
         protected Record $related,
         protected string $relationName,
-    ) {}
+    ) {
+        $this->queryBuilder = $this->related->newQuery();
+    }
 
     /**
      * Loads related data and adds it to the corresponding records
@@ -56,6 +64,6 @@ abstract class Relation
      */
     protected function loadRelated(string $field, array $values): array
     {
-        return $this->related->newQuery()->whereIn($field, $values)->get();
+        return $this->queryBuilder->whereIn($field, $values)->get();
     }
 }

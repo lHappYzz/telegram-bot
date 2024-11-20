@@ -150,14 +150,19 @@ class QueryBuilder
 
     /**
      * Adds relations that will be loaded with parent records
-     * @param string[] $relations
+     * @param array $relations Array of relation names (strings) or key-value pairs,
+     * where the key is the relation name, and the value is a callback function that modifies the QueryBuilder
      * @return $this
      */
     public function withRelations(array $relations): QueryBuilder
     {
-        foreach ($relations as $relation) {
+        foreach ($relations as $key => $value) {
             try {
-                $this->addRelation($relation);
+                if (is_callable($value)) {
+                    $this->addRelation($key, $value);
+                } else {
+                    $this->addRelation($value);
+                }
             } catch (BadRelationGivenException $e) {
                 Logger::logException($e);
                 throw new RuntimeException($e);
@@ -204,14 +209,18 @@ class QueryBuilder
     /**
      * Add new relation to QueryBuilder so they will be loaded after parent records retrieved
      * @param string $relationName
+     * @param callable|null $callback
      * @return void
      * @throws BadRelationGivenException
      */
-    private function addRelation(string $relationName): void
+    private function addRelation(string $relationName, ?callable $callback = null): void
     {
         if (method_exists($this->calledOnInstance, $relationName)) {
             $relation = $this->calledOnInstance->{$relationName}();
             if($relation instanceof Relation) {
+                if ($callback) {
+                    call_user_func($callback, $relation->queryBuilder);
+                }
                 $this->relations[] = $relation;
                 array_push($this->relationColumns, ...$relation->getLocalTableRelationColumns());
                 return;
