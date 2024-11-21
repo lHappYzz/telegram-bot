@@ -6,6 +6,7 @@ use App\Bot;
 use App\Config\Config;
 use App\Config\ContainerConfig;
 use Boot\Interfaces\ContainerInterface;
+use Boot\Log\Logger;
 use Boot\Src\Abstracts\BaseCommand;
 use Boot\Src\Abstracts\Telegram;
 use Boot\Src\Entities\MessageEntity;
@@ -17,8 +18,8 @@ use Boot\Src\TelegramRequest;
 use Boot\Src\TelegramWebhook;
 use Boot\Traits\DirectoryHelpers;
 use Boot\Traits\Helpers;
-use Exception;
 use RuntimeException;
+use Throwable;
 
 class Application
 {
@@ -49,6 +50,7 @@ class Application
 
         date_default_timezone_set(Config::timezone() ?? '');
 
+        $this->registerShutdownFunction();
         $this->registerBaseBindings();
 
         $this->telegramWebhook = $this->container->get(TelegramWebhook::class);
@@ -59,7 +61,7 @@ class Application
     /**
      * Entry point of the application. Launches application components according to received telegram Update
      *
-     * @throws Exception
+     * @return void
      */
     public function boot(): void
     {
@@ -198,5 +200,27 @@ class Application
             ->when(TelegramRequest::class)
             ->needs('token')
             ->give(Config::bot()['bot_token']);
+    }
+
+    /**
+     * Function unhandled errors
+     * @return void
+     */
+    private function registerShutdownFunction(): void
+    {
+        set_exception_handler(function (Throwable $exception) {
+            Logger::logException($exception, Logger::LEVEL_ERROR);
+        });
+
+        register_shutdown_function(function () {
+            $error = error_get_last();
+
+            if ($error) {
+                if ($error["type"] === E_ERROR) {
+                    $errorMessage = "Unhandled error: {$error['message']} in the file {$error['file']} on a row {$error['line']}";
+                    Logger::logError($errorMessage);
+                }
+            }
+        });
     }
 }

@@ -2,3 +2,4 @@ vendor
 .idea
 app/app.ini
 storage/logs
+/.osp/
