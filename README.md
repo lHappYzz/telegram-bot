@@ -102,8 +102,8 @@ the core provides robust infrastructure for its operation.
 > In general all necessary objects will be injected automatically depending on the module you work with. E.g. to handle a Command
 > a `TelegramMessage` with `Bot` will be provided. To handle an `InlineRequest` an `InlineQuery` with `Bot` will be provided.
 
-You should think of the `Bot` as some kind of gateway to the Telegram API. Here you can find the implemented API methods.
-E.g. `sendMessage`. You can find list of currently implemented commands in the `DocBlock` of the `Bot` class.
+You should think of the `app/Bot` as some kind of gateway to the Telegram API. Here you can find the implemented API methods.
+E.g. `sendMessage`. You can find list of currently implemented commands in the `DocBlock` of the `app/Bot` class.
 
 > <picture>
 >   <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Mqxx/GitHub-Markdown/main/blockquotes/badge/light-theme/danger.svg">
@@ -150,7 +150,7 @@ After that access your `index.php` using `GET` HTTP method. If no error occurred
 
 `Work dir: app/Commands`
 
-Each command is represented by a class that extends the base class `BaseCommand` and implements its own `boot()` method:
+Each command is represented by a class that extends the base class `boot/Src/Abstracts/BaseCommand` and implements its own `boot()` method:
 ```php
 abstract public function boot(
   Bot $bot,
@@ -160,9 +160,9 @@ abstract public function boot(
 ```
 Inherited methods:
 ```php
-public function getDescription(): string
-public function getSignature(): string
-public function getAllowedUsers(): array //Returns ids of users authorized for command. If empty array is returned command is public.
+public function getDescription(): string;
+public function getSignature(): string;
+public function getAllowedUsers(): array; //Returns ids of users authorized for command. If empty array is returned command is public.
 ```
 The `$signature` field is essential for mapping user inputs to the appropriate command class.
 ```php
@@ -195,7 +195,7 @@ Application::bootCommand($commandSignature, $telegramMessage, $parameters);
 `Work dir: app/States`
 
 There is implemented mechanism for managing chat states, that allows the app to "remember" a chat's current state
-and respond accordingly. Each chat state is represented by a dedicated class that extends the base `State` class.
+and respond accordingly. Each chat state is represented by a dedicated class that extends the base `boot/Src/Abstracts/State` class.
 These state classes can be mapped to database records using the `app/Records/StatusRecord` class by filling the bindings array,
 where the key is the status identifier and the value is the corresponding state class:
 ```php
@@ -205,7 +205,7 @@ public static array $statesBindings = [
   self::STATUS_POST_SUGGESTION => PostSuggestionState::class,
 ];
 ```
-Each state class defines a `handle()` method where the logic for processing `boot/Src/Update` for a chat in that specific state is implemented.
+Each state class defines a `boot/Src/Abstracts/State::handle()` method where the logic for processing `boot/Src/Update` for a chat in that specific state is implemented.
 ```php
 class DefaultState extends State
 {
@@ -218,11 +218,11 @@ class DefaultState extends State
     }
 }
 ```
-To transition a chat from one state to another, use the `setStatus(int $id)` method provided by the `TelegramChat` class:
+To transition a chat from one state to another, use the `setStatus(int $id)` method provided by the `boot/Src/Entities/TelegramChat` entity:
 ```php
 $telegramMessage->getChat()->setStatus(StatusRecord::STATUS_DEFAULT);
 ```
-In this example `->getChat()` returns an instance of `TelegramChat` class.
+In this example `->getChat()` returns an instance of `boot/Src/Entities/TelegramChat` class.
 So the next `boot/Src/Update` from the chat will then be processed in the appropriate state class.
 
 This feature can be useful fore create a multi-level dialogues with users. Or whenever you want to wait for an answer
@@ -232,19 +232,19 @@ for the given question.
 `Work dir: /app/InlineQuery`
 
 The framework provides a mechanism for processing incoming 'InlineQuery' updates. Within the designated directory,
-you can find the `InlineQueryHandler`, which is an integral part of this system.
+you can find the `app/InlineQuery/InlineQueryHandler`, which is an integral part of this system.
 The framework automatically invokes this handler whenever an InlineQuery-type Update is received on the registered webhook.
 
-To define the processing logic for the `InlineQuery`, implement it in the `handle()` method of the handler.
+To define the processing logic for the `InlineQuery`, implement it in the `app/InlineQuery/InlineQueryHandler::handle()` method of the handler.
 During the handler's construction, the framework will inject a Bot entity for accessing framework methods, 
-along with the `InlineQuery` object. This object contains all the information related to the incoming `Update`.
+along with the `boot/Src/Entities/InlineQuery` entity. This object contains all the information related to the incoming `Update`.
 
 By leveraging this mechanism, you can easily process `InlineQuery` updates and implement custom logic for
 interactions initiated via inline queries.
 ```php
 class InlineQueryHandler
 {
-public function __construct(protected InlineQuery $inlineQuery, protected Bot $bot) {}
+    public function __construct(protected InlineQuery $inlineQuery, protected Bot $bot) {}
 
     public function handle(): void
     {
@@ -258,8 +258,8 @@ public function __construct(protected InlineQuery $inlineQuery, protected Bot $b
 `Work dir: app/CallbackQueryHandlers`
 
 The framework includes a mechanism for processing `CallbackQuery` requests, implemented as dedicated classes.
-Each handler extends the base `CallbackQueryHandler` class, allowing developers to define custom logic for handling
-callback queries received from Telegram bots.
+Each handler extends the base `boot/Src/Abstracts/CallbackQueryHandler` class, allowing developers to define custom logic for handling
+callback queries received from Telegram.
 
 ```php
 class TestHandler extends CallbackQueryHandler
@@ -280,14 +280,14 @@ including its data payload and the associated message and chat details.
 Callback queries are particularly useful for creating interactive features in bots, such as `inline keyboards`.
 By leveraging this mechanism, developers can dynamically respond to user interactions in a structured and efficient way.
 For instance:
-1. Inline Keyboards: `CallbackQuery` is triggered when a user interacts with buttons in an inline keyboard attached to a bot message.
+1. Inline Keyboards: `boot/Src/Entities/CallbackQuery` is triggered when a user interacts with buttons in an inline keyboard attached to a bot message.
 2. Custom Logic: Use the CallbackQuery payload (`$callbackQuery->getData()`) to perform specific actions.
 
-So to create an `InlineKeyboard` you should use `InlineKeyboardMarkup` object as shown:
+So to create an `InlineKeyboard` you should use `boot/Src/Entities/ReplyMarkup/InlineKeyboardMarkup` object as shown:
 ```php
 $inlineKeyboard = new InlineKeyboardMarkup();
 $inlineKeyboard
-    ->addKeyboardRow()
+    ->addKeyboardRow() //Creates new row for the keyboard. Can contain multiple buttons
     ->addButton('Button text')
     ->addCallbackHandler(TestHandler::class, callbackData: 'any callback data');
 ```
@@ -297,20 +297,21 @@ can retrieve the _**"any callback data"**_.
 ### 5. Records
 `Work dir: app/Records`
 
-The framework includes a models module that defines object representations for database interactions.
-Each model must extend the base `Record` class and implement specific fields to define its behavior and mapping to database tables:
+The framework includes a models module that defines object representations for database interactions called `Records`.
+Each model must extend the base `boot/Database/Record` class and implement specific fields to define its behavior and mapping to database tables:
 
 **Key Properties**:
 - `$table` Represents the name of the database table that the model maps to. This is essential for identifying where the data is stored.
-- `$fillable` A list of fields that can be set when creating or updating a record using methods like `create()` or `update()`.
+- `$fillable` A list of fields that can be set when creating or updating a record using methods like
+`boot/Database/Record::create()` or `boot/Database/Record::update()`.
 This ensures controlled data manipulation and prevents mass-assignment vulnerabilities.
 - `$customFields` Defines additional fields stored in the database that are not present in the Telegram entity associated with this model.
 This is useful for extending functionality beyond what the Telegram entity provides.
 
 Interactions with Core Framework Entities:
 Models can integrate with framework entities for seamless data handling.
-For instance, the `ChatRecord` model has a direct relationship with the `TelegramChat` entity.
-The `TelegramChat` class encapsulates all essential information about a chat within the messenger, making it easier
+For instance, the `app/Records/ChatRecord` model has a direct relationship with the `boot/Src/Entities/TelegramChat` entity.
+The `boot/Src/Entities/TelegramChat` class encapsulates all essential information about a chat within the messenger, making it easier
 to initialize and persist data.
 
 ```php
@@ -332,7 +333,7 @@ class ChatRecord extends Record
 }
 ```
 Example Workflow:
-When a new chat needs to be registered in the bot's database, the framework allows this through the `createFrom()` method:
+When a new chat needs to be registered in the bot's database, the framework allows this through the `boot/Database/Record::createFrom()` method:
 ```php
 ChatRecord::createFrom($telegramChat)
     ->with([
@@ -341,26 +342,26 @@ ChatRecord::createFrom($telegramChat)
     ])->create();
 ```
 Here:
-- The model checks the `$fillable` property to identify which fields to extract from the `TelegramChat` entity.
-The `create()` method saves this information in the corresponding database table.
+- The model checks the `$fillable` property to identify which fields to extract from the `boot/Src/Entities/TelegramChat` entity.
+The `boot/Database/Record::create()` method saves this information in the corresponding database table.
 #### Telegram Entity Binding:
 The `$boundedTelegramEntity` property specifies the Telegram entity associated with the model.
 Binding is only possible if the entity implements the `Recordable` interface, ensuring compatibility with the model's design.
 
 ```php
-public function getTableName(): string
-public function fetchAll(): array //Returns an array of database record objects
-public function update(): bool //Updates a record in the database
-public function create(): bool //Creates a record to the database
-public function delete(): bool //Removes a record from the database
-public function fetch(int $id): ?static //Returns an object that represents table record identified by the $tableName field
-public function find(array $ids): array //Find multiple records by their ids
-public function static query(): QueryBuilder //Creates new instance of QueryBuilder on the given Record
-public function newQuery(): QueryBuilder //Creates new instance of QueryBuilder on the given Record
-public static function createFrom(Recordable $recordableEntity): static //Creates new DB record using telegramEntity
-public function with(array $columnValues): static //Used to initialize record's fields that listed in customFields array
-public function belongsTo(string $relatedAbstract, string $foreignKey, string $relatedLocalKey): BelongsToRelation //Creates new inverted one-to-many relation
-public function hasMany(string $relatedAbstract, string $relatedForeignKey, string $localKey): HasManyRelation //Creates new one-to-many relation
+public function getTableName(): string;
+public function fetchAll(): array; //Returns an array of database record objects
+public function update(): bool; //Updates a record in the database
+public function create(): bool; //Creates a record to the database
+public function delete(): bool; //Removes a record from the database
+public function fetch(int $id): ?static; //Returns an object that represents table record identified by the $tableName field
+public function find(array $ids): array; //Find multiple records by their ids
+public function static query(): QueryBuilder; //Creates new instance of QueryBuilder on the given Record
+public function newQuery(): QueryBuilder; //Creates new instance of QueryBuilder on the given Record
+public static function createFrom(Recordable $recordableEntity): static; //Creates new DB record using telegramEntity
+public function with(array $columnValues): static; //Used to initialize record's fields that listed in customFields array
+public function belongsTo(string $relatedAbstract, string $foreignKey, string $relatedLocalKey): BelongsToRelation; //Creates new inverted one-to-many relation
+public function hasMany(string $relatedAbstract, string $relatedForeignKey, string $localKey): HasManyRelation; //Creates new one-to-many relation
 ```
 
 ## :telescope: Global Functions
@@ -433,8 +434,8 @@ class DefaultState extends State
 ```
 
 ### Access Database
-_by using `QueryBuilder`. To access `QueryBuilder` firstly you need to create a Record class at `/app/Records` dir that will extend
-`Record` class. Then you can call for `query()` method and build your sql query like shown:_
+_by using `boot/Database/QueryBuilder`. To access `boot/Database/QueryBuilder` firstly you need to create a Record class at `/app/Records` dir that will extend
+`boot/Database/Record` class. Then you can call for `boot/Database/Record::query()` method and build your sql query like shown:_
 
 ```php
 class ChatRecord extends Record
@@ -444,9 +445,9 @@ class ChatRecord extends Record
 
     protected array $fillable = ['id', 'status_id', 'user_id', 'type'];
     protected array $customFields = ['status_id', 'user_id'];
-
-    //This field is marker of the type to which the data obtained from the table should be converted to
-    //Given type must implement the Recordable interface
     protected string $boundedTelegramEntity = TelegramChat::class;
 }
+
+$queryBuilder = ChatRecord::query();
+$chats = $queryBuilder->select(['id, type'])->get();
 ```
