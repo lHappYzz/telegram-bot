@@ -41,7 +41,7 @@ class Application
     public function __construct(protected Container $container)
     {
         if (!Config::exists()) {
-            throw new RuntimeException('Missing application configuration file.');
+            throw new RuntimeException('Missing an application configuration file.');
         }
 
         if (!Config::bot()['bot_token']) {
@@ -203,7 +203,8 @@ class Application
     }
 
     /**
-     * Function unhandled errors
+     * Registers a shutdown function with an exception handler to handle uncaught errors (E_ERROR) and log them
+     *
      * @return void
      */
     private function registerShutdownFunction(): void
@@ -215,11 +216,9 @@ class Application
         register_shutdown_function(function () {
             $error = error_get_last();
 
-            if ($error) {
-                if ($error["type"] === E_ERROR) {
-                    $errorMessage = "Unhandled error: {$error['message']} in the file {$error['file']} on a row {$error['line']}";
-                    Logger::logError($errorMessage);
-                }
+            if ($error && $error["type"] === E_ERROR) {
+                $errorMessage = "Unhandled error: {$error['message']} in the file {$error['file']} on a row {$error['line']}";
+                Logger::logError($errorMessage);
             }
         });
     }
